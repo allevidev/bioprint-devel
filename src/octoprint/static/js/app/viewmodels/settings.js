@@ -99,6 +99,7 @@ $(function() {
 
         self.printer_defaultPressure = ko.observable(undefined);
         self.printer_defaultTemperature = ko.observable(undefined);
+        self.printer_defaultLightIntensity = ko.observable(undefined);
 
         self.webcam_streamUrl = ko.observable(undefined);
         self.webcam_snapshotUrl = ko.observable(undefined);
@@ -406,6 +407,7 @@ $(function() {
 
             self.printer_defaultPressure(response.printer.defaultPressure);
             self.printer_defaultTemperature(response.printer.defaultTemperature);
+            self.printer_defaultLightIntensity(response.printer.defaultLightIntensity);
 
             self.webcam_streamUrl(response.webcam.streamUrl);
             self.webcam_snapshotUrl(response.webcam.snapshotUrl);

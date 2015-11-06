@@ -31,7 +31,11 @@ $(function() {
         self.extruder2Temp = ko.observable(undefined);
         self.extruder2TempTarget = ko.observable(undefined);
 
-        self.lightIntensity = ko.observable(undefined);
+        self.lightIntensity = ko.observable(0);
+
+        self.extruderTravelTemp = ko.observable(0);
+        self.extruderTravel = ko.observable(0);
+        self.activeTool = ko.observable(0);
 
         self.tools = ko.observableArray([]);
 
@@ -328,15 +332,56 @@ $(function() {
                     }
                 });
             }
-
-            // self.sendToolCommand({
-            //     "command": "target",
-            //     "targets": { 
-            //         tool: "tool" + String(extruder),
-            //         value: target
-            //     }
-            // });
         };
+
+        self.stepToolChange = function (dir) {
+            var step = dir * 10;
+            self.extruderTravelTemp += step;
+
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'G91'
+            });
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'T0'
+            });
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'G1 E' + step
+            });
+
+            $('#extruderTravelValue').val(self.extruderTravelTemp);
+        }
+
+        self.resetToolChangeDist = function () {
+            self.extruderTravelTemp = 0;
+        }
+
+        self.saveToolChangeDist = function () {
+            self.extruderTravel = self.extruderTravelTemp;
+        }
+
+        self.switchTool = function() {
+            var dir;
+            if (self.activeTool == 0) {
+                dir = -1;
+            } else {
+                dir = 1;
+            }
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'G91'
+            });
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'T0'
+            });
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'G1 E' + dir * self.extruderTravel
+            });
+        }
 
         self.sendTempDecrease = function (extruder) {
             var target = 0;

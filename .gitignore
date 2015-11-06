@@ -20,5 +20,5 @@ dist
 pypy
 OctoPrint.egg-info
 *.orig
-
+venv
 *.codekit

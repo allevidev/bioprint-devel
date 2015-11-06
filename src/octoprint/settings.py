@@ -188,7 +188,8 @@ default_settings = {
 		"pauseTriggers": [],
 		"defaultExtrusionLength": 5,
 		"defaultPressure": 25,
-		"defaultTemperature": 37
+		"defaultTemperature": 37,
+		"defaultLightIntensity": 0
 	},
 	"appearance": {
 		"name": "",

@@ -114,6 +114,15 @@
         <input style="width: 100px" type="number" data-bind="slider: {min: 0, max: 100, step: 1, value: lightIntensity, tooltip: 'hide'}">
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && loginState.isUser(), click: function() { $root.sendLightIntensity() }">{{ _('Light Intensity:') }}<span data-bind="text: lightIntensity() + '%'"></span></button>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M18'}) }">{{ _('Motors off') }}</button>
+        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.stepToolChange(1) }">{{ _('+') }}</button>
+        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.resetToolChangeDist() }">{{ _('Reset') }}</button>
+        <div class="input-append control-box">
+            <input id="extruderTravelValue" type="text" class="input-mini text-right" data-bind="value: extruderTravelTemp, enable: isOperational() && !isPrinting() && loginState.isUser()">
+            <span class="add-on"> mm </span>
+        </div>
+        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.saveToolChangeDist() }">{{ _('Save') }}</button>
+        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.stepToolChange(-1) }">{{ _('-') }}</button>
+        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.switchTool() }">{{ _('Switch Tool') }}</button>
     </div>
 </div>
 

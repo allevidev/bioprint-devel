@@ -47,7 +47,8 @@ def getSettings():
 		"printer": {
 			"defaultExtrusionLength": s.getInt(["printerParameters", "defaultExtrusionLength"]),
 			"defaultPressure": s.getInt(["printerParameters", "defaultPressure"]),
-			"defaultTemperature": s.getInt(["printerParameters", "defaultTemperature"])
+			"defaultTemperature": s.getInt(["printerParameters", "defaultTemperature"]),
+			"defaultLightIntensity": s.getInt(["printerParameters", "defaultLightIntensity"])
 		},
 		"webcam": {
 			"streamUrl": s.get(["webcam", "stream"]),
