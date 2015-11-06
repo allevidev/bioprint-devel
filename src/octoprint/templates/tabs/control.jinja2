@@ -81,7 +81,7 @@
             <span class="add-on">° C</span>
         </div>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendTempDecrease(1) }">{{ _('-') }}</button>
-
+        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.switchTool(1) }">{{ _('Select Tool') }}</button>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M42 P16 S255'}) }">{{ _('Extrude') }}</button>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M42 P16 S0'}) }">{{ _('Stop') }}</button>
     </div>
@@ -102,6 +102,7 @@
             <span class="add-on">° C</span>
         </div>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendTempDecrease(2) }">{{ _('-') }}</button>
+        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.switchTool(-1) }">{{ _('Select Tool') }}</button>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M42 P17 S255'}) }">{{ _('Extrude') }}</button>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M42 P17 S0'}) }">{{ _('Stop') }}</button>
     </div>

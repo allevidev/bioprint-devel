@@ -34,8 +34,7 @@ $(function() {
         self.lightIntensity = ko.observable(0);
 
         self.extruderTravelTemp = ko.observable(0);
-        self.extruderTravel = ko.observable(0);
-        self.activeTool = ko.observable(0);
+        self.extruderTravel = 160;
 
         self.tools = ko.observableArray([]);
 
@@ -362,13 +361,7 @@ $(function() {
             self.extruderTravel = self.extruderTravelTemp;
         }
 
-        self.switchTool = function() {
-            var dir;
-            if (self.activeTool == 0) {
-                dir = -1;
-            } else {
-                dir = 1;
-            }
+        self.switchTool = function(dir) {
             self.sendCustomCommand({
                 type: 'command',
                 command: 'G91'
