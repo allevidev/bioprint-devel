@@ -186,7 +186,7 @@ default_settings = {
 	},
 	"printerParameters": {
 		"pauseTriggers": [],
-		"defaultExtrusionLength": 5,
+		"defaultExtrusionLength": 50,
 		"defaultPressure": 25,
 		"defaultTemperature": 37,
 		"defaultLightIntensity": 0

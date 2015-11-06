@@ -23,13 +23,13 @@ $(function() {
         self.extrusionAmount = ko.observable(undefined);
         self.controls = ko.observableArray([]);
 
-        self.extruder1Pressure = ko.observable(undefined);
-        self.extruder1Temp = ko.observable(undefined);
-        self.extruder1TempTarget = ko.observable(undefined);
+        // self.extruder1Pressure = ko.observable(undefined);
+        // self.extruder1Temp = ko.observable(undefined);
+        // self.extruder1TempTarget = ko.observable(undefined);
 
-        self.extruder2Pressure = ko.observable(undefined);
-        self.extruder2Temp = ko.observable(undefined);
-        self.extruder2TempTarget = ko.observable(undefined);
+        // self.extruder2Pressure = ko.observable(undefined);
+        // self.extruder2Temp = ko.observable(undefined);
+        // self.extruder2TempTarget = ko.observable(undefined);
 
         self.lightIntensity = ko.observable(0);
 
@@ -257,20 +257,31 @@ $(function() {
             }
         };
 
-        self.getToolState = function () {
-            $.ajax({
-                url: API_BASEURL + "printer/tool",
-                type: "GET",
-                dataType: "json",
-                contentType: "application/json; charset=UTF-8",
-                success: function(state) {
-                    self.extruder1Temp = state['tool0']['actual'];
-                    self.extruder1Pressure = state['bed']['actual'];
-                    self.extruder2Temp = state['tool1']['actual'];
-                    self.extruder2Pressure = state['tool2']['actual'];
-                }
-            });
-        }
+        // self.getToolState = function () {
+        //     $.ajax({
+        //         url: API_BASEURL + "printer/tool",
+        //         type: "GET",
+        //         dataType: "json",
+        //         contentType: "application/json; charset=UTF-8",
+        //         success: function(state) {
+
+
+        //             var extruder1Temp = state['tool0']['actual'];
+        //             var extruder1Pressure = state['bed']['actual'];
+        //             var extruder2Temp = state['tool1']['actual'];
+        //             var extruder2Pressure = state['tool2']['actual'];
+
+        //             console.log(state)
+
+        //             $('#extruder1Pressure').val(extruder1Pressure);
+        //             $('#extruder1Temp').val(extruder1Temp);
+        //             $('#extruder2Pressure').val(extruder2Pressure);
+        //             $('#extruder2Temp').val(extruder2Temp);
+        //         }
+        //     });
+        // }
+
+        // setInterval(self.getToolState, 10000);
 
         self.sendJogCommand = function (axis, multiplier, distance) {
             if (typeof distance === "undefined")
