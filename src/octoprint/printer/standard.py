@@ -478,7 +478,6 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 				"target": self._bedTemp[1],
 				"offset": offsets["bed"] if "bed" in offsets and offsets["bed"] is not None else 0
 			}
-		print '\n\n\n\n\n', result, '\n\n\n\n\n'
 
 		return result
 
