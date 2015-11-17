@@ -383,17 +383,58 @@ $(function() {
         }
 
         self.switchTool = function(dir) {
-            self.sendCustomCommand({
-                type: 'command',
-                command: 'G91'
-            });
+            var pin1;
+            var pin2;
+            if (dir == 1) {
+                pin1 = 16;
+                pin2 = 17;
+            } else {
+                pin1 = 17;
+                pin2 = 16;
+            }
             self.sendCustomCommand({
                 type: 'command',
                 command: 'T0'
             });
             self.sendCustomCommand({
                 type: 'command',
-                command: 'G1 E' + dir * self.extruderTravel
+                command: 'M400'
+            });
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'M42 P' + pin1 + 'S0'
+            });
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'G91'
+            });
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'G1 E' + dir * 8.5 + ' F100.00'
+            });
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'M400'
+            });
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'G1 X' + -1 * dir * 49 + ' F1800.00'
+            });
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'M400'
+            });
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'G1 E' + dir * 8.5 + 'F100.00'
+            });
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'M400'
+            });
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'M42 P' + pin2 + 'S255'
             });
         }
 

@@ -248,7 +248,7 @@ def printerPrintheadCommand():
 		# do not jog when a print job is running or we don't have a connection
 		return make_response("Printer is not operational or currently printing", 409)
 
-	valid_axes = ["x", "y", "z"]
+	valid_axes = ["x", "y", "z", "e"]
 	##~~ jog command
 	if command == "jog":
 		# validate all jog instructions, make sure that the values are numbers
