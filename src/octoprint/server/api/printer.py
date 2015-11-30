@@ -34,6 +34,8 @@ def printerState():
 
 	result = {}
 
+	print '\n\n\n\n\n', printer.get_current_data(), '\n\n\n\n\n\n'
+
 	# add temperature information
 	if not "temperature" in excludes:
 		result.update({"temperature": _getTemperatureData(lambda x: x)})
@@ -46,6 +48,10 @@ def printerState():
 	if not "state" in excludes:
 		state = printer.get_current_data()["state"]
 		result.update({"state": state})
+
+	if not "position" in excludes:
+		position = printer.get_current_data()["position"]
+		result.update({"position": position})
 
 	return jsonify(result)
 

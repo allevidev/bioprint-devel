@@ -62,6 +62,8 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 
 		self._currentZ = None
 
+		self._position = None
+
 		self._progress = None
 		self._printTime = None
 		self._printTimeLeft = None
@@ -569,6 +571,10 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 
 	#~~ state monitoring
 
+	def _setPosition(self, position):
+		self._position = position
+		self._stateMonitor.set_position(self._position)
+
 	def _setCurrentZ(self, currentZ):
 		self._currentZ = currentZ
 		self._stateMonitor.set_current_z(self._currentZ)
@@ -770,6 +776,9 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 	def on_comm_temperature_update(self, temp, bedTemp):
 		self._addTemperatureData(temp, bedTemp)
 
+	def on_comm_position_update(self, position):
+		self._setPosition(position)
+
 	def on_comm_state_change(self, state):
 		"""
 		 Callback method for the comm object, called if the connection state changes.
@@ -876,6 +885,7 @@ class StateMonitor(object):
 		self._job_data = None
 		self._gcode_data = None
 		self._sd_upload_data = None
+		self._position = None
 		self._current_z = None
 		self._progress = None
 
@@ -928,6 +938,10 @@ class StateMonitor(object):
 		self._offsets = offsets
 		self._change_event.set()
 
+	def set_position(self, position):
+		self._position = position
+		self._change_event.set()
+
 	def _work(self):
 		while True:
 			self._change_event.wait()
@@ -949,6 +963,7 @@ class StateMonitor(object):
 			"state": self._state,
 			"job": self._job_data,
 			"currentZ": self._current_z,
+			"position": self._position,
 			"progress": self._progress,
 			"offsets": self._offsets
 		}

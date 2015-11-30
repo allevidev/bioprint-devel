@@ -26,15 +26,37 @@ $(function() {
         self.extruder1Pressure = ko.observable(undefined);
         self.extruder1Temp = ko.observable(undefined);
         self.extruder1TempTarget = ko.observable(undefined);
+        self.extruder1Pos = 19;
+        self.extruder1ZOffset = 0;
+
 
         self.extruder2Pressure = ko.observable(undefined);
         self.extruder2Temp = ko.observable(undefined);
         self.extruder2TempTarget = ko.observable(undefined);
+        self.extruder2ZOffset = 0;
+        self.extruder2Pos = 0;
 
         self.lightIntensity = ko.observable(0);
 
-        self.extruderTravelTemp = ko.observable(0);
-        self.extruderTravel = 160;
+        self.isHomed = ko.observable(false);
+        self.homed = {
+            'x,y': false,
+            'z': false,
+            'e': false
+        }
+
+        self.wellPlate = ko.observable(0);
+        self.wellPlatePositions = {
+            '24': {
+                'X': 33.3,
+                'Y': 193.5
+            }
+        }
+
+        self.position = {}
+        
+        
+        self.xTravel = 49;
 
         self.tools = ko.observableArray([]);
 
@@ -289,8 +311,24 @@ $(function() {
             });
             
         }
+        
+        self.getPrinterState = function () {
+            $.ajax({
+                url: API_BASEURL + "printer",
+                type: "GET",
+                datatype: "json",
+                contentType: "application/json; charset=UTF-8",
+                success: function (resp) {
+                    self.position = resp.position;
+                }
+            })
+        }
 
-        setInterval(self.getToolState, 2000);
+        if (self.isOperational()) {
+            setInterval(self.getToolState, 2000);
+            setInterval(self.getPrinterState, 1000);
+        }
+        
 
 
         self.sendJogCommand = function (axis, multiplier, distance) {
@@ -313,6 +351,20 @@ $(function() {
                 "command": "home",
                 "axes": axis
             });
+            if (axis == 'z') {
+                self.sendCustomCommand({
+                    type: "commands",
+                    commands: [
+                    "M400",
+                    "G1 Z15 F100"
+                    ]
+                });
+            }
+            self.homed[axis] = true;
+            if (self.homed['x,y'] == true && self.homed['z'] == true && self.homed['e'] == true) {
+                self.isHomed(true);
+            }
+            console.log(self.homed);
         };
 
         self.sendFeedRateCommand = function () {
@@ -354,87 +406,70 @@ $(function() {
             }
         };
 
-        self.stepToolChange = function (dir) {
-            var step = dir * 10;
-            self.extruderTravelTemp += step;
-
-            self.sendCustomCommand({
-                type: 'command',
-                command: 'G91'
-            });
-            self.sendCustomCommand({
-                type: 'command',
-                command: 'T0'
-            });
-            self.sendCustomCommand({
-                type: 'command',
-                command: 'G1 E' + step
-            });
-
-            $('#extruderTravelValue').val(self.extruderTravelTemp);
+        self.selectWellPlate = function (select) {
+            self.wellPlate = $('#wellPlate').val();
+            self.switchTool(1);
+            switch(self.wellPlate) {
+                case '1':
+                case '6':
+                case '12':
+                case '24':
+                    self.sendCustomCommand({
+                        type: 'command',
+                        command: 'G1 X33.3 Y193.5 F2000'
+                    });
+                case 96:
+            }
         }
 
-        self.resetToolChangeDist = function () {
-            self.extruderTravelTemp = 0;
-        }
+        self.saveToolChangeDist = function (tool) {
+            self.extruderTravel = self.position["E"]
+            if (tool == 1) {
+                self.extruder1Pos = self.position["E"]
+                self.extruder1ZOffset = self.position["Z"]
 
-        self.saveToolChangeDist = function () {
-            self.extruderTravel = self.extruderTravelTemp;
-        }
-
-        self.switchTool = function(dir) {
-            var pin1;
-            var pin2;
-            if (dir == 1) {
-                pin1 = 16;
-                pin2 = 17;
             } else {
-                pin1 = 17;
-                pin2 = 16;
+                self.extruder2Pos = self.position["E"]
+                self.extruder2ZOffset = self.position["Z"]
             }
             self.sendCustomCommand({
-                type: 'command',
-                command: 'T0'
+                type: 'commands',
+                commands: [
+                    'M400',
+                    'G1 Z15 F100'
+                ]
             });
+            if (tool == 1) {
+                self.switchTool(2);
+            } else {
+                self.switchTool(1);
+            }
+        }
+
+        self.switchTool = function(tool) {
+            var midpoint = (self.extruder1Pos - self.extruder2Pos) / 2;
+            console.log('\n\n\n\n\n',midpoint, '\n\n\n\n');
+            var target;
+            var dir;
+            if (tool == 1) {
+                target = self.extruder1Pos;
+                dir = -1;
+            } else if (tool == 2) {
+                target = self.extruder2Pos;
+                dir = 1;
+            }
             self.sendCustomCommand({
-                type: 'command',
-                command: 'M400'
-            });
-            self.sendCustomCommand({
-                type: 'command',
-                command: 'M42 P' + pin1 + 'S0'
-            });
-            self.sendCustomCommand({
-                type: 'command',
-                command: 'G91'
-            });
-            self.sendCustomCommand({
-                type: 'command',
-                command: 'G1 E' + dir * 8.5 + ' F100.00'
-            });
-            self.sendCustomCommand({
-                type: 'command',
-                command: 'M400'
-            });
-            self.sendCustomCommand({
-                type: 'command',
-                command: 'G1 X' + -1 * dir * 49 + ' F1800.00'
-            });
-            self.sendCustomCommand({
-                type: 'command',
-                command: 'M400'
-            });
-            self.sendCustomCommand({
-                type: 'command',
-                command: 'G1 E' + dir * 8.5 + 'F100.00'
-            });
-            self.sendCustomCommand({
-                type: 'command',
-                command: 'M400'
-            });
-            self.sendCustomCommand({
-                type: 'command',
-                command: 'M42 P' + pin2 + 'S255'
+                type: 'commands',
+                commands: [
+                    'T0',
+                    'M400',
+                    'G1 E' + midpoint + ' F100.00',
+                    'M400',
+                    'G1 X' + dir * self.xTravel + ' F1800.00',
+                    'M400',
+                    'G1 E' + target + 'F100.00',
+                    'M400'
+                ]
             });
         }
 

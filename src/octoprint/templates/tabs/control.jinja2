@@ -79,6 +79,17 @@
         <!-- Light Intensity -->
         <input style="width: 300px" type="number" data-bind="slider: {min: 0, max: 100, step: 1, value: lightIntensity, tooltip: 'hide'}">
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && loginState.isUser(), click: function() { $root.sendLightIntensity() }">{{ _('Light Intensity: ') }}<span data-bind="text: lightIntensity() + '%'"></span></button>
+        <div class="row">
+            <select class="form-control" style="width: 300px" id="wellPlate" data-bind="enable: isOperational() && loginState.isUser() && isHomed()">
+                <option selected="selected">Select Plate Type</option>
+                <option value="1">Petri Dish</option>
+                <option value="6">6-Well Plate</option>
+                <option value="12">12-Well Plate</option>
+                <option value="24">24-Well Plate</option>
+                <option value="96">96-Well Plate</option>
+            </select>
+            <button class="btn btn-block" data-bind="enable: isOperational() && loginState.isUser() && isHomed(), click: function() { $root.selectWellPlate() }">Select Well Plate</button>
+        </div>
     </div>
 </div>
 <!-- <div class = "row-fluid"> -->
@@ -99,7 +110,9 @@
             <span class="add-on">° C</span>
         </div>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendTempDecrease(1) }">{{ _('-') }}</button>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.switchTool(-1) }">{{ _('Select Tool') }}</button>
+        <hr>
+        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.saveToolChangeDist(1) }">{{ _('Set Tool Distance') }}</button>
+        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.switchTool(1) }">{{ _('Select Tool') }}</button>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M42 P16 S255'}) }">{{ _('Extrude') }}</button>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M42 P16 S0'}) }">{{ _('Stop') }}</button>
     </div>
@@ -120,7 +133,8 @@
             <span class="add-on">° C</span>
         </div>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendTempDecrease(2) }">{{ _('-') }}</button>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.switchTool(1) }">{{ _('Select Tool') }}</button>
+        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.saveToolChangeDist(1) }">{{ _('Set Tool Distance') }}</button>
+        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.switchTool(2) }">{{ _('Select Tool') }}</button>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M42 P17 S255'}) }">{{ _('Extrude') }}</button>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M42 P17 S0'}) }">{{ _('Stop') }}</button>
     </div>

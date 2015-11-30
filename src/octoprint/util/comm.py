@@ -86,6 +86,15 @@ Groups will be as follows:
   * ``target``: target temperature, if provided (float)
 """
 
+regex_position = re.compile("(?P<axis>X|Y|Z|E):\s*(?P<pos>%s)" % (regex_float_pattern))
+"""Regex matching posotion values in line.
+
+Groups will be as follows:
+
+	* ``axis``: axis designator (str)
+	* ``pos``: axis position (float)
+"""
+
 regex_repetierTempExtr = re.compile("TargetExtr(?P<toolnum>\d+):(?P<target>%s)" % regex_positive_float_pattern)
 """Regex for matching target temp reporting from Repetier.
 
@@ -212,6 +221,7 @@ class MachineCom(object):
 		self._baudrateDetectList = baudrateList()
 		self._baudrateDetectRetry = 0
 		self._temp = {}
+		self._position = {}
 		self._bedTemp = None
 		self._tempOffsets = dict()
 		self._commandQueue = queue.Queue()
@@ -419,6 +429,9 @@ class MachineCom(object):
 
 	def getTemp(self):
 		return self._temp
+
+	def getPosition(self):
+		return self._position
 
 	def getBedTemp(self):
 		return self._bedTemp
@@ -801,6 +814,13 @@ class MachineCom(object):
 			else:
 				self._bedTemp = (actual, None)
 
+	def _processPosition(self, line):
+		parsedPosition = parse_position_line(line)
+
+		self._position = parsedPosition
+
+
+
 	##~~ Serial monitor processing received messages
 
 	def _monitor(self):
@@ -838,6 +858,7 @@ class MachineCom(object):
 		# enqueue an M105 first thing
 		if try_hello:
 			self._sendCommand("M110")
+			self._sendCommand("M114")
 			self._clear_to_send.set()
 
 		while self._monitoring_active:
@@ -946,6 +967,11 @@ class MachineCom(object):
 							self._callback.on_comm_temperature_update(self._temp, self._bedTemp)
 						except ValueError:
 							pass
+
+				if ' X:' in line or line.startswith('X:'):
+					self._processPosition(line)
+					self._callback.on_comm_position_update(self._position)
+
 
 				#If we are waiting for an M109 or M190 then measure the time we lost during heatup, so we can remove that time from our printing time estimate.
 				if 'ok' in line and self._heatupWaitStartTime:
@@ -1060,6 +1086,7 @@ class MachineCom(object):
 							self._serial.write('\n')
 							self._log("Baudrate test retry: %d" % (self._baudrateDetectRetry))
 							self._sendCommand("M110")
+							self._sendCommand("M114")
 							self._clear_to_send.set()
 						elif len(self._baudrateDetectList) > 0:
 							baudrate = self._baudrateDetectList.pop(0)
@@ -1072,6 +1099,7 @@ class MachineCom(object):
 								self._timeout = get_new_timeout("communication")
 								self._serial.write('\n')
 								self._sendCommand("M110")
+								self._sendCommand("M114")
 								self._clear_to_send.set()
 							except:
 								self._log("Unexpected error while setting baudrate: %d %s" % (baudrate, get_exception_string()))
@@ -1089,6 +1117,7 @@ class MachineCom(object):
 					if "start" in line and not startSeen:
 						startSeen = True
 						self._sendCommand("M110")
+						self._sendCommand("M114")
 						self._clear_to_send.set()
 					elif "ok" in line:
 						self._onConnected()
@@ -1116,6 +1145,7 @@ class MachineCom(object):
 						if not self._long_running_command:
 							self._log("Communication timeout during printing, forcing a line")
 							self._sendCommand("M105")
+							self._sendCommand("M114")
 							self._clear_to_send.set()
 						else:
 							self._logger.debug("Ran into a communication timeout, but a command known to be a long runner is currently active")
@@ -1192,6 +1222,8 @@ class MachineCom(object):
 
 		if self.isOperational() and not self.isStreaming() and not self._long_running_command and not self._heating:
 			self.sendCommand("M105", cmd_type="temperature_poll")
+			self.sendCommand("M114")
+
 
 	def _poll_sd_status(self):
 		"""
@@ -1817,6 +1849,9 @@ class MachineComPrintCallback(object):
 	def on_comm_temperature_update(self, temp, bedTemp):
 		pass
 
+	def on_comm_position_update(self, position):
+		pass
+
 	def on_comm_state_change(self, state):
 		pass
 
@@ -2318,6 +2353,28 @@ def parse_temperature_line(line, current):
 			pass
 
 	return max(maxToolNum, current), canonicalize_temperatures(result, current)
+
+def parse_position_line(line):
+	"""
+	Parses the provided positon line.
+
+	The result will be a dictionary mapping from the axis to the current axis position
+
+	Arguments:
+			line (str): the position line to parse
+
+	Returns:
+			dict: a dictionary with a mapping from the axis name to the current position
+	"""
+
+	result = {}
+	for match in re.finditer(regex_position, line):
+		values = match.groupdict()
+		axis = values["axis"]
+		pos = values["pos"]
+		if axis not in result:
+			result[axis] = pos
+	return result
 
 def gcode_command_for_cmd(cmd):
 	"""
