@@ -1,0 +1,101 @@
+a {
+  color: #FF1025;
+}
+
+/* Portrait tablet to landscape and desktop */
+@media (min-width: 768px) and (max-width: 979px) { 
+  #sidebar {
+    display: none;
+  }
+}
+
+@media only screen  and (min-device-width : 768px) and (max-device-width : 1024px)  { 
+  #sidebar {
+    display: none;
+  }
+  #main {
+    width: 100%;
+    margin: 0;
+  }
+  #motion {
+    width:600px;
+  }
+
+  #XY {
+    width:450px;
+  }
+
+  #X {
+    padding-left: 60px;
+  }
+
+  #control .box {
+    height: 100px;
+    width: 100px;
+  }
+  .octoprint-container {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .btn-primary.disabled, .btn-primary[disabled] {
+  background-color: #FF1025;
+  background-image: none;
+  color: #fff;
+}
+
+.btn {
+  background-color: #FF1025;
+  background-image: none;
+  color: #fff;
+}
+
+.navbar-inner {
+  padding: 20px 0;
+}
+
+#navbar .navbar-inner{
+  background-color: #fff;
+  background-image: none;
+  color: #000;
+}
+
+#navbar .navbar-inner .brand {
+  text-shadow: none;
+  color: #000;
+}
+
+#navbar .navbar-inner .brand span{
+  background-size: 213px 80px;
+  background-position: left center;
+  padding-left: 213px;
+  background-repeat: no-repeat;
+  background-image: url(../img/biobots-black.png);
+}
+
+#navbar .navbar-inner .nav>li>a {
+  text-shadow: none;
+  color: #000;
+  /*font-family:"COUTURE Bold";
+  src:url("COUTURE-Bold.eot?") format("eot"),url("COUTURE-Bold.woff") format("woff"),url("COUTURE-Bold.ttf") format("truetype"),url("COUTURE-Bold.svg#COUTURE-Bold") format("svg");*/
+  font-weight:normal;
+  font-style:normal;
+}
+
+.page-container {
+  background-color: #ecf0f1;
+}
+
+.container {
+  width: 90%;
+}
+
+.navbar-static-top .container {
+  width: 90%;
+}
+
+#temperature-graph {
+  background-image: none;
+}
