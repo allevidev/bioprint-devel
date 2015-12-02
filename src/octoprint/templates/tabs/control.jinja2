@@ -104,13 +104,6 @@
         </div>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendRetractCommand(1) }">{{ _('-') }}</button>
         <hr>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendTempIncrease(1) }">{{ _('+') }}</button>
-        <div class="input-append control-box">
-            <input type="text" class="input-mini text-right" id="extruder1Temp" data-bind="value: extruder1Temp, enable: isOperational() && !isPrinting() && loginState.isUser(), attr: {placeholder: settings.printer_defaultTemperature}">
-            <span class="add-on">° C</span>
-        </div>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendTempDecrease(1) }">{{ _('-') }}</button>
-        <hr>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.saveToolChangeDist(1) }">{{ _('Set Tool Distance') }}</button>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.switchTool(1) }">{{ _('Select Tool') }}</button>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M42 P16 S255'}) }">{{ _('Extrude') }}</button>
@@ -121,18 +114,13 @@
     <h1>Extruder 2</h1>
     <div>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendExtrudeCommand(2) }">{{ _('+') }}</button>
+        <div class=""
         <div class="input-append control-box">
             <input type="text" class="input-mini text-right" id="extruder2Pressure" data-bind="value: extruder2Pressure, enable: isOperational() && !isPrinting() && loginState.isUser(), attr: {placeholder: settings.printer_defaultPressure}">
             <span class="add-on">psi</span>
         </div>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendRetractCommand(2) }">{{ _('-') }}</button>
         <hr>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendTempIncrease(2) }">{{ _('+') }}</button>
-        <div class="input-append control-box">
-            <input type="text" class="input-mini text-right" id="extruder2Temp" data-bind="value: extruder2Temp, enable: isOperational() && !isPrinting() && loginState.isUser(), attr: {placeholder: settings.printer_defaultTemperature}">
-            <span class="add-on">° C</span>
-        </div>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendTempDecrease(2) }">{{ _('-') }}</button>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.saveToolChangeDist(1) }">{{ _('Set Tool Distance') }}</button>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.switchTool(2) }">{{ _('Select Tool') }}</button>
         <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M42 P17 S255'}) }">{{ _('Extrude') }}</button>
@@ -167,6 +155,29 @@
     <div class="custom_section">
         <h1 onclick="$(this).children().first().toggleClass('icon-caret-down icon-caret-right').parent().next().slideToggle('fast')"><i data-bind="css: {'icon-caret-down': !collapsed, 'icon-caret-right': collapsed}"></i> <span data-bind="text: name"></span></h1>
         <!-- ko template: { name: 'customControls_containerTemplate', data: $data } --><!-- /ko -->
+    </div>
+</script>
+<script type="text/html" id="temp-template">
+    <div class="input-append">
+        <input type="text" class="input-mini text-right tempInput" data-bind="attr: {placeholder: cleanTemperature(target()) }, value: newTarget, enable: $root.isOperational() && $root.loginState.isUser(), event: { keyup: function(d, e) {$root.handleEnter(e, 'target', $data);} }">
+        <span class="add-on">&deg;C</span>
+        <div class="btn-group">
+            <button type="submit" data-bind="click: $parent.setTarget, enable: $root.isOperational() && $root.loginState.isUser()" class="btn">{{ _('Set') }}</button>
+            <button class="btn dropdown-toggle" data-toggle="dropdown" data-bind="enable: $root.isOperational() && $root.loginState.isUser()">
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <!-- ko foreach: $root.temperature_profiles -->
+                <li>
+                    <a href="#" data-bind="click: function() {$root.setTargetFromProfile($parent, $data);}, text: 'Set ' + name + ' (' + ($parent.key() == 'bed' ? bed : extruder) + '&deg;C)'"></a>
+                </li>
+                <!-- /ko -->
+                <li class="divider"></li>
+                <li>
+                    <a href="#" data-bind="click: $root.setTargetToZero">{{ _('Off') }}</a>
+                </li>
+            </ul>
+        </div>
     </div>
 </script>
 <script type="text/html" id="customControls_containerTemplate">

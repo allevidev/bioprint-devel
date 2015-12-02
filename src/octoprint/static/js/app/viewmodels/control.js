@@ -8,7 +8,13 @@ $(function() {
         self._createToolEntry = function () {
             return {
                 name: ko.observable(),
-                key: ko.observable()
+                key: ko.observable(),
+                actual: ko.observable(0),
+                target: ko.observable(0),
+                offset: ko.observable(0),
+                newTarget: ko.observable(),
+                newOffset: ko.observable(),
+                pressure: ko.observable()
             }
         };
 
@@ -59,6 +65,15 @@ $(function() {
         self.xTravel = 49;
 
         self.tools = ko.observableArray([]);
+        self.hasBed = ko.observable(true);
+        self.bedTemp = self._createToolEntry();
+        self.bedTemp["name"](gettext("Bed"));
+        self.bedTemp["key"]("bed");
+
+        self.temperature_profiles = self.settings.temperature_profiles;
+        self.temperature_cutoff = self.settings.temperature_cutoff;
+
+        self.heaterOptions = ko.observable({});
 
         self.feedRate = ko.observable(100);
         self.flowRate = ko.observable(100);
@@ -81,35 +96,54 @@ $(function() {
 
         self.settings.printerProfiles.currentProfileData.subscribe(function () {
             self._updateExtruderCount();
+
             self.settings.printerProfiles.currentProfileData().extruder.count.subscribe(self._updateExtruderCount);
         });
         self._updateExtruderCount = function () {
-            var tools = [];
+            var graphColors = ["red", "orange", "green", "brown", "purple"];
+            var heaterOptions = {};
+            var tools = self.tools();
 
             var numExtruders = self.settings.printerProfiles.currentProfileData().extruder.count();
             if (numExtruders > 1) {
                 // multiple extruders
                 for (var extruder = 0; extruder < numExtruders; extruder++) {
-                    tools[extruder] = self._createToolEntry();
-                    tools[extruder]["name"](gettext("Tool") + " " + extruder);
-                    tools[extruder]["key"]("tool" + extruder);
+                    var color = graphColors.shift();
+                    if (!color) color = "black";
+                    heaterOptions["tool" + extruder] = {name: "T" + extruder, color: color};
+                    if (extruder == 0 || extruder == 1) {
+                        tools[extruder] = self._createToolEntry();
+                        tools[extruder]["name"](gettext("Tool") + " " + extruder);
+                        tools[extruder]["key"]("tool" + extruder);
+                    }
                 }
             } else {
                 // only one extruder, no need to add numbers
+                var color = graphColors[0];
+                heaterOptions["tool0"] = {name: "T", color: color};
+
                 tools[0] = self._createToolEntry();
                 tools[0]["name"](gettext("Hotend"));
                 tools[0]["key"]("tool0");
             }
+            heaterOptions["bed"] = {name: gettext("Bed"), color: "blue"};
 
+            self.heaterOptions(heaterOptions);
             self.tools(tools);
         };
 
+        self.temperatures = [];
+
         self.fromCurrentData = function (data) {
             self._processStateData(data.state);
+            self._processTemperatureUpdateData(data.serverTime, data.temps);
+            self._processOffsetData(data.offsets);
         };
 
         self.fromHistoryData = function (data) {
             self._processStateData(data.state);
+            self._processTemperatureHistoryData(data.serverTime, data.temps);
+            self._processOffsetData(data.offsets);
         };
 
         self._processStateData = function (data) {
@@ -120,6 +154,231 @@ $(function() {
             self.isError(data.flags.error);
             self.isReady(data.flags.ready);
             self.isLoading(data.flags.loading);
+        };
+
+        self._processTemperatureUpdateData = function(serverTime, data) {
+            if (data.length == 0)
+                return;
+
+            var lastData = data[data.length - 1];
+
+            var tools = self.tools();
+            for (var i = 0; i < tools.length; i++) {
+                if (lastData.hasOwnProperty("tool" + i)) {
+                    tools[i]["actual"](lastData["tool" + i].actual);
+                    tools[i]["target"](lastData["tool" + i].target);
+                }
+            }
+
+            if (lastData.hasOwnProperty("bed")) {
+                self.hasBed(true);
+                self.bedTemp["actual"](lastData.bed.actual);
+                self.bedTemp["target"](lastData.bed.target);
+            } else {
+                self.hasBed(false);
+            }
+
+            if (!CONFIG_TEMPERATURE_GRAPH) return;
+
+            self.temperatures = self._processTemperatureData(serverTime, data, self.temperatures);
+            self.updatePlot();
+        };
+
+        self._processTemperatureHistoryData = function(serverTime, data) {
+            self.temperatures = self._processTemperatureData(serverTime, data);
+            self.updatePlot();
+        };
+
+
+        self._processOffsetData = function(data) {
+            var tools = self.tools();
+            for (var i = 0; i < tools.length; i++) {
+                if (data.hasOwnProperty("tool" + i)) {
+                    tools[i]["offset"](data["tool" + i]);
+                }
+            }
+
+            if (data.hasOwnProperty("bed")) {
+                self.bedTemp["offset"](data["bed"]);
+            }
+        };
+
+        self._processTemperatureData = function(serverTime, data, result) {
+            var types = _.keys(self.heaterOptions());
+            var clientTime = Date.now();
+
+            // make sure result is properly initialized
+            if (!result) {
+                result = {};
+            }
+
+            _.each(types, function(type) {
+                if (!result.hasOwnProperty(type)) {
+                    result[type] = {actual: [], target: []};
+                }
+                if (!result[type].hasOwnProperty("actual")) result[type]["actual"] = [];
+                if (!result[type].hasOwnProperty("target")) result[type]["target"] = [];
+            });
+
+            // convert data
+            _.each(data, function(d) {
+                var timeDiff = (serverTime - d.time) * 1000;
+                var time = clientTime - timeDiff;
+                _.each(types, function(type) {
+                    if (!d[type]) return;
+                    result[type].actual.push([time, d[type].actual]);
+                    result[type].target.push([time, d[type].target]);
+
+                    self.hasBed(self.hasBed() || (type == "bed"));
+                })
+            });
+
+            var filterOld = function(item) {
+                return item[0] >= clientTime - self.temperature_cutoff() * 60 * 1000;
+            };
+
+            _.each(_.keys(self.heaterOptions()), function(d) {
+                result[d].actual = _.filter(result[d].actual, filterOld);
+                result[d].target = _.filter(result[d].target, filterOld);
+            });
+
+            return result;
+        };
+
+        self.updatePlot = function() {
+            var graph = $("#temperature-graph");
+            if (graph.length) {
+                var data = [];
+                var heaterOptions = self.heaterOptions();
+                if (!heaterOptions) return;
+
+                _.each(_.keys(heaterOptions), function(type) {
+                    if (type == "bed" && !self.hasBed()) {
+                        return;
+                    }
+
+                    var actuals = [];
+                    var targets = [];
+
+                    if (self.temperatures[type]) {
+                        actuals = self.temperatures[type].actual;
+                        targets = self.temperatures[type].target;
+                    }
+
+                    var actualTemp = actuals && actuals.length ? formatTemperature(actuals[actuals.length - 1][1]) : "-";
+                    var targetTemp = targets && targets.length ? formatTemperature(targets[targets.length - 1][1]) : "-";
+
+                    data.push({
+                        label: gettext("Actual") + " " + heaterOptions[type].name + ": " + actualTemp,
+                        color: heaterOptions[type].color,
+                        data: actuals
+                    });
+                    data.push({
+                        label: gettext("Target") + " " + heaterOptions[type].name + ": " + targetTemp,
+                        color: pusher.color(heaterOptions[type].color).tint(0.5).html(),
+                        data: targets
+                    });
+                });
+
+                $.plot(graph, data, self.plotOptions);
+            }
+        };
+
+        self.setTarget = function(item) {
+            var value = item.newTarget();
+            if (!value) return;
+
+            self._sendToolCommand("target",
+                item.key(),
+                item.newTarget(),
+                function() {item.newTarget("");}
+            );
+        };
+
+        self.setTargetFromProfile = function(item, profile) {
+            if (!profile) return;
+
+            var value = undefined;
+            if (item.key() == "bed") {
+                value = profile.bed;
+            } else {
+                value = profile.extruder;
+            }
+
+            self._sendToolCommand("target",
+                item.key(),
+                value,
+                function() {item.newTarget("");}
+            );
+        };
+
+        self.setTargetToZero = function(item) {
+            self._sendToolCommand("target",
+                item.key(),
+                0,
+                function() {item.newTarget("");}
+            );
+        };
+
+        self.setOffset = function(item) {
+            self._sendToolCommand("offset",
+                item.key(),
+                item.newOffset(),
+                function() {item.newOffset("");}
+            );
+        };
+
+         self._sendToolCommand = function(command, type, temp, successCb, errorCb) {
+            var data = {
+                command: command
+            };
+
+            var endpoint;
+            if (type == "bed") {
+                if ("target" == command) {
+                    data["target"] = parseInt(temp);
+                } else if ("offset" == command) {
+                    data["offset"] = parseInt(temp);
+                } else {
+                    return;
+                }
+
+                endpoint = "bed";
+            } else {
+                var group;
+                if ("target" == command) {
+                    group = "targets";
+                } else if ("offset" == command) {
+                    group = "offsets";
+                } else {
+                    return;
+                }
+                data[group] = {};
+                data[group][type] = parseInt(temp);
+
+                endpoint = "tool";
+            }
+
+            $.ajax({
+                url: API_BASEURL + "printer/" + endpoint,
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify(data),
+                success: function() { if (successCb !== undefined) successCb(); },
+                error: function() { if (errorCb !== undefined) errorCb(); }
+            });
+
+        };
+
+        self.handleEnter = function(event, type, item) {
+            if (event.keyCode == 13) {
+                if (type == "target") {
+                    self.setTarget(item);
+                } else if (type == "offset") {
+                    self.setOffset(item);
+                }
+            }
         };
 
         self.onEventSettingsUpdated = function (payload) {
