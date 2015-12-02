@@ -140,24 +140,24 @@ class PrinterProfileManager(object):
 	"""
 
 	default = dict(
-		id = "_default",
-		name = "Default",
-		model = "Generic RepRap Printer",
+		id = "biobot1",
+		name = "BioBot 1",
+		model = "BioBot 1",
 		color = "default",
 		volume=dict(
-			width = 200,
-			depth = 200,
-			height = 200,
+			width = 136,
+			depth = 86,
+			height = 75,
 			formFactor = BedTypes.RECTANGULAR,
 			origin = BedOrigin.LOWERLEFT
 		),
 		heatedBed = False,
 		extruder=dict(
-			count = 1,
+			count = 2,
 			offsets = [
-				(0, 0)
+				(0, 0, 0),
+				(49, 0, 0)
 			],
-			nozzleDiameter = 0.4
 		),
 		axes=dict(
 			x = dict(speed=6000, inverted=False),
@@ -437,12 +437,12 @@ class PrinterProfileManager(object):
 		# validate offsets
 		offsets = []
 		for offset in profile["extruder"]["offsets"]:
-			if not len(offset) == 2:
+			if not len(offset) == 3:
 				self._logger.warn("Profile has an invalid extruder.offsets entry: {entry!r}".format(entry=offset))
 				return False
-			x_offset, y_offset = offset
+			x_offset, y_offset, z_offset = offset
 			try:
-				offsets.append((float(x_offset), float(y_offset)))
+				offsets.append((float(x_offset), float(y_offset), float(z_offset)))
 			except:
 				self._logger.warn("Profile has an extruder.offsets entry with non-float values: {entry!r}".format(entry=offset))
 				return False
