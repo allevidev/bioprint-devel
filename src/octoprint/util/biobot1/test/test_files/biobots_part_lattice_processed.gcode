@@ -24,11 +24,11 @@ G1 Z5 F5000 ; lift nozzle
 M109 S200 ; wait for temperature to be reached
 G90 ; use absolute coordinates
 M400 ; wait for commands to complete
-M42 P16S255 ; turn extruder 0 off
+M42 P16 S0 ; turn extruder 0 off
 M82 ; use absolute distances for extrusion
 G1 F1800.000
 M400 ; wait for commands to complete
-M42 P16S255 ; turn extruder 0 off
+M42 P16 S0 ; turn extruder 0 off
 G1 Z0.350 F7800.000
 G1 X100.516 Y100.924
 G1 F1800.000
@@ -103,7 +103,7 @@ G1 X101.875 Y99.700 F7800.000
 G1 X101.812 Y99.250 F540.000
 G1 F1800.000
 M400 ; wait for commands to complete
-M42 P16S255 ; turn extruder 0 off
+M42 P16 S0 ; turn extruder 0 off
 G1 Z0.750 F7800.000
 G1 Z1.150
 G1 X102.423 Y100.899
@@ -157,7 +157,7 @@ G1 X101.875 Y100.894 F7800.000
 G1 X102.423 Y100.899 F1800.000
 G1 F1800.000
 M400 ; wait for commands to complete
-M42 P16S255 ; turn extruder 0 off
+M42 P16 S0 ; turn extruder 0 off
 G1 X101.083 Y99.300 F7800.000
 G1 F1800.000
 G1 X101.042 Y99.100 F1800.000
@@ -191,7 +191,7 @@ G1 X98.429 Y100.910 F7800.000
 G1 X98.625 Y100.891 F1800.000
 G1 F1800.000
 M400 ; wait for commands to complete
-M42 P16S255 ; turn extruder 0 off
+M42 P16 S0 ; turn extruder 0 off
 G1 Z1.550 F7800.000
 G1 Z1.950
 G1 X102.423 Y100.899
@@ -245,7 +245,7 @@ G1 X101.875 Y100.894 F7800.000
 G1 X102.423 Y100.899 F1800.000
 G1 F1800.000
 M400 ; wait for commands to complete
-M42 P16S255 ; turn extruder 0 off
+M42 P16 S0 ; turn extruder 0 off
 G1 X101.083 Y99.300 F7800.000
 G1 F1800.000
 G1 X101.042 Y99.100 F1800.000
@@ -279,7 +279,7 @@ G1 X98.429 Y100.910 F7800.000
 G1 X98.625 Y100.891 F1800.000
 G1 F1800.000
 M400 ; wait for commands to complete
-M42 P16S255 ; turn extruder 0 off
+M42 P16 S0 ; turn extruder 0 off
 G1 Z2.350 F7800.000
 G1 Z2.750
 G1 Z3.150
@@ -336,7 +336,7 @@ G1 X101.875 Y100.894 F7800.000
 G1 X102.423 Y100.899 F1800.000
 G1 F1800.000
 M400 ; wait for commands to complete
-M42 P16S255 ; turn extruder 0 off
+M42 P16 S0 ; turn extruder 0 off
 G1 X101.083 Y99.300 F7800.000
 G1 F1800.000
 G1 X101.042 Y99.100 F1800.000
@@ -370,7 +370,7 @@ G1 X98.429 Y100.910 F7800.000
 G1 X98.625 Y100.891 F1800.000
 G1 F1800.000
 M400 ; wait for commands to complete
-M42 P16S255 ; turn extruder 0 off
+M42 P16 S0 ; turn extruder 0 off
 G1 Z4.350 F7800.000
 G1 Z4.750
 G1 X102.423 Y100.899
@@ -424,7 +424,7 @@ G1 X101.875 Y100.894 F7800.000
 G1 X102.423 Y100.899 F1800.000
 G1 F1800.000
 M400 ; wait for commands to complete
-M42 P16S255 ; turn extruder 0 off
+M42 P16 S0 ; turn extruder 0 off
 G1 X101.083 Y99.300 F7800.000
 G1 F1800.000
 G1 X101.042 Y99.100 F1800.000
@@ -458,7 +458,7 @@ G1 X98.429 Y100.910 F7800.000
 G1 X98.625 Y100.891 F1800.000
 G1 F1800.000
 M400 ; wait for commands to complete
-M42 P16S255 ; turn extruder 0 off
+M42 P16 S0 ; turn extruder 0 off
 G1 Z5.150 F7800.000
 G1 Z5.550
 G1 X102.423 Y100.899
@@ -512,7 +512,7 @@ G1 X101.875 Y100.894 F7800.000
 G1 X102.423 Y100.899 F1800.000
 G1 F1800.000
 M400 ; wait for commands to complete
-M42 P16S255 ; turn extruder 0 off
+M42 P16 S0 ; turn extruder 0 off
 G1 X101.083 Y99.300 F7800.000
 G1 F1800.000
 G1 X101.042 Y99.100 F1800.000
@@ -546,7 +546,7 @@ G1 X98.429 Y100.910 F7800.000
 G1 X98.625 Y100.891 F1800.000
 G1 F1800.000
 M400 ; wait for commands to complete
-M42 P16S255 ; turn extruder 0 off
+M42 P16 S0 ; turn extruder 0 off
 M104 S0 ; turn off temperature
 G28 X0  ; home X axis
 M84     ; disable motors

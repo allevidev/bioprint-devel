@@ -108,7 +108,7 @@ def start_extrude(extruder):
         onPin = 17
     commands = [
         'M400 ; wait for commands to complete',
-        'M42 P' + str(onPin) + 'S255 ; turn extruder ' + str(extruder) + ' on']
+        'M42 P' + str(onPin) + ' S255 ; turn extruder ' + str(extruder) + ' on']
     return '\n'.join(commands)
 
 
@@ -119,8 +119,8 @@ def stop_extrude(extruder):
         offPin = 17
     commands = [
         'M400 ; wait for commands to complete',
-        'M42 P' + str(offPin) + 'S255 '
-        '; turn extruder ' + str(extruder) + ' off']
+        'M42 P' + str(offPin) + ' S0' 
+        ' ; turn extruder ' + str(extruder) + ' off']
     return '\n'.join(commands)
 
 
