@@ -167,9 +167,8 @@ def post_process(filename, e1_pos, e1_Zoffset,
             for i, line in enumerate(f):
                 if e_value(line) is not None:
                     if e_value(line) == 0.0:
-                        print 'STOP'
                         o.write(stop_extrude(active_e) + '\n')
-                    elif e_value(line) is 1.0:
+                    elif e_value(line) == 1.0:
                         o.write(start_extrude(active_e) + '\n')
                     else:
                         o.write(remove_e(line) + '\n')
