@@ -175,8 +175,8 @@ default_settings = {
     },
     "temperature": {
         "profiles": [
-            {"name": "ABS", "extruder" : 210, "bed" : 100 },
-            {"name": "PLA", "extruder" : 180, "bed" : 60 }
+            # {"name": "ABS", "extruder" : 210, "bed" : 100 },
+            # {"name": "PLA", "extruder" : 180, "bed" : 60 }
         ],
         "cutoff": 30
     },
@@ -277,7 +277,7 @@ default_settings = {
             "okAfterResend": False,
             "forceChecksum": False,
             "okWithLinenumber": False,
-            "numExtruders": 1,
+            "numExtruders": 2,
             "includeCurrentToolInTemps": True,
             "movementSpeed": {
                 "x": 6000,

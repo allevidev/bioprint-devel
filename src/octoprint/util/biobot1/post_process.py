@@ -16,10 +16,12 @@
 
 import re
 
+from octoprint.settings import settings
+
 e_rate = 100.00
 x_rate = 1800.00
 
-e_pattern = 'E(\d+\.\d+|\.\d+|\d+)'
+e_pattern = 'E([+-]?\d+(?:\.\d+)?)'
 t_pattern = 'T(\d+\.\d+|\.\d+|\d+)'
 
 
@@ -33,6 +35,14 @@ def e_value(line):
         return None
     res = re.findall(e_pattern, line.upper())
     return None if res == [] else float(res[0])
+
+
+def remove_e(line):
+    '''
+    Remove the E value from a line, for example
+    returns "G1 X13.932 Y45.135" on input "G1 X13.932 Y45.135 E1.81780"
+    '''
+    return ' '.join(str.split(line, ' ')[:-1])
 
 
 def next_e(e_vals, lines, ind):
@@ -91,6 +101,29 @@ def next_z(z_vals, lines, ind):
     return None, None
 
 
+def start_extrude(extruder):
+    if extruder is 0:
+        onPin = 16
+    elif extruder is 1:
+        onPin = 17
+    commands = [
+        'M400 ; wait for commands to complete',
+        'M42 P' + str(onPin) + 'S255 ; turn extruder ' + str(extruder) + ' on']
+    return '\n'.join(commands)
+
+
+def stop_extrude(extruder):
+    if extruder is 0:
+        offPin = 16
+    elif extruder is 1:
+        offPin = 17
+    commands = [
+        'M400 ; wait for commands to complete',
+        'M42 P' + str(offPin) + 'S255 '
+        '; turn extruder ' + str(extruder) + ' off']
+    return '\n'.join(commands)
+
+
 def switch_extruder(extruder, e1_pos, e2_pos, X_offset):
     mid_pos = e1_pos + (e2_pos - e1_pos) / 2
     if extruder is 0:
@@ -105,28 +138,47 @@ def switch_extruder(extruder, e1_pos, e2_pos, X_offset):
         target = e2_pos
 
     commands = [
-        'T0',
-        'M400',
-        'M42 P' + offPin + 'S0',
-        'G1 E' + mid_pos + ' F' + e_rate,
-        'M400',
-        'G1 X' + direction * X_offset + ' F' + x_rate,
-        'M400',
-        'G1 E' + target + ' F' + e_rate,
-        'M400',
-        'M42 P' + onPin + 'S255']
+        'T0 ; ensure we keep T0 active to prevent changing pressure',
+        'M400 ; wait for commands to complete',
+        'M42 P' + str(offPin) + 'S0 ; turn off extruder ' + str(extruder),
+        'G1 E' + str(mid_pos) + ' F' + str(e_rate) +
+        ' ; move extruder to midpoint',
+        'M400 ; wait for commands to complete',
+        'G1 X' + str(direction * X_offset) + ' F' + str(x_rate) +
+        ' ; move over by x offset',
+        'M400 ; wait for commands to complete',
+        'G1 E' + str(target) + ' F' + str(e_rate) + ' ; move extruder ' + str(extruder) + ' into position',
+        ]
 
     return commands.join('\n')
 
 
-def post_process(filename, e1_pos, e1_Zoffset, e2_pos, e2_Zoffset, X_offset):
+def post_process(filename, e1_pos, e1_Zoffset,
+                 e2_pos, e2_Zoffset,
+                 X_offset, e_start):
     '''
     Read a gcode file and add M106 after E1.000 lines and
     M107, M126, M127 after each E peak.
     '''
+    fName, fType = str.split(filename, '.')
     with open(filename, 'r') as f:
-        for i, line in enumerate(f):
-            print i, line
+        with open(fName + '_processed.' + fType, 'w') as o:
+            active_e = e_start
+            for i, line in enumerate(f):
+                if e_value(line) is not None:
+                    if e_value(line) == 0.0:
+                        print 'STOP'
+                        o.write(stop_extrude(active_e) + '\n')
+                    elif e_value(line) is 1.0:
+                        o.write(start_extrude(active_e) + '\n')
+                    else:
+                        o.write(remove_e(line) + '\n')
+                elif t_value(line) is not None:
+                    print i, line
+                else:
+                    o.write(line)
+        o.close()
+    f.close()
     # lines = f.read().split('\n')
     # f.close()
     # if lines[-1] == '':
@@ -147,3 +199,15 @@ def post_process(filename, e1_pos, e1_Zoffset, e2_pos, e2_Zoffset, X_offset):
     # f.write('\n'.join(result))
     # f.close()
 
+
+filename = '/Users/karanhiremath/Documents/Programming/BioBots/OctoPrint/src/octoprint/util/biobot1/test/test_files/biobots_part_lattice.gcode'
+e1_pos = 0
+e1_Zoffset = 2
+
+e2_pos = 17
+e2_Zoffset = 4
+
+X_offset = 49
+e_start = 0
+
+post_process(filename, e1_pos, e1_Zoffset, e2_pos, e2_Zoffset, X_offset, e_start)
