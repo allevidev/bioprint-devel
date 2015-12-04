@@ -20,7 +20,7 @@
 G21 ; set units to millimeters
 M104 S200 ; set temperature
 G28 ; home all axes
-G1 Z5 F5000 ; lift nozzle
+G1 Z10.0 F5000 ; lift nozzle ; Extruder 0 Z Offset of 5 added.
 M109 S200 ; wait for temperature to be reached
 G90 ; use absolute coordinates
 M400 ; wait for commands to complete
@@ -29,7 +29,7 @@ M82 ; use absolute distances for extrusion
 G1 F1800.000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z0.350 F7800.000
+G1 Z5.35 F7800.000 ; Extruder 0 Z Offset of 5 added.
 G1 X100.516 Y100.924
 M400 ; wait for commands to complete
 M42 P16 S255 ; turn extruder 0 on
@@ -105,8 +105,8 @@ G1 X101.812 Y99.250 F540.000
 G1 F1800.000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z0.750 F7800.000
-G1 Z1.150
+G1 Z5.75 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z6.15 ; Extruder 0 Z Offset of 5 added.
 G1 X102.423 Y100.899
 M400 ; wait for commands to complete
 M42 P16 S255 ; turn extruder 0 on
@@ -195,8 +195,8 @@ G1 X98.625 Y100.891 F1800.000
 G1 F1800.000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z1.550 F7800.000
-G1 Z1.950
+G1 Z6.55 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z6.95 ; Extruder 0 Z Offset of 5 added.
 G1 X102.423 Y100.899
 M400 ; wait for commands to complete
 M42 P16 S255 ; turn extruder 0 on
@@ -285,11 +285,11 @@ G1 X98.625 Y100.891 F1800.000
 G1 F1800.000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z2.350 F7800.000
-G1 Z2.750
-G1 Z3.150
-G1 Z3.550
-G1 Z3.950
+G1 Z7.35 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z7.75 ; Extruder 0 Z Offset of 5 added.
+G1 Z8.15 ; Extruder 0 Z Offset of 5 added.
+G1 Z8.55 ; Extruder 0 Z Offset of 5 added.
+G1 Z8.95 ; Extruder 0 Z Offset of 5 added.
 G1 X102.423 Y100.899
 M400 ; wait for commands to complete
 M42 P16 S255 ; turn extruder 0 on
@@ -378,8 +378,8 @@ G1 X98.625 Y100.891 F1800.000
 G1 F1800.000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z4.350 F7800.000
-G1 Z4.750
+G1 Z9.35 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z9.75 ; Extruder 0 Z Offset of 5 added.
 G1 X102.423 Y100.899
 M400 ; wait for commands to complete
 M42 P16 S255 ; turn extruder 0 on
@@ -468,8 +468,8 @@ G1 X98.625 Y100.891 F1800.000
 G1 F1800.000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z5.150 F7800.000
-G1 Z5.550
+G1 Z10.15 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z10.55 ; Extruder 0 Z Offset of 5 added.
 G1 X102.423 Y100.899
 M400 ; wait for commands to complete
 M42 P16 S255 ; turn extruder 0 on

@@ -16,13 +16,14 @@
 
 import re
 
-from octoprint.settings import settings
+# from octoprint.settings import settings
 
 e_rate = 100.00
 x_rate = 1800.00
 
 e_pattern = 'E([+-]?\d+(?:\.\d+)?)'
 t_pattern = 'T(\d+\.\d+|\.\d+|\d+)'
+z_pattern = 'Z([+-]?\d+(?:\.\d+)?)'
 
 
 def e_value(line):
@@ -42,19 +43,7 @@ def remove_e(line):
     Remove the E value from a line, for example
     returns "G1 X13.932 Y45.135" on input "G1 X13.932 Y45.135 E1.81780"
     '''
-    return ' '.join(str.split(line, ' ')[:-1])
-
-
-def next_e(e_vals, lines, ind):
-    '''
-    Returns the next e-value just after item ind.
-    It skips lines without E values.
-    It returns the value and its container line.
-    '''
-    for i in range(ind + 1, len(e_vals)):
-        if e_vals[i] is not None:
-            return e_vals[i], lines[i]
-    return None, None
+    return ' '.join(filter(lambda x: x != '', [i.strip() if e_value(i) is None else ''.strip() for i in line.split(' ')]))
 
 
 def t_value(line):
@@ -69,24 +58,16 @@ def t_value(line):
     return None if res == [] else float(res[0])
 
 
-def next_t(t_vals, lines, ind):
-    '''
-    Returns the next e-value just after item ind.
-    It skips lines without E values.
-    It returns the value and its container line.
-    '''
-    for i in range(ind + 1, len(t_vals)):
-        if t_vals[i] is not None:
-            return t_vals[i], lines[i]
-    return None, None
-
-
 def z_value(line):
     '''
     Identify and returns the value of Z on a line, for example
     returns 1.81780 for this line "G1 Z1.81780"
     If no Z found it returns None
     '''
+    if line.strip().startswith(';'):
+        return None
+    res = re.findall(z_pattern, line.upper())
+    return None if res == [] else float(res[0])
 
 
 def next_z(z_vals, lines, ind):
@@ -124,23 +105,22 @@ def stop_extrude(extruder):
     return '\n'.join(commands)
 
 
-def switch_extruder(extruder, e1_pos, e2_pos, X_offset):
-    mid_pos = e1_pos + (e2_pos - e1_pos) / 2
+def switch_extruder(extruder, e0_pos, e1_pos, X_offset):
+    mid_pos = e0_pos + (e1_pos - e0_pos) / 2
     if extruder is 0:
         onPin = 16
         offPin = 17
         direction = -1
-        target = e1_pos
+        target = e0_pos
     elif extruder is 1:
         onPin = 17
         offPin = 16
         direction = 1
-        target = e2_pos
+        target = e1_pos
 
     commands = [
         'T0 ; ensure we keep T0 active to prevent changing pressure',
         'M400 ; wait for commands to complete',
-        'M42 P' + str(offPin) + 'S0 ; turn off extruder ' + str(extruder),
         'G1 E' + str(mid_pos) + ' F' + str(e_rate) +
         ' ; move extruder to midpoint',
         'M400 ; wait for commands to complete',
@@ -150,11 +130,11 @@ def switch_extruder(extruder, e1_pos, e2_pos, X_offset):
         'G1 E' + str(target) + ' F' + str(e_rate) + ' ; move extruder ' + str(extruder) + ' into position',
         ]
 
-    return commands.join('\n')
+    return '\n'.join(commands)
 
 
-def post_process(filename, e1_pos, e1_Zoffset,
-                 e2_pos, e2_Zoffset,
+def post_process(filename, e0_pos, e0_Zoffset,
+                 e1_pos, e1_Zoffset,
                  X_offset, e_start):
     '''
     Read a gcode file and add M106 after E1.000 lines and
@@ -172,41 +152,32 @@ def post_process(filename, e1_pos, e1_Zoffset,
                         o.write(start_extrude(active_e) + '\n')
                     else:
                         o.write(remove_e(line) + '\n')
-                elif t_value(line) is not None:
-                    print i, line
+                elif line.startswith('T') and t_value(line) is not None:
+                    active_e = int(t_value(line))
+                    o.write(switch_extruder(active_e, e0_pos, e1_pos, X_offset) + '\n')
+                elif z_value(line) is not None:
+                    z_offset = e0_Zoffset if active_e == 0 else e1_Zoffset    
+                    z_offset_comment = '; Extruder ' + str(active_e) + \
+                                       ' Z Offset of ' + str(z_offset) + ' added.\n'
+                    o.write(' '.join(['Z' + str(z_offset + z_value(i)) 
+                                        if z_value(i.strip()) is not None else i.strip() 
+                                        for i in line.split(' ')] +
+                                        [z_offset_comment]))
                 else:
                     o.write(line)
         o.close()
     f.close()
-    # lines = f.read().split('\n')
-    # f.close()
-    # if lines[-1] == '':
-    #     lines.pop()
-    # t_vals = [t_value(i) for i in lines]
-    # result = []
-    # pt = None
-
-    # #checking for T0 and T1 lines
-    # for j, line in enumerate(lines):
-    #     result.append(line)
-    #     t = t_vals[j]
-    #     result.append(switch_extruder(t))
-
-    #     pt = t if t is not None else pt
-
-    # f = open(filename + '', 'w')
-    # f.write('\n'.join(result))
-    # f.close()
 
 
-filename = '/Users/karanhiremath/Documents/Programming/BioBots/OctoPrint/src/octoprint/util/biobot1/test/test_files/biobots_part_lattice.gcode'
-e1_pos = 0
-e1_Zoffset = 2
+# filename = '/Users/karanhiremath/Documents/Programming/BioBots/bioprint/src/octoprint/util/biobot1/test_files/biobots_part_lattice.gcode'
+filename = '/Users/karanhiremath/Documents/Programming/BioBots/bioprint/src/octoprint/util/biobot1/test_files/1STCYLINDER.gcode'
+e0_pos = 0
+e0_Zoffset = 5
 
-e2_pos = 17
-e2_Zoffset = 4
+e1_pos = 17
+e1_Zoffset = 4
 
 X_offset = 49
 e_start = 0
 
-post_process(filename, e1_pos, e1_Zoffset, e2_pos, e2_Zoffset, X_offset, e_start)
+post_process(filename, e0_pos, e0_Zoffset, e1_pos, e1_Zoffset, X_offset, e_start)
