@@ -606,19 +606,27 @@ $(function() {
         };
 
         self.sendHomeCommand = function (axis) {
+            if (axis == 'e') {
+                self.sendCustomCommand({
+                    type: "commands",
+                    commands: [
+                    "T0"
+                    ]
+                });
+            }
             self.sendPrintHeadCommand({
                 "command": "home",
                 "axes": axis
             });
-            if (axis == 'z') {
-                self.sendCustomCommand({
-                    type: "commands",
-                    commands: [
-                    "M400",
-                    "G1 Z15 F100"
-                    ]
-                });
-            }
+            // if (axis == 'z') {
+            //     self.sendCustomCommand({
+            //         type: "commands",
+            //         commands: [
+            //         "M400",
+            //         "G1 Z15 F100"
+            //         ]
+            //     });
+            // }
             self.homed[axis] = true;
             if (self.homed['x,y'] == true && self.homed['z'] == true && self.homed['e'] == true) {
                 self.isHomed(true);
@@ -648,6 +656,22 @@ $(function() {
             });
             self._sendECommand(-1);
         };
+
+        self.pressureIncrease = function (extruder) {
+            if (extruder == 0) {
+                tool = 1
+            } else if (extruder == 1) {
+                too1 = 2
+            }
+            self.sendCustomCommand({
+                    type: "commands",
+                    commands: [
+                        "T" + tool,
+                        "G91",
+                        "G1 E" + .025
+                    ]
+                })
+        }
 
         self.sendTempIncrease = function (extruder) {
             var current = self.getToolState();
