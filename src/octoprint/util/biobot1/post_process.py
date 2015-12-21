@@ -21,7 +21,10 @@ import re
 e_rate = 100.00
 x_rate = 1800.00
 
+x_pattern = 'X([+-]?\d+(?:\.\d+)?)'
+y_pattern = 'Y([+-]?\d+(?:\.\d+)?)'
 e_pattern = 'E([+-]?\d+(?:\.\d+)?)'
+g_pattern = 'G([+-]?\d+(?:\.\d+)?)'
 t_pattern = 'T(\d+\.\d+|\.\d+|\d+)'
 z_pattern = 'Z([+-]?\d+(?:\.\d+)?)'
 
@@ -58,6 +61,30 @@ def t_value(line):
     return None if res == [] else float(res[0])
 
 
+def x_value(line):
+    '''
+    Identify and returns the value of X on a line, for example
+    returns 1.81780 for this line "G1 X1.81780"
+    If no X found it returns None
+    '''
+    if line.strip().startswith(';'):
+        return None
+    res = re.findall(x_pattern, line.upper())
+    return None if res == [] else float(res[0])
+
+
+def y_value(line):
+    '''
+    Identify and returns the value of Y on a line, for example
+    returns 1.81780 for this line "G1 Y1.81780"
+    If no Y found it returns None
+    '''
+    if line.strip().startswith(';'):
+        return None
+    res = re.findall(y_pattern, line.upper())
+    return None if res == [] else float(res[0])
+
+
 def z_value(line):
     '''
     Identify and returns the value of Z on a line, for example
@@ -68,18 +95,6 @@ def z_value(line):
         return None
     res = re.findall(z_pattern, line.upper())
     return None if res == [] else float(res[0])
-
-
-def next_z(z_vals, lines, ind):
-    '''
-    Returns the next z-value just after item ind.
-    It skips lines without Z values.
-    It returns the value and its container line.
-    '''
-    for i in range(ind + 1, len(z_vals)):
-        if z_vals[i] is not None:
-            return z_vals[i], lines[i]
-    return None, None
 
 
 def start_extrude(extruder):
@@ -180,4 +195,4 @@ e1_Zoffset = 4
 X_offset = 49
 e_start = 0
 
-post_process(filename, e0_pos, e0_Zoffset, e1_pos, e1_Zoffset, X_offset, e_start)
+# post_process(filename, e0_pos, e0_Zoffset, e1_pos, e1_Zoffset, X_offset, e_start)

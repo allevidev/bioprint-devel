@@ -155,15 +155,15 @@ class PrinterProfileManager(object):
 		extruder=dict(
 			count = 2,
 			offsets = [
-				(0, 0, 0),
-				(49, 0, 0)
+				(0, 0),
+				(49, 0)
 			],
 		),
 		axes=dict(
-			x = dict(speed=6000, inverted=False),
-			y = dict(speed=6000, inverted=False),
-			z = dict(speed=200, inverted=False),
-			e = dict(speed=300, inverted=False)
+			x = dict(speed=1000, inverted=False),
+			y = dict(speed=1000, inverted=False),
+			z = dict(speed=1000, inverted=False),
+			e = dict(speed=1000, inverted=False)
 		)
 	)
 
@@ -437,12 +437,12 @@ class PrinterProfileManager(object):
 		# validate offsets
 		offsets = []
 		for offset in profile["extruder"]["offsets"]:
-			if not len(offset) == 3:
+			if not len(offset) == 2:
 				self._logger.warn("Profile has an invalid extruder.offsets entry: {entry!r}".format(entry=offset))
 				return False
-			x_offset, y_offset, z_offset = offset
+			x_offset, y_offset = offset
 			try:
-				offsets.append((float(x_offset), float(y_offset), float(z_offset)))
+				offsets.append((float(x_offset), float(y_offset)))
 			except:
 				self._logger.warn("Profile has an extruder.offsets entry with non-float values: {entry!r}".format(entry=offset))
 				return False

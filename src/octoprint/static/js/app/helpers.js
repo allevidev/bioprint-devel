@@ -407,12 +407,12 @@ function formatFilament(filament) {
 }
 
 function cleanTemperature(temp) {
-    if (!temp || temp < 10) return gettext("off");
+    if (!temp || temp < 0) return gettext("off");
     return temp;
 }
 
 function formatTemperature(temp) {
-    if (!temp || temp < 10) return gettext("off");
+    if (!temp || temp < 0) return gettext("off");
     return _.sprintf("%.1f&deg;C", temp);
 }
 

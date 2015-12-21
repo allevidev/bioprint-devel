@@ -94,11 +94,6 @@ $(function() {
             return self.keycontrolActive() && self.keycontrolPossible();
         });
 
-        self.settings.printerProfiles.currentProfileData.subscribe(function () {
-            self._updateExtruderCount();
-
-            self.settings.printerProfiles.currentProfileData().extruder.count.subscribe(self._updateExtruderCount);
-        });
         self._updateExtruderCount = function () {
             var graphColors = ["red", "orange", "green", "brown", "purple"];
             var heaterOptions = {};
@@ -131,6 +126,11 @@ $(function() {
             self.heaterOptions(heaterOptions);
             self.tools(tools);
         };
+        self.settings.printerProfiles.currentProfileData.subscribe(function () {
+            self._updateExtruderCount();
+
+            self.settings.printerProfiles.currentProfileData().extruder.count.subscribe(self._updateExtruderCount);
+        });
 
         self.temperatures = [];
 
@@ -610,15 +610,15 @@ $(function() {
                 "command": "home",
                 "axes": axis
             });
-            if (axis == 'z') {
-                self.sendCustomCommand({
-                    type: "commands",
-                    commands: [
-                    "M400",
-                    "G1 Z15 F100"
-                    ]
-                });
-            }
+            // if (axis == 'z') {
+            //     self.sendCustomCommand({
+            //         type: "commands",
+            //         commands: [
+            //         "M400",
+            //         "G1 Z15 F100"
+            //         ]
+            //     });
+            // }
             self.homed[axis] = true;
             if (self.homed['x,y'] == true && self.homed['z'] == true && self.homed['e'] == true) {
                 self.isHomed(true);
@@ -648,6 +648,30 @@ $(function() {
             });
             self._sendECommand(-1);
         };
+
+        self.sendPressureIncrease = function(extruder) {
+            self.sendCustomCommand({
+                type: "commands",
+                commands: [
+                "G91",
+                "G1 "+ extruder + "-0.25 ",
+                "M18 " + extruder,
+                'M105'
+                ]
+            })
+        }
+
+        self.sendPressureDecrease = function(extruder) {
+            self.sendCustomCommand({
+                type: "commands",
+                commands: [
+                "G91",
+                "G1 "+ extruder + "0.25 ",
+                "M18 " + extruder,
+                'M105'
+                ]
+            })
+        }
 
         self.sendTempIncrease = function (extruder) {
             var current = self.getToolState();
