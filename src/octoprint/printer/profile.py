@@ -401,7 +401,7 @@ class PrinterProfileManager(object):
 			try:
 				convert_value(profile, path, int)
 			except Exception as e:
-				self._logger.warn("Profile has invalid value for path {path!r}: {msg}".format(path=".".join(path), msg=str(e)))
+				self._logger.warn("Profile has invalid value for path {path!r}".format(path=".".join(path)))
 				return False
 
 		# convert floats
@@ -409,7 +409,7 @@ class PrinterProfileManager(object):
 			try:
 				convert_value(profile, path, float)
 			except:
-				self._logger.warn("Profile has invalid value for path {path!r}: {msg}".format(path=".".join(path), msg=str(e)))
+				self._logger.warn("Profile has invalid value for path {path!r}".format(path=".".join(path)))
 				return False
 
 		# convert booleans
@@ -417,7 +417,7 @@ class PrinterProfileManager(object):
 			try:
 				convert_value(profile, path, bool)
 			except:
-				self._logger.warn("Profile has invalid value for path {path!r}: {msg}".format(path=".".join(path), msg=str(e)))
+				self._logger.warn("Profile has invalid value for path {path!r}".format(path=".".join(path)))
 				return False
 
 		# validate form factor
