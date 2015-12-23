@@ -14,12 +14,18 @@
 # resume motion script
 
 
-import re
+import re, os
 
 # from octoprint.settings import settings
 
 e_rate = 1000.00
 x_rate = 1800.00
+
+e0_Xctr = 56
+e0_Yctr = 90
+
+e1_Xctr = 105
+e1_Yctr = 90
 
 x_pattern = 'X([+-]?\d+(?:\.\d+)?)'
 y_pattern = 'Y([+-]?\d+(?:\.\d+)?)'
@@ -146,7 +152,7 @@ def start_extrude(extruder, e0_pos, e1_pos):
         onPin = 17
         target = e1_pos
     commands = [
-        'G1 E' + str(target),
+        'G1 E' + str(target) + ' ; Move extruder to E' + str(extruder) + ' position of ' + str(target),
         'M400 ; wait for commands to complete',
         'M42 P' + str(onPin) + ' S255 ; turn extruder ' + str(extruder) + ' on']
     return '\n'.join(commands)
@@ -215,7 +221,10 @@ def post_process(filename, e0_pos, e0_Zoffset,
                     if g_value(line) is not None:
                         if g_value(line) == 28.0:
                             o.write('G1 Z45\n')
-                            o.write('G28 X Y E\n')
+                            o.write('G1 E' + str(e1_pos) + '\n')
+                            o.write('G28 X Y\n')
+                            o.write('G21\n')
+                            o.write('G1 X' + str(e0_Xctr) + ' Y' + str(e0_Yctr) + ' F1000\n')
                         else:
                             if x_value(line) is not None or y_value(line) is not None or z_value(line) is not None:    
                                 if active_e == 0:
@@ -249,19 +258,15 @@ def post_process(filename, e0_pos, e0_Zoffset,
 
 
 # filename = '/Users/karanhiremath/Documents/Programming/BioBots/bioprint/src/octoprint/util/biobot1/test_files/biobots_part_lattice.gcode'
-filename = '/Users/karanhiremath/Documents/Programming/BioBots/OctoPrint/src/octoprint/util/biobot1/test_files/PediatricBronchi.gcode'
-e0_pos = 46
-e0_Zoffset = 8.9
+filename = os.path.dirname(os.path.realpath(__file__)) + '/test_files/PediatricBronchi.gcode'
+e0_pos = 36.20
+e0_Zoffset = 0
 
-e1_pos = 1.6
-e1_Zoffset = 8.9
+e1_pos = 10.2
+e1_Zoffset = 0
 
 X_offset = 49
 e_start = 0
 
-e0_Xctr = 56
-e0_Yctr = 90
 
-e1_Xctr = 105
-e1_Yctr = 90
 post_process(filename, e0_pos, e0_Zoffset, e1_pos, e1_Zoffset, X_offset, e_start)
