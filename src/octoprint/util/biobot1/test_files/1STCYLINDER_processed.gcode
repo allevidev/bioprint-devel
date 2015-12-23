@@ -13,13 +13,8 @@
 ; top infill extrusion width = 0.58mm
 
 M107
-M190 S5 ; set bed temperature
-M104 S205 T0 ; set temperature
-M104 S200 T1 ; set temperature
 G28 ; home all axes
-G1 Z10.0 F5000 ; lift nozzle ; Extruder 0 Z Offset of 5 added.
-M109 S205 T0 ; wait for temperature to be reached
-M109 S200 T1 ; wait for temperature to be reached
+G1 Z32.9 F5000 ; lift nozzle ; Extruder 0 Z Offset of 27.9 added.
 G21 ; set units to millimeters
 G90 ; use absolute coordinates
 M82 ; use absolute distances for extrusion
@@ -27,17 +22,19 @@ M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z5.5 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z28.4 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 X81.157 Y80.601 F7800.000
 M400 ; wait for commands to complete
 M42 P16 S255 ; turn extruder 0 on
@@ -347,17 +344,19 @@ G1 X88.636 Y112.795 F1080.000
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z5.5 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z28.4 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 F1800.00000
@@ -532,21 +531,22 @@ G1 X107.313 Y84.424 F1080.000
 G1 X111.364 Y87.204 F7800.000
 G1 X112.535 Y88.376 F1080.000
 M106 S102
-M104 S200 T0 ; set temperature
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z4.9 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z28.0 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -785,17 +785,19 @@ G1 X87.524 Y86.260 F3600.000
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z5.9 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z28.8 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -1034,17 +1036,19 @@ G1 X113.441 Y112.777 F3600.000
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z5.3 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z28.4 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -1283,17 +1287,19 @@ G1 X87.560 Y113.748 F3600.000
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z6.3 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z29.2 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -1533,17 +1539,19 @@ M106 S198.9
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z5.7 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z28.8 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -2112,17 +2120,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z6.7 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z29.6 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -2694,17 +2704,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z6.1 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z29.2 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -3272,17 +3284,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z7.1 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z30.0 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -3838,17 +3852,19 @@ G1 X117.163 Y106.899
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z6.5 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z29.6 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -4434,17 +4450,19 @@ G1 X98.482 Y81.774
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z7.5 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z30.4 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -5020,17 +5038,19 @@ G1 X101.531 Y81.492
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z6.9 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z30.0 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -5599,17 +5619,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z7.9 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z30.8 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -6181,17 +6203,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z7.3 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z30.4 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -6759,17 +6783,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z8.3 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z31.2 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -7325,17 +7351,19 @@ G1 X117.163 Y106.899
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z7.7 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z30.8 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -7921,17 +7949,19 @@ G1 X98.482 Y81.774
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z8.7 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z31.6 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -8506,17 +8536,19 @@ G1 X101.675 Y81.499
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z8.1 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z31.2 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -9085,17 +9117,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z9.1 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z32.0 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -9667,17 +9701,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z8.5 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z31.6 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -10245,17 +10281,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z9.5 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z32.4 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -10811,17 +10849,19 @@ G1 X117.163 Y106.899
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z8.9 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z32.0 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -11407,17 +11447,19 @@ G1 X98.482 Y81.774
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z9.9 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z32.8 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -11992,17 +12034,19 @@ G1 X101.675 Y81.499
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z9.3 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z32.4 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -12571,17 +12615,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z10.3 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z33.2 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -13153,17 +13199,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z9.7 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z32.8 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -13731,17 +13779,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z10.7 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z33.6 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -14297,17 +14347,19 @@ G1 X117.163 Y106.899
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z10.1 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z33.2 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -14893,17 +14945,19 @@ G1 X98.482 Y81.774
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z11.1 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z34.0 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -15478,17 +15532,19 @@ G1 X101.675 Y81.499
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z10.5 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z33.6 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -16057,17 +16113,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z11.5 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z34.4 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -16639,17 +16697,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z10.9 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z34.0 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -17217,17 +17277,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z11.9 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z34.8 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -17783,17 +17845,19 @@ G1 X117.163 Y106.899
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z11.3 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z34.4 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -18379,17 +18443,19 @@ G1 X98.482 Y81.774
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z12.3 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z35.2 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -18964,17 +19030,19 @@ G1 X101.675 Y81.499
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z11.7 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z34.8 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -19543,17 +19611,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z12.7 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z35.6 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -20125,17 +20195,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z12.1 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z35.2 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -20703,17 +20775,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z13.1 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z36.0 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -21269,17 +21343,19 @@ G1 X117.163 Y106.899
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z12.5 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z35.6 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -21865,17 +21941,19 @@ G1 X98.482 Y81.774
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z13.5 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z36.4 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -22450,17 +22528,19 @@ G1 X101.675 Y81.499
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z12.9 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z36.0 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -23029,17 +23109,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z13.9 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z36.8 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -23611,17 +23693,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z13.3 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z36.4 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -24189,17 +24273,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z14.3 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z37.2 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -24755,17 +24841,19 @@ G1 X117.163 Y106.899
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z13.7 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z36.8 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -25351,17 +25439,19 @@ G1 X98.482 Y81.774
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z14.7 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z37.6 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -25936,17 +26026,19 @@ G1 X101.675 Y81.499
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z14.1 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z37.2 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -26515,17 +26607,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z15.1 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z38.0 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -27097,17 +27191,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z14.5 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z37.6 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -27675,17 +27771,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z15.5 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z38.4 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -28241,17 +28339,19 @@ G1 X117.163 Y106.899
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z14.9 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z38.0 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -28837,17 +28937,19 @@ G1 X98.482 Y81.774
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z15.9 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z38.8 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -29422,17 +29524,19 @@ G1 X101.675 Y81.499
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z15.3 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z38.4 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -30001,17 +30105,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z16.3 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z39.2 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -30583,17 +30689,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z15.7 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z38.8 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -31161,17 +31269,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z16.7 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z39.6 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -31727,17 +31837,19 @@ G1 X117.163 Y106.899
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z16.1 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z39.2 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -32323,17 +32435,19 @@ G1 X98.482 Y81.774
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z17.1 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z40.0 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -32908,17 +33022,19 @@ G1 X101.675 Y81.499
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z16.5 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z39.6 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -33487,17 +33603,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z17.5 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z40.4 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -34069,17 +34187,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z16.9 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z40.0 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -34647,17 +34767,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z17.9 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z40.8 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -35213,17 +35335,19 @@ G1 X117.163 Y106.899
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z17.3 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z40.4 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -35809,17 +35933,19 @@ G1 X98.482 Y81.774
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z18.3 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z41.2 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -36394,17 +36520,19 @@ G1 X101.675 Y81.499
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z17.7 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z40.8 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -36973,17 +37101,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z18.7 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z41.6 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -37555,17 +37685,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z18.1 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z41.2 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -38133,17 +38265,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z19.1 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z42.0 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -38699,17 +38833,19 @@ G1 X117.163 Y106.899
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z18.5 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z41.6 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -39295,17 +39431,19 @@ G1 X98.482 Y81.774
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z19.5 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z42.4 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -39880,17 +40018,19 @@ G1 X101.675 Y81.499
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z18.9 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z42.0 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -40459,17 +40599,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z19.9 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z42.8 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -41041,17 +41183,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z19.3 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z42.4 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -41619,17 +41763,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z20.3 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z43.2 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -42185,17 +42331,19 @@ G1 X117.163 Y106.899
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z19.7 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z42.8 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -42781,17 +42929,19 @@ G1 X98.482 Y81.774
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z20.7 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z43.6 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -43366,17 +43516,19 @@ G1 X101.675 Y81.499
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z20.1 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z43.2 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -43945,17 +44097,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z21.1 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z44.0 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -44527,17 +44681,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z20.5 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z43.6 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -45105,17 +45261,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z21.5 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z44.4 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -45671,17 +45829,19 @@ G1 X117.163 Y106.899
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z20.9 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z44.0 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -46267,17 +46427,19 @@ G1 X98.482 Y81.774
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z21.9 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z44.8 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -46852,17 +47014,19 @@ G1 X101.675 Y81.499
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z21.3 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z44.4 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -47431,17 +47595,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z22.3 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z45.2 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -48013,17 +48179,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z21.7 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z44.8 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -48591,17 +48759,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z22.7 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z45.6 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -49157,17 +49327,19 @@ G1 X117.163 Y106.899
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z22.1 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z45.2 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -49753,17 +49925,19 @@ G1 X98.482 Y81.774
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z23.1 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z46.0 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -50338,17 +50512,19 @@ G1 X101.675 Y81.499
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z22.5 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z45.6 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -50917,17 +51093,19 @@ G1 X87.633 Y86.490
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z23.5 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z46.4 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -51499,17 +51677,19 @@ G1 X101.624 Y92.531
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z22.9 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z46.0 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -52077,17 +52257,19 @@ G1 X98.482 Y82.029
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z23.9 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z46.8 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -52644,17 +52826,19 @@ M106 S124.95
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z23.3 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z46.4 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -52887,17 +53071,19 @@ M106 S124.95
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z24.3 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z47.2 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -53133,17 +53319,19 @@ M106 S102
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z23.7 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z46.8 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -53382,17 +53570,19 @@ G1 X87.560 Y113.748 F3600.000
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z24.7 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z47.6 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -53632,17 +53822,19 @@ M107
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-G1 Z24.1 F7800.000 ; Extruder 1 Z Offset of 4 added.
+G1 Z47.2 F7800.000 ; Extruder 1 Z Offset of 27.1 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X-49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E0 F100.0 ; move extruder 0 into position
+G1 E48 F100.0 ; move extruder 0 into position
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 G1 X98.899 Y118.946 F7800.000
@@ -53886,17 +54078,19 @@ G1 X87.560 Y86.223 F3000.000
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
-G1 Z25.1 F7800.000 ; Extruder 0 Z Offset of 5 added.
+G1 Z48.0 F7800.000 ; Extruder 0 Z Offset of 27.9 added.
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P16 S0 ; turn extruder 0 off
 T0 ; ensure we keep T0 active to prevent changing pressure
 M400 ; wait for commands to complete
-G1 E8 F100.0 ; move extruder to midpoint
+G1 E24 F100.0 ; move extruder to midpoint
 M400 ; wait for commands to complete
+G91
 G1 X49 F1800.0 ; move over by x offset
+G90
 M400 ; wait for commands to complete
-G1 E17 F100.0 ; move extruder 1 into position
+G1 E0 F100.0 ; move extruder 1 into position
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
 G1 X101.101 Y118.975 F7800.000
@@ -54150,7 +54344,6 @@ G1 X113.441 Y112.777 F3000.000
 G1 F1800.00000
 M400 ; wait for commands to complete
 M42 P17 S0 ; turn extruder 1 off
-M104 S0 ; turn off temperature
 G28 X0  ; home X axis
 M84     ; disable motors
 ; filament used = 1215.8mm (8.6cm3)
