@@ -18,7 +18,7 @@ a {
     margin: 0;
   }
   #motion {
-    width:600px;
+    width:100%;
   }
 
   #XY {
@@ -39,8 +39,14 @@ a {
   }
 }
 
+#motion {
+  width:100%;
+}
+
 #motion-control {
-  margin-left:0px;
+  width:80%;
+  margin-left: 10%;
+  margin-bottom: 10px;
 }
 
 .distance {
@@ -61,7 +67,7 @@ a {
 
 h2 {
   font-weight: 100;
-  line-height: 25px;
+  line-height: 20px;
 }
 
 h3 {
@@ -81,6 +87,7 @@ h3 {
 .btn-group {
   border-radius: 0px;
   margin: 0px;
+  width:100%;
 }
 
 .btn-group .btn {
@@ -94,11 +101,12 @@ h3 {
 }
 
 .btn-group .tempSubmit {
-  width: 105px;
+  width: 80%;
+  padding: 4px 6px;
 }
 
 .btn-group>.btn+.dropdown-toggle {
-  width: 36.359px;
+  width: 20%;
 }
 
 #control .btn-group {
@@ -110,7 +118,7 @@ h3 {
   background: none;
   font-size: 31.5px; 
   height: auto;
-  width: 90px;
+  width: 70%;
   line-height: 37px;
   vertical-align: middle;
 }
