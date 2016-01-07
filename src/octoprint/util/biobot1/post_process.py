@@ -278,16 +278,16 @@ def post_process(payload, positions):
     }
 
 
-# # filename = '/Users/karanhiremath/Documents/Programming/BioBots/bioprint/src/octoprint/util/biobot1/test_files/biobots_part_lattice.gcode'
-payload = {
-    "file" : os.path.dirname(os.path.realpath(__file__)) + '/test_files/cylinder_0.1mm.gcode',
-    "filename": 'cylinder_0.1mm.gcode',
-    "origin": 'local'
-}
+# # # filename = '/Users/karanhiremath/Documents/Programming/BioBots/bioprint/src/octoprint/util/biobot1/test_files/biobots_part_lattice.gcode'
+# payload = {
+#     "file" : os.path.dirname(os.path.realpath(__file__)) + '/test_files/cylinder_0.1mm.gcode',
+#     "filename": 'cylinder_0.1mm.gcode',
+#     "origin": 'local'
+# }
 
-positions = {
-    "tool0": 38.0,
-    "tool1": 3.2
-}
+# positions = {
+#     "tool0": 38.0,
+#     "tool1": 3.2
+# }
 
-post_process(payload, positions)
+# post_process(payload, positions)

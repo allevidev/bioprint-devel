@@ -26,10 +26,14 @@ import signal
 SUCCESS = {}
 NO_CONTENT = ("", 204)
 
-app = Flask("octoprint")
+app = Flask("bioprint")
 assets = None
 babel = None
 debug = False
+
+app.config.update(
+	SERVER_NAME='bioprint'
+)
 
 printer = None
 printerProfileManager = None
