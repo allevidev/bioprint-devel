@@ -14,8 +14,9 @@
 # resume motion script
 
 
-import re, os
-import time, datetime
+import re
+import time
+import datetime
 
 # from octoprint.settings import settings
 
@@ -41,9 +42,6 @@ m_pattern = 'M([+-]?\d+(?:\.\d+)?)'
 e0_pos = 24
 e1_pos = 24
 
-def setExtruderPosition(e0_pos, e1_pos):
-    self.e0_pos = e0_pos
-    self.e1_pos = e1_pos
 
 def e_value(line):
     '''
@@ -151,6 +149,7 @@ def m_value(line):
         return None
     res = re.findall(m_pattern, line.upper())
     return None if res == [] else float(res[0])    
+
 
 def start_extrude(extruder, e0_pos, e1_pos):
     if extruder is 0:
@@ -274,20 +273,6 @@ def post_process(payload, positions):
     return {
         "file": outputFile,
         "filename": payload["filename"],
-        "origin": payload["origin"] 
+        "origin": payload["origin"]
     }
 
-
-# # # filename = '/Users/karanhiremath/Documents/Programming/BioBots/bioprint/src/octoprint/util/biobot1/test_files/biobots_part_lattice.gcode'
-# payload = {
-#     "file" : os.path.dirname(os.path.realpath(__file__)) + '/test_files/cylinder_0.1mm.gcode',
-#     "filename": 'cylinder_0.1mm.gcode',
-#     "origin": 'local'
-# }
-
-# positions = {
-#     "tool0": 38.0,
-#     "tool1": 3.2
-# }
-
-# post_process(payload, positions)
