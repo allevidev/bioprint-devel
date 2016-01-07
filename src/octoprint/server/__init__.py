@@ -31,10 +31,6 @@ assets = None
 babel = None
 debug = False
 
-app.config.update(
-	SERVER_NAME='bioprint'
-)
-
 printer = None
 printerProfileManager = None
 fileManager = None
