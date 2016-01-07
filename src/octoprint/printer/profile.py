@@ -153,11 +153,13 @@ class PrinterProfileManager(object):
 		),
 		heatedBed = False,
 		extruder=dict(
-			count = 2,
+			count = 3,
 			offsets = [
 				(0, 0),
-				(49, 0)
+				(49, 0),
+				(0, 0)
 			],
+			nozzleDiameter = 0.2
 		),
 		axes=dict(
 			x = dict(speed=1000, inverted=False),
@@ -216,7 +218,7 @@ class PrinterProfileManager(object):
 		profile["id"] = identifier
 		profile = dict_clean(profile, self.__class__.default)
 
-		if identifier == "_default":
+		if identifier == "biobot1":
 			default_profile = dict_merge(self._load_default(), profile)
 			if not self._ensure_valid_profile(default_profile):
 				raise InvalidProfileError()

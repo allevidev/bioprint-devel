@@ -568,7 +568,7 @@ class MachineCom(object):
             self.sendCommand(line)
         return "\n".join(scriptLines)
 
-    def startPrint(self):
+    def startPrint(self, extruder_positions):
         if not self.isOperational() or self.isPrinting():
             return
 
@@ -592,8 +592,6 @@ class MachineCom(object):
                 "filename": os.path.basename(self._currentFile.getFilename()),
                 "origin": self._currentFile.getFileLocation()
             }
-
-            # POST PROCESS FILE HERE
 
             eventManager().fire(Events.PRINT_STARTED, payload)
             self.sendGcodeScript("beforePrintStarted", replacements=dict(event=payload))
@@ -636,7 +634,7 @@ class MachineCom(object):
         eventManager().fire(Events.TRANSFER_STARTED, {"local": localFilename, "remote": remoteFilename})
         self._callback.on_comm_file_transfer_started(remoteFilename, self._currentFile.getFilesize())
 
-    def selectFile(self, filename, sd):
+    def selectFile(self, filename, sd, extruder_positions):
         if self.isBusy():
             return
 
@@ -647,13 +645,22 @@ class MachineCom(object):
             self._sdFileToSelect = filename
             self.sendCommand("M23 %s" % filename)
         else:
-            self._currentFile = PrintingGcodeFileInformation(filename, offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
+            selectedFile = PrintingGcodeFileInformation(filename, offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
+            payload = {
+                "file": selectedFile.getFilename(),
+                "filename": os.path.basename(selectedFile.getFilename()),
+                "origin": selectedFile.getFileLocation()
+            }
+            selectedFile.close()
+            processed = post_process.post_process(payload, extruder_positions)
+            self._currentFile = PrintingGcodeFileInformation(processed["file"], offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
+
             eventManager().fire(Events.FILE_SELECTED, {
                 "file": self._currentFile.getFilename(),
                 "filename": os.path.basename(self._currentFile.getFilename()),
                 "origin": self._currentFile.getFileLocation()
             })
-            self._callback.on_comm_file_selected(filename, self._currentFile.getFilesize(), False)
+            self._callback.on_comm_file_selected(processed["filename"], self._currentFile.getFilesize(), False)
 
     def unselectFile(self):
         if self.isBusy():

@@ -1,1 +1,1 @@
-C:\Python27\python.exe C:\Users\mprender\Desktop\bioprint\run
+C:\Python27\python.exe %~dp0run

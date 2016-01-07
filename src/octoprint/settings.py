@@ -200,7 +200,7 @@ default_settings = {
             "order": {
                 "navbar": ["settings", "systemmenu", "login"],
                 "sidebar": ["connection", "state", "files"],
-                "tab": ["temperature", "control", "gcodeviewer", "terminal", "timelapse"],
+                "tab": ["control", "gcodeviewer"],
                 "settings": [
                     "section_printer", "serial", "printerprofiles", "temperatures", "terminalfilters", "gcodescripts",
                     "section_features", "features", "webcam", "accesscontrol", "api",
@@ -212,7 +212,7 @@ default_settings = {
             "disabled": {
                 "navbar": [],
                 "sidebar": [],
-                "tab": [],
+                "tab": ["temperature", "terminal"],
                 "settings": [],
                 "usersettings": [],
                 "generic": []

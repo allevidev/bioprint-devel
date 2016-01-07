@@ -14,9 +14,14 @@ $(function() {
                 offset: ko.observable(0),
                 newTarget: ko.observable(),
                 newOffset: ko.observable(),
-                pressure: ko.observable()
+                pressure: ko.observable(0)
             }
         };
+
+        self.log = ko.observableArray([]);
+        self.buffer = ko.observable(300);
+
+        self.command = ko.observable(undefined);
 
         self.isErrorOrClosed = ko.observable(undefined);
         self.isOperational = ko.observable(undefined);
@@ -32,15 +37,15 @@ $(function() {
         self.extruder1Pressure = ko.observable(undefined);
         self.extruder1Temp = ko.observable(undefined);
         self.extruder1TempTarget = ko.observable(undefined);
-        self.extruder1Pos = 19;
-        self.extruder1ZOffset = 0;
+        self.extruder1Pos = -1;
+        self.extruder1Selected = ko.observable(false);
 
 
         self.extruder2Pressure = ko.observable(undefined);
         self.extruder2Temp = ko.observable(undefined);
         self.extruder2TempTarget = ko.observable(undefined);
-        self.extruder2ZOffset = 0;
-        self.extruder2Pos = 0;
+        self.extruder2Pos = -1;
+        self.extruder2Selected = ko.observable(false);
 
         self.lightIntensity = ko.observable(0);
 
@@ -62,13 +67,14 @@ $(function() {
         self.position = {}
         
         
-        self.xTravel = 49;
+        self.midpoint = 24;
+        self.xTravel = 48.33;
 
-        self.tools = ko.observableArray([]);
+        self.tools = ko.observableArray([self._createToolEntry(), self._createToolEntry()]);
         self.hasBed = ko.observable(true);
-        self.bedTemp = self._createToolEntry();
-        self.bedTemp["name"](gettext("Bed"));
-        self.bedTemp["key"]("bed");
+        // self.bedTemp = self._createToolEntry();
+        // self.bedTemp["name"](gettext("Bed"));
+        // self.bedTemp["key"]("bed");
 
         self.temperature_profiles = self.settings.temperature_profiles;
         self.temperature_cutoff = self.settings.temperature_cutoff;
@@ -102,16 +108,17 @@ $(function() {
             var numExtruders = self.settings.printerProfiles.currentProfileData().extruder.count();
             if (numExtruders > 1) {
                 // multiple extruders
-                for (var extruder = 0; extruder < numExtruders; extruder++) {
-                    var color = graphColors.shift();
-                    if (!color) color = "black";
-                    heaterOptions["tool" + extruder] = {name: "T" + extruder, color: color};
-                    if (extruder == 0 || extruder == 1) {
-                        tools[extruder] = self._createToolEntry();
-                        tools[extruder]["name"](gettext("Tool") + " " + extruder);
-                        tools[extruder]["key"]("tool" + extruder);
-                    }
-                }
+                heaterOptions["tool0"] = {name: "T0", color: "red"};
+                heaterOptions["tool1"] = {name: "T1", color: "black"};
+
+                tools[0] = self._createToolEntry();
+                tools[0]["name"](gettext("Extruder 1"));
+                tools[0]["key"]("tool0")
+
+                tools[1] = self._createToolEntry();
+                tools[1]["name"](gettext("Extruder 2"));
+                tools[1]["key"]("tool1")
+
             } else {
                 // only one extruder, no need to add numbers
                 var color = graphColors[0];
@@ -133,17 +140,109 @@ $(function() {
         });
 
         self.temperatures = [];
+        self.plotOptions = {
+            yaxis: {
+                min: 0,
+                max: 310,
+                ticks: 10
+            },
+            xaxis: {
+                mode: "time",
+                minTickSize: [2, "minute"],
+                tickFormatter: function(val, axis) {
+                    if (val == undefined || val == 0)
+                        return ""; // we don't want to display the minutes since the epoch if not connected yet ;)
+
+                    // current time in milliseconds in UTC
+                    var timestampUtc = Date.now();
+
+                    // calculate difference in milliseconds
+                    var diff = timestampUtc - val;
+
+                    // convert to minutes
+                    var diffInMins = Math.round(diff / (60 * 1000));
+                    if (diffInMins == 0)
+                        return gettext("just now");
+                    else
+                        return "- " + diffInMins + " " + gettext("min");
+                }
+            },
+            legend: {
+                position: "sw",
+                noColumns: 2,
+                backgroundOpacity: 0
+            }
+        };
+
+         self.autoscrollEnabled = ko.observable(true);
+
+        self.filters = self.settings.terminalFilters;
+        self.filterRegex = ko.observable();
+
+        self.cmdHistory = [];
+        self.cmdHistoryIdx = -1;
+
+        self.displayedLines = ko.computed(function() {
+            var regex = self.filterRegex();
+            var lineVisible = function(entry) {
+                return regex == undefined || !entry.line.match(regex);
+            };
+
+            var filtered = false;
+            var result = [];
+            _.each(self.log(), function(entry) {
+                if (lineVisible(entry)) {
+                    result.push(entry);
+                    filtered = false;
+                } else if (!filtered) {
+                    result.push(self._toInternalFormat("[...]", "filtered"));
+                    filtered = true;
+                }
+            });
+
+            return result;
+        });
+        self.displayedLines.subscribe(function() {
+            self.updateOutput();
+        });
+
+        self.lineCount = ko.computed(function() {
+            var total = self.log().length;
+            var displayed = _.filter(self.displayedLines(), function(entry) { return entry.type == "line" }).length;
+            var filtered = total - displayed;
+
+            if (total == displayed) {
+                return _.sprintf(gettext("showing %(displayed)d lines"), {displayed: displayed});
+            } else {
+                return _.sprintf(gettext("showing %(displayed)d lines (%(filtered)d of %(total)d total lines filtered)"), {displayed: displayed, total: total, filtered: filtered});
+            }
+        });
+
+        self.autoscrollEnabled.subscribe(function(newValue) {
+            if (newValue) {
+                self.log(self.log.slice(-self.buffer()));
+            }
+        });
+
+        self.activeFilters = ko.observableArray([]);
+        self.activeFilters.subscribe(function(e) {
+            self.updateFilterRegex();
+        });
 
         self.fromCurrentData = function (data) {
+            console.log(data)
             self._processStateData(data.state);
+            self._processPositionData(data.position);
             self._processTemperatureUpdateData(data.serverTime, data.temps);
             self._processOffsetData(data.offsets);
+            self._processCurrentLogData(data.logs);
         };
 
         self.fromHistoryData = function (data) {
             self._processStateData(data.state);
             self._processTemperatureHistoryData(data.serverTime, data.temps);
             self._processOffsetData(data.offsets);
+            self._processHistoryLogData(data.logs);
         };
 
         self._processStateData = function (data) {
@@ -156,6 +255,17 @@ $(function() {
             self.isLoading(data.flags.loading);
         };
 
+        self._processPositionData = function(data) {
+            self.position = data;
+        }
+
+        self._processCurrentLogData = function(data) {
+            self.log(self.log().concat(_.map(data, function(line) { return self._toInternalFormat(line) })));
+            if (self.autoscrollEnabled()) {
+                self.log(self.log.slice(-self.buffer()));
+            }
+        };
+
         self._processTemperatureUpdateData = function(serverTime, data) {
             if (data.length == 0)
                 return;
@@ -163,25 +273,29 @@ $(function() {
             var lastData = data[data.length - 1];
 
             var tools = self.tools();
-            for (var i = 0; i < tools.length; i++) {
-                if (lastData.hasOwnProperty("tool" + i)) {
-                    tools[i]["actual"](lastData["tool" + i].actual);
-                    tools[i]["target"](lastData["tool" + i].target);
-                }
+
+            if (lastData.hasOwnProperty("tool0") && lastData.hasOwnProperty("bed")) {
+                tools[0].actual(lastData["tool0"].actual);
+                tools[0].target(lastData["tool0"].target);
+                tools[0].pressure(lastData["bed"].actual);
             }
 
-            if (lastData.hasOwnProperty("bed")) {
-                self.hasBed(true);
-                self.bedTemp["actual"](lastData.bed.actual);
-                self.bedTemp["target"](lastData.bed.target);
-            } else {
-                self.hasBed(false);
+            if (lastData.hasOwnProperty("tool1") && lastData.hasOwnProperty("tool2")) {
+                tools[1].actual(lastData["tool1"].actual);
+                tools[1].target(lastData["tool1"].target);
+                tools[1].pressure(lastData["tool2"].actual);   
             }
 
             if (!CONFIG_TEMPERATURE_GRAPH) return;
 
+            console.log(tools[1].actual());
+
             self.temperatures = self._processTemperatureData(serverTime, data, self.temperatures);
             self.updatePlot();
+        };
+
+        self._processHistoryLogData = function(data) {
+            self.log(_.map(data, function(line) { return self._toInternalFormat(line) }));
         };
 
         self._processTemperatureHistoryData = function(serverTime, data) {
@@ -189,6 +303,12 @@ $(function() {
             self.updatePlot();
         };
 
+        self._toInternalFormat = function(line, type) {
+            if (type == undefined) {
+                type = "line";
+            }
+            return {line: line, type: type}
+        };
 
         self._processOffsetData = function(data) {
             var tools = self.tools();
@@ -198,9 +318,9 @@ $(function() {
                 }
             }
 
-            if (data.hasOwnProperty("bed")) {
-                self.bedTemp["offset"](data["bed"]);
-            }
+            // if (data.hasOwnProperty("bed")) {
+            //     self.bedTemp["offset"](data["bed"]);
+            // }
         };
 
         self._processTemperatureData = function(serverTime, data, result) {
@@ -212,35 +332,30 @@ $(function() {
                 result = {};
             }
 
-            _.each(types, function(type) {
-                if (!result.hasOwnProperty(type)) {
-                    result[type] = {actual: [], target: []};
-                }
-                if (!result[type].hasOwnProperty("actual")) result[type]["actual"] = [];
-                if (!result[type].hasOwnProperty("target")) result[type]["target"] = [];
-            });
+            result['tool0'] = {actual: [], target: []};
+            result['tool1'] = {actual: [], target: []};
+
 
             // convert data
             _.each(data, function(d) {
                 var timeDiff = (serverTime - d.time) * 1000;
                 var time = clientTime - timeDiff;
-                _.each(types, function(type) {
-                    if (!d[type]) return;
-                    result[type].actual.push([time, d[type].actual]);
-                    result[type].target.push([time, d[type].target]);
+                result['tool0'].actual.push([time, d['tool0'].actual]);
+                result['tool0'].target.push([time, d['tool0'].target]);
 
-                    self.hasBed(self.hasBed() || (type == "bed"));
-                })
+                result['tool1'].actual.push([time, d['tool1'].actual]);
+                result['tool1'].target.push([time, d['tool1'].target]);
             });
 
             var filterOld = function(item) {
                 return item[0] >= clientTime - self.temperature_cutoff() * 60 * 1000;
             };
 
-            _.each(_.keys(self.heaterOptions()), function(d) {
-                result[d].actual = _.filter(result[d].actual, filterOld);
-                result[d].target = _.filter(result[d].target, filterOld);
-            });
+            result['tool0'].actual = _.filter(result['tool0'].actual, filterOld);
+            result['tool0'].target = _.filter(result['tool0'].target, filterOld);
+
+            result['tool1'].actual = _.filter(result['tool1'].actual, filterOld);
+            result['tool1'].target = _.filter(result['tool1'].target, filterOld);
 
             return result;
         };
@@ -369,6 +484,120 @@ $(function() {
                 error: function() { if (errorCb !== undefined) errorCb(); }
             });
 
+        };
+
+        self.updateFilterRegex = function() {
+            var filterRegexStr = self.activeFilters().join("|").trim();
+            if (filterRegexStr == "") {
+                self.filterRegex(undefined);
+            } else {
+                self.filterRegex(new RegExp(filterRegexStr));
+            }
+            self.updateOutput();
+        };
+
+        self.updateOutput = function() {
+            if (self.autoscrollEnabled()) {
+                self.scrollToEnd();
+            }
+        };
+
+        self.toggleAutoscroll = function() {
+            self.autoscrollEnabled(!self.autoscrollEnabled());
+        };
+
+        self.selectAll = function() {
+            var container = $("#terminal-output");
+            if (container.length) {
+                container.selectText();
+            }
+        };
+
+        self.scrollToEnd = function() {
+            var container = $("#terminal-output");
+            if (container.length) {
+                container.scrollTop(container[0].scrollHeight - container.height())
+            }
+        };
+
+        self.sendCommand = function() {
+            var command = self.command();
+            if (!command) {
+                return;
+            }
+
+            var re = /^([gmt][0-9]+)(\s.*)?/;
+            var commandMatch = command.match(re);
+            if (commandMatch != null) {
+                command = commandMatch[1].toUpperCase() + ((commandMatch[2] !== undefined) ? commandMatch[2] : "");
+            }
+
+            if (command) {
+                $.ajax({
+                    url: API_BASEURL + "printer/command",
+                    type: "POST",
+                    dataType: "json",
+                    contentType: "application/json; charset=UTF-8",
+                    data: JSON.stringify({"command": command})
+                });
+
+                self.cmdHistory.push(command);
+                self.cmdHistory.slice(-300); // just to set a sane limit to how many manually entered commands will be saved...
+                self.cmdHistoryIdx = self.cmdHistory.length;
+                self.command("");
+            }
+        };
+
+        self.fakeAck = function() {
+            $.ajax({
+                url: API_BASEURL + "connection",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({"command": "fake_ack"})
+            });
+        };
+
+        self.handleKeyDown = function(event) {
+            var keyCode = event.keyCode;
+
+            if (keyCode == 38 || keyCode == 40) {
+                if (keyCode == 38 && self.cmdHistory.length > 0 && self.cmdHistoryIdx > 0) {
+                    self.cmdHistoryIdx--;
+                } else if (keyCode == 40 && self.cmdHistoryIdx < self.cmdHistory.length - 1) {
+                    self.cmdHistoryIdx++;
+                }
+
+                if (self.cmdHistoryIdx >= 0 && self.cmdHistoryIdx < self.cmdHistory.length) {
+                    self.command(self.cmdHistory[self.cmdHistoryIdx]);
+                }
+
+                // prevent the cursor from being moved to the beginning of the input field (this is actually the reason
+                // why we do the arrow key handling in the keydown event handler, keyup would be too late already to
+                // prevent this from happening, causing a jumpy cursor)
+                return false;
+            }
+
+            // do not prevent default action
+            return true;
+        };
+
+        self.handleKeyUp = function(event) {
+            if (event.keyCode == 13) {
+                self.sendCommand();
+            }
+
+            // do not prevent default action
+            return true;
+        };
+
+        self.onAfterTabChange = function(current, previous) {
+            if (current != "#control") {
+                return;
+            }
+            if (self.autoscrollEnabled()) {
+                self.scrollToEnd();
+            }
         };
 
         self.handleEnter = function(event, type, item) {
@@ -610,18 +839,13 @@ $(function() {
                 "command": "home",
                 "axes": axis
             });
-            // if (axis == 'z') {
-            //     self.sendCustomCommand({
-            //         type: "commands",
-            //         commands: [
-            //         "M400",
-            //         "G1 Z15 F100"
-            //         ]
-            //     });
-            // }
             self.homed[axis] = true;
             if (self.homed['x,y'] == true && self.homed['z'] == true && self.homed['e'] == true) {
                 self.isHomed(true);
+            }
+            if (axis == 'E' || axis == 'Z') {
+                self.extruder1Pos = -1;
+                self.extruder2Pos = -1;
             }
             console.log(self.homed);
         };
@@ -633,41 +857,69 @@ $(function() {
             });
         };
 
-        self.sendExtrudeCommand = function (extruder) {
-            self.sendToolCommand({
-                command: "select",
-                tool: "tool" + String(extruder)
-            });
-            self._sendECommand(1);
+        self.startExtrude = function (extruder) {
+            if (extruder == "tool0") {
+                var pin = 16;
+            } else if (extruder == "tool1") {
+                var pin = 17;
+            }
+            self.sendCustomCommand({
+                type: "commands",
+                commands: [
+                    'M400',
+                    'M42 P' + pin + ' S255'
+                ]
+            })
         };
 
-        self.sendRetractCommand = function (extruder) {
-            self.sendToolCommand({
-                command: "select",
-                tool: "tool" + String(extruder)
-            });
-            self._sendECommand(-1);
+        self.stopExtrude = function (extruder) {
+            if (extruder == "tool0") {
+                var pin = 16;
+            } else if (extruder == "tool1") {
+                var pin = 17;
+            }
+            self.sendCustomCommand({
+                type: "commands",
+                commands: [
+                    'M400',
+                    'M42 P' + pin + ' S0'
+                ]
+            })
         };
 
         self.sendPressureIncrease = function(extruder) {
+            if (extruder == "tool0") {
+                var regulator = 'L';
+            } else if (extruder == "tool1") {
+                var regulator = 'R';
+            }
+
             self.sendCustomCommand({
                 type: "commands",
                 commands: [
                 "G91",
-                "G1 "+ extruder + "-0.25 ",
-                "M18 " + extruder,
+                "G1 "+ regulator + "-0.25 ",
+                "G90",
+                "M18 " + regulator,
                 'M105'
                 ]
             })
         }
 
         self.sendPressureDecrease = function(extruder) {
+            if (extruder == "tool0") {
+                var regulator = 'L';
+            } else if (extruder == "tool1") {
+                var regulator = 'R';
+            }
+
             self.sendCustomCommand({
                 type: "commands",
                 commands: [
                 "G91",
-                "G1 "+ extruder + "0.25 ",
-                "M18 " + extruder,
+                "G1 "+ regulator + "0.25 ",
+                "G90",
+                "M18 " + regulator,
                 'M105'
                 ]
             })
@@ -691,67 +943,105 @@ $(function() {
 
         self.selectWellPlate = function (select) {
             self.wellPlate = $('#wellPlate').val();
-            self.switchTool(1);
             switch(self.wellPlate) {
                 case '1':
+                    var x = 56;
+                    var y = 90;
+                    break;
                 case '6':
+                    break;
                 case '12':
+                    break;
                 case '24':
-                    self.sendCustomCommand({
-                        type: 'command',
-                        command: 'G1 X33.3 Y193.5 F2000'
-                    });
-                case 96:
-            }
-        }
-
-        self.saveToolChangeDist = function (tool) {
-            self.extruderTravel = self.position["E"]
-            if (tool == 1) {
-                self.extruder1Pos = self.position["E"]
-                self.extruder1ZOffset = self.position["Z"]
-
-            } else {
-                self.extruder2Pos = self.position["E"]
-                self.extruder2ZOffset = self.position["Z"]
+                    break;
+                case '96':
+                    break;
             }
             self.sendCustomCommand({
                 type: 'commands',
                 commands: [
-                    'M400',
-                    'G1 Z15 F100'
-                ]
+                    'G90',
+                    'G1 E24 F1000',
+                    'G1 X' + x + ' Y' + y + ' F2000',
+                    'G1 Z0 F1000']
             });
-            if (tool == 1) {
-                self.switchTool(2);
-            } else {
-                self.switchTool(1);
+        }
+
+        self.saveToolChangeDist = function (tool) {
+            if (tool == 'tool0') {
+                self.extruder1Pos = self.position["E"]
+            } else if (tool == 'tool1') {
+                self.extruder2Pos = self.position["E"]
             }
+            if (tool == 'tool0') {
+                self.switchTool('tool1');
+            } else if (tool == 'tool1') {
+                self.switchTool('tool0');
+            }
+            console.log("HERE")
+            self.sendPrintHeadCommand({
+                "command": "position",
+                "positions": {
+                    "tool0" : self.extruder1Pos,
+                    "tool1" : self.extruder2Pos
+                }
+            });
         }
 
         self.switchTool = function(tool) {
-            var midpoint = (self.extruder1Pos - self.extruder2Pos) / 2;
-            console.log('\n\n\n\n\n',midpoint, '\n\n\n\n');
             var target;
             var dir;
-            if (tool == 1) {
-                target = self.extruder1Pos;
+            if (tool == 'tool0') {
+                if (self.extruder1Pos != -1) {
+                    target = self.extruder1Pos;    
+                } else {
+                    target = self.midpoint;
+                }
                 dir = -1;
-            } else if (tool == 2) {
-                target = self.extruder2Pos;
+                self.extruder2Selected(false);
+                self.extruder1Selected(true);
+            } else if (tool == 'tool1') {
+                if (self.extruder2Pos != -1) {
+                    target = self.extruder2Pos;    
+                } else {
+                    target = self.midpoint;
+                }
                 dir = 1;
+                self.extruder1Selected(false);
+                self.extruder2Selected(true);
             }
             self.sendCustomCommand({
                 type: 'commands',
                 commands: [
                     'T0',
                     'M400',
-                    'G1 E' + midpoint + ' F100.00',
+                    'G1 E' + self.midpoint + ' F1000.00',
                     'M400',
-                    'G1 X' + dir * self.xTravel + ' F1800.00',
+                    'G91',
+                    'G1 X' + dir * self.xTravel + ' F2000.00',
+                    'G90',
                     'M400',
-                    'G1 E' + target + 'F100.00',
+                    'G1 E' + target + 'F1000.00',
                     'M400'
+                ]
+            });
+        }
+
+        self.extruderSelected = function(tool) {
+            if (tool == "tool0") {
+                return self.extruder1Selected();
+            } else if (tool == "tool1") {
+                return self.extruder2Selected();
+            }
+        }
+
+        self.toolMid = function() {
+            self.sendCustomCommand({
+                type: 'commands',
+                commands: [
+                    'T0',
+                    'M400',
+                    'G1 E' + self.midpoint + ' F1000.00'
                 ]
             });
         }
