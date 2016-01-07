@@ -26,7 +26,7 @@ import signal
 SUCCESS = {}
 NO_CONTENT = ("", 204)
 
-app = Flask("bioprint")
+app = Flask("octoprint")
 assets = None
 babel = None
 debug = False
