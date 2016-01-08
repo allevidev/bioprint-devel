@@ -24,123 +24,139 @@
     </div>
 {% endif %}
 <div class="row-fluid">
-<div id="motion" class="jog-panel" style="display: none;" data-bind="visible: loginState.isUser">
+    <div class="span6">
+        <div id="motion" class="jog-panel" style="display: none;" data-bind="visible: loginState.isUser">
+            <div class="row-fluid">
+                <!-- XY jogging control panel -->
+                <div id="motion-control">
+                    <div id="XY" class="jog-panel">
+                        <h1>X/Y</h1>
+                        <div>
+                            <button class="btn box" id="control-yinc" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('y',1) }"><i class="icon-arrow-up"></i></button>
+                        </div>
+                        <div id="X">
+                            <button class="btn box pull-left" id="control-xdec" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('x',1) }"><i class="icon-arrow-left"></i></button>
+                            <button class="btn box pull-left" id="control-xyhome" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendHomeCommand(['x', 'y']) }"><i class="icon-home"></i></button>
+                            <button class="btn box pull-left" id="control-xinc" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('x',-1) }"><i class="icon-arrow-right"></i></button>
+                        </div>
+                        <div>
+                            <button class="btn box" id="control-ydec" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('y',-1) }"><i class="icon-arrow-down"></i></button>
+                        </div>
+                    </div>
+                    <!-- Z jogging control panel -->
+                    <div id="Z" class="jog-panel">
+                        <h1>Z</h1>
+                        <div>
+                            <button class="btn box" id="control-zinc" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('z',-1) }"><i class="icon-arrow-up"></i></button>
+                        </div>
+                        <div>
+                            <button class="btn box" id="control-zhome" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendHomeCommand(['z']) }"><i class="icon-home"></i></button>
+                        </div>
+                        <div>
+                            <button class="btn box" id="control-zdec" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('z',1) }"><i class="icon-arrow-down"></i></button>
+                        </div>
+                    </div>
+                    <!-- E jogging control panel -->
+                    <div id="E" class="jog-panel">
+                        <h1>E</h1>
+                        <div>
+                            <button class="btn box" id="control-zinc" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('e',1) }"><i class="icon-arrow-up"></i></button>
+                        </div>
+                        <div>
+                            <button class="btn box" id="control-zhome" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendHomeCommand(['e']) }"><i class="icon-home"></i></button>
+                        </div>
+                        <div>
+                            <button class="btn box" id="control-zdec" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('e',-1) }"><i class="icon-arrow-down"></i></button>
+                        </div>
+                    </div>
+                    <!-- Jog distance -->
+                    <div class="distance">
+                        <div class="btn-group" data-toggle="buttons-radio" id="jog_distance">
+                            <button type="button" id="control-distance01" class="btn distance" data-distance="0.1" data-bind="enable: loginState.isUser()">0.1</button>
+                            <button type="button" id="control-distance1" class="btn distance" data-distance="1" data-bind="enable: loginState.isUser()">1</button>
+                            <button type="button" id="control-distance10" class="btn distance active" data-distance="10" data-bind="enable: loginState.isUser()">10</button>
+                            <button type="button" id="control-distance100" class="btn distance" data-distance="100" data-bind="enable: loginState.isUser()">100</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-block" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M18'}) }">{{ _('Motors off') }}</button>
+                <button class="btn btn-block" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M112'}) }">{{ _('Emergency Stop') }}</button>
+                <hr>
+                <!-- Light Intensity -->
+                <input style="width: 226px; margin-left" type="number" data-bind="slider: {min: 0, max: 100, step: 1, value: lightIntensity, tooltip: 'hide'}">
+                <button class="btn btn-block control-box" data-bind="enable: isOperational() && loginState.isUser(), click: function() { $root.sendLightIntensity() }">{{ _('Light Intensity: ') }}<span data-bind="text: lightIntensity() + '%'"></span></button>
+                <hr>
+                <select class="form-control" style="width: 250px" id="wellPlate" data-bind="enable: isOperational() && loginState.isUser() && isHomed()">
+                        <option selected="selected">Select Plate Type</option>
+                        <option value="1">Petri Dish</option>
+                        <option value="6">6-Well Plate</option>
+                        <option value="12">12-Well Plate</option>
+                        <option value="24">24-Well Plate</option>
+                        <option value="96">96-Well Plate</option>
+                </select>
+                <button class="btn btn-block" data-bind="enable: isOperational() && loginState.isUser() && isHomed(), click: function() { $root.selectWellPlate() }">Select Well Plate</button>
+            </div>
+        </div>
+    </div>
+    <div class="span6">
+        <div class="row-fluid">
+            <!-- ko foreach: tools -->
+                <div data-bind="template: { name: 'extruder-template' }"></div>
+            <!-- /ko -->
+
+            <script type="text/html" id="extruder-template">
+                <div class="span5 jog-panel" style="display: none;" data-bind="visible: $root.loginState.isUser">
+                    <h1 data-bind="text: name"></h1>
+                    <div>
+                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && $root.loginState.isUser(), click: function() { $root.sendPressureIncrease(key()) }">{{ _('+') }}</button>
+                        <div class="display">
+                            <h2 data-bind="html: formatPressure(pressure())"></h2>
+                        </div>
+                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && $root.loginState.isUser(), click: function() { $root.sendPressureDecrease(key()) }">{{ _('-') }}</button>
+                        <hr>
+                        <h2 style="vertical-align: middle" data-bind="html: formatTemperature(actual())"></h2>
+                        <h3>Actual</h3>
+                        <div class="input-append">
+                            <input type="text" class="input text-right tempInput" data-bind="attr: {placeholder: cleanTemperature(target()) }, value: newTarget, enable: $root.isOperational() && $root.loginState.isUser(), event: { keyup: function(d, e) {$root.handleEnter(e, 'target', $data);} }">
+                            <span class="add-on tempAddOn">&deg;C</span>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" data-bind="click: $parent.setTarget, enable: $root.isOperational() && $root.loginState.isUser()" class="tempSubmit btn">{{ _('Set Target') }}</button>
+                            <button class="btn dropdown-toggle tempDropdown" data-toggle="dropdown" data-bind="enable: $root.isOperational() && $root.loginState.isUser()">
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <!-- ko foreach: $root.temperature_profiles -->
+                                <li>
+                                    <a href="#" data-bind="click: function() {$root.setTargetFromProfile($parent, $data);}, text: 'Set ' + name + ' (' + ($parent.key() == 'bed' ? bed : extruder) + '&deg;C)'"></a>
+                                </li>
+                                <!-- /ko -->
+                                <li class="divider"></li>
+                                <li>
+                                    <a href="#" data-bind="click: $root.setTargetToZero">{{ _('Off') }}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <hr>
+                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting() && $root.loginState.isUser(), click: function() { $root.saveToolChangeDist(key()) }">{{ _('Set Tool Distance') }}</button>
+                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting() && $root.loginState.isUser() && !$root.extruderSelected(key()), click: function() { $root.switchTool(key()) }">{{ _('Select Tool') }}</button>
+                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting() && $root.loginState.isUser(), click: function() { $root.startExtrude(key()) }">{{ _('Extrude') }}</button>
+                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting() && $root.loginState.isUser(), click: function() { $root.stopExtrude(key()) }">{{ _('Stop') }}</button>
+                    </div>
+                </div>
+            </script>
+        <div class="row-fluid">
+            <button class="span10 btn btn-block" data-bind="enable: isOperational() && loginState.isUser() && isHomed(), click: function() { $root.toolMid() }">Extruder Midpoint</button>
+        </div>
+    </div>
+</div>
+
+
+{% if enableTemperatureGraph %}
     <div class="row-fluid">
-        <!-- XY jogging control panel -->
-        <div id="XY" class="jog-panel">
-            <h1>X/Y</h1>
-            <div>
-                <button class="btn box" id="control-yinc" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('y',1) }"><i class="icon-arrow-up"></i></button>
-            </div>
-            <div id="X">
-                <button class="btn box pull-left" id="control-xdec" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('x',-1) }"><i class="icon-arrow-left"></i></button>
-                <button class="btn box pull-left" id="control-xyhome" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendHomeCommand(['x', 'y']) }"><i class="icon-home"></i></button>
-                <button class="btn box pull-left" id="control-xinc" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('x',1) }"><i class="icon-arrow-right"></i></button>
-            </div>
-            <div>
-                <button class="btn box" id="control-ydec" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('y',-1) }"><i class="icon-arrow-down"></i></button>
-            </div>
-        </div>
-        <!-- Z jogging control panel -->
-        <div id="Z" class="jog-panel">
-            <h1>Z</h1>
-            <div>
-                <button class="btn box" id="control-zinc" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('z',1) }"><i class="icon-arrow-up"></i></button>
-            </div>
-            <div>
-                <button class="btn box" id="control-zhome" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendHomeCommand(['z']) }"><i class="icon-home"></i></button>
-            </div>
-            <div>
-                <button class="btn box" id="control-zdec" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('z',-1) }"><i class="icon-arrow-down"></i></button>
-            </div>
-        </div>
-        <!-- Z jogging control panel -->
-        <div id="E" class="jog-panel">
-            <h1>E</h1>
-            <div>
-                <button class="btn box" id="control-zinc" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('e',1) }"><i class="icon-arrow-up"></i></button>
-            </div>
-            <div>
-                <button class="btn box" id="control-zhome" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendHomeCommand(['e']) }"><i class="icon-home"></i></button>
-            </div>
-            <div>
-                <button class="btn box" id="control-zdec" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendJogCommand('e',-1) }"><i class="icon-arrow-down"></i></button>
-            </div>
-        </div>
-        <!-- Jog distance -->
-        <div class="distance">
-            <div class="btn-group" data-toggle="buttons-radio" id="jog_distance">
-                <button type="button" id="control-distance01" class="btn distance" data-distance="0.1" data-bind="enable: loginState.isUser()">0.1</button>
-                <button type="button" id="control-distance1" class="btn distance" data-distance="1" data-bind="enable: loginState.isUser()">1</button>
-                <button type="button" id="control-distance10" class="btn distance active" data-distance="10" data-bind="enable: loginState.isUser()">10</button>
-                <button type="button" id="control-distance100" class="btn distance" data-distance="100" data-bind="enable: loginState.isUser()">100</button>
-            </div>
-        </div>
-        <!-- Light Intensity -->
-        <input style="width: 300px" type="number" data-bind="slider: {min: 0, max: 100, step: 1, value: lightIntensity, tooltip: 'hide'}">
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && loginState.isUser(), click: function() { $root.sendLightIntensity() }">{{ _('Light Intensity: ') }}<span data-bind="text: lightIntensity() + '%'"></span></button>
-        <div class="row">
-            <select class="form-control" style="width: 300px" id="wellPlate" data-bind="enable: isOperational() && loginState.isUser() && isHomed()">
-                <option selected="selected">Select Plate Type</option>
-                <option value="1">Petri Dish</option>
-                <option value="6">6-Well Plate</option>
-                <option value="12">12-Well Plate</option>
-                <option value="24">24-Well Plate</option>
-                <option value="96">96-Well Plate</option>
-            </select>
-            <button class="btn btn-block" data-bind="enable: isOperational() && loginState.isUser() && isHomed(), click: function() { $root.selectWellPlate() }">Select Well Plate</button>
-        </div>
+        <div class="span12" id="temperature-graph"></div>
     </div>
-</div>
-<!-- <div class = "row-fluid"> -->
-<!-- Extrusion control panel -->
-<div class="jog-panel" style="display: none;" data-bind="visible: loginState.isUser">
-    <h1>Extruder 1</h1>
-    <div>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendExtrudeCommand(1) }">{{ _('+') }}</button>
-        <div class="input-append control-box">
-            <input type="text" class="input-mini text-right" id="extruder1Pressure" data-bind="value: extruder1Pressure, enable: isOperational() && !isPrinting() && loginState.isUser(), attr: {placeholder: settings.printer_defaultPressure}">
-            <span class="add-on">psi</span>
-        </div>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendRetractCommand(1) }">{{ _('-') }}</button>
-        <hr>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.saveToolChangeDist(1) }">{{ _('Set Tool Distance') }}</button>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.switchTool(1) }">{{ _('Select Tool') }}</button>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M42 P16 S255'}) }">{{ _('Extrude') }}</button>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M42 P16 S0'}) }">{{ _('Stop') }}</button>
-    </div>
-</div>
-<div class="jog-panel" style="display: none;" data-bind="visible: loginState.isUser">
-    <h1>Extruder 2</h1>
-    <div>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendExtrudeCommand(2) }">{{ _('+') }}</button>
-        <div class=""
-        <div class="input-append control-box">
-            <input type="text" class="input-mini text-right" id="extruder2Pressure" data-bind="value: extruder2Pressure, enable: isOperational() && !isPrinting() && loginState.isUser(), attr: {placeholder: settings.printer_defaultPressure}">
-            <span class="add-on">psi</span>
-        </div>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendRetractCommand(2) }">{{ _('-') }}</button>
-        <hr>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.saveToolChangeDist(1) }">{{ _('Set Tool Distance') }}</button>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.switchTool(2) }">{{ _('Select Tool') }}</button>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M42 P17 S255'}) }">{{ _('Extrude') }}</button>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M42 P17 S0'}) }">{{ _('Stop') }}</button>
-    </div>
-</div>
-</div>
-<div class="row-fluid">
-<!-- General control panel -->
-<div class="jog-panel" style="display: none;" data-bind="visible: loginState.isUser">
-    <h1>{{ _('General') }}</h1>
-    <div>
-        <button class="btn btn-block control-box" id="control-zhome" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendHomeCommand(['e']) }"><i class="icon-home"></i></button>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M18'}) }">{{ _('Motors off') }}</button>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M112'}) }">{{ _('Emergency Stop') }}</button>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.stepToolChange(1) }">{{ _('+') }}</button>
-        <button class="btn btn-block control-box" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.stepToolChange(-1) }">{{ _('-') }}</button>
-    </div>
-</div>
-</div>
+{% endif %}
 
 <!-- Container for custom controls -->
 <div style="clear: both; display: none;" data-bind="visible: loginState.isUser, template: { name: $root.displayMode, foreach: controls }"></div>
@@ -157,29 +173,7 @@
         <!-- ko template: { name: 'customControls_containerTemplate', data: $data } --><!-- /ko -->
     </div>
 </script>
-<script type="text/html" id="temp-template">
-    <div class="input-append">
-        <input type="text" class="input-mini text-right tempInput" data-bind="attr: {placeholder: cleanTemperature(target()) }, value: newTarget, enable: $root.isOperational() && $root.loginState.isUser(), event: { keyup: function(d, e) {$root.handleEnter(e, 'target', $data);} }">
-        <span class="add-on">&deg;C</span>
-        <div class="btn-group">
-            <button type="submit" data-bind="click: $parent.setTarget, enable: $root.isOperational() && $root.loginState.isUser()" class="btn">{{ _('Set') }}</button>
-            <button class="btn dropdown-toggle" data-toggle="dropdown" data-bind="enable: $root.isOperational() && $root.loginState.isUser()">
-                <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu">
-                <!-- ko foreach: $root.temperature_profiles -->
-                <li>
-                    <a href="#" data-bind="click: function() {$root.setTargetFromProfile($parent, $data);}, text: 'Set ' + name + ' (' + ($parent.key() == 'bed' ? bed : extruder) + '&deg;C)'"></a>
-                </li>
-                <!-- /ko -->
-                <li class="divider"></li>
-                <li>
-                    <a href="#" data-bind="click: $root.setTargetToZero">{{ _('Off') }}</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</script>
+
 <script type="text/html" id="customControls_containerTemplate">
     <!-- ko if: layout == 'vertical' -->
     <div class="custom_section_vertical" data-bind="template: { name: $root.displayMode, foreach: children }, css: {hide: collapsed && name}"></div>
@@ -222,3 +216,37 @@
     <button class="btn" data-bind="text: name, enable: $root.isCustomEnabled($data), click: function() { $root.clickCustom($data) }"></button>
 </script>
 <!-- End of templates for custom controls -->
+
+<div class="row-fluid">
+    <div class="span12 terminal">
+        <pre id="terminal-output" class="pre-scrollable" data-bind="foreach: displayedLines"><span data-bind="text: line, css: {muted: type == 'filtered'}"></span><br></pre>
+        <small class="pull-left"><button class="btn btn-mini" data-bind="click: toggleAutoscroll, css: {active: autoscrollEnabled}">{{ _('Autoscroll') }}</button> <span data-bind="text: lineCount"></span></small>
+        <small class="pull-right"><a href="#" data-bind="click: scrollToEnd">{{ _("Scroll to end") }}</a>&nbsp;|&nbsp;<a href="#" data-bind="click: selectAll">{{ _("Select all") }}</a></small>
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="span6" id="termin-filterpanel">
+        <div data-bind="foreach: filters">
+            <label class="checkbox">
+                <input type="checkbox" data-bind="attr: { value: regex }, checked: $parent.activeFilters"> <span data-bind="text: name"></span>
+            </label>
+        </div>
+    </div>
+    <div class="span6" id="terminal-sendpanel" style="display: none;" data-bind="visible: loginState.isUser">
+        <div class="input-append">
+            <input type="text" id="terminal-command" data-bind="value: command, event: { keyup: function(d,e) { return handleKeyUp(e); }, keydown: function(d,e) { return handleKeyDown(e); } }, enable: isOperational() && loginState.isUser()">
+            <button class="btn" type="button" id="terminal-send" data-bind="click: sendCommand, enable: isOperational() && loginState.isUser()">{{ _('Send') }}</button>
+        </div>
+        <small class="muted">{{ _('Hint: Use the arrow up/down keys to recall commands sent previously') }}</small>
+    </div>
+</div>
+
+<div>
+    <div><small><a href="#" class="muted" onclick="$(this).children().toggleClass('icon-caret-right icon-caret-down').parent().parent().parent().next().slideToggle('fast')"><i class="icon-caret-right"></i> {{ _('Advanced options') }}</a></small></div>
+    <div class="hide">
+        <button class="btn btn-block" type="button" data-bind="click: fakeAck, enable: isOperational() && loginState.isUser()">{{ _("Fake Acknowledgement") }}</button>
+        <small class="muted">{{ _("If acknowledgements (\"ok\"s) sent by the firmware get lost due to issues with the serial communication to your printer, OctoPrint's communication with it can become stuck. If that happens, this can help. Please be advised that such occurences hint at general communication issues with your printer which will probably negatively influence your printing results and which you should therefore try to resolve!") }}</small>
+    </div>
+</div>
+</div>

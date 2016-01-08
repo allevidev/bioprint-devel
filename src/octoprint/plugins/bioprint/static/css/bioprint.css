@@ -18,7 +18,7 @@ a {
     margin: 0;
   }
   #motion {
-    width:600px;
+    width:100%;
   }
 
   #XY {
@@ -39,6 +39,25 @@ a {
   }
 }
 
+#motion {
+  width:100%;
+}
+
+#motion-control {
+  width:80%;
+  margin-left: 10%;
+  margin-bottom: 10px;
+}
+
+.distance {
+  margin-left:-5px;
+}
+
+#control .box {
+  height: 45px;
+  width: 45px;
+  padding-left: 12px;
+}
 
 .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .btn-primary.disabled, .btn-primary[disabled] {
   background-color: #FF1025;
@@ -46,10 +65,97 @@ a {
   color: #fff;
 }
 
+h2 {
+  font-weight: 100;
+  line-height: 20px;
+}
+
+h3 {
+  font-weight: 100;
+  font-size: 15px;
+  line-height: 10px;
+  color: #FF1025;
+}
+
 .btn {
   background-color: #FF1025;
   background-image: none;
   color: #fff;
+  border-radius: 0px;
+}
+
+.btn-group {
+  border-radius: 0px;
+  margin: 0px;
+  width:100%;
+}
+
+.btn-group .btn {
+  border-radius: 0px;
+  margin: 0px;
+}
+
+.btn-group>.btn:first-child {
+  border-radius: 0px;
+  margin: 0px; 
+}
+
+.btn-group .tempSubmit {
+  width: 80%;
+  padding: 4px 6px;
+}
+
+.btn-group>.btn+.dropdown-toggle {
+  width: 20%;
+}
+
+#control .btn-group {
+  margin: 0px;
+}
+
+.input-append .tempInput {
+  border-radius: 0px;
+  background: none;
+  font-size: 31.5px; 
+  height: auto;
+  width: 70%;
+  line-height: 37px;
+  vertical-align: middle;
+}
+
+.input-append .add-on:last-child {
+  border-radius: 0px;
+}
+
+.input-append .tempAddOn {
+  font-size: 31.5px;
+  padding: 12.5px 0;
+  vertical-align: middle;
+  border-radius: 0px;
+}
+
+::-webkit-input-placeholder { /* Safari, Chrome and Opera */
+  vertical-align: middle;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+  vertical-align: middle;
+}
+
+::-moz-placeholder { /* Firefox 19+ */
+  vertical-align: middle;
+}
+
+:-ms-input-placeholder { /* IE 10+ */
+  vertical-align: middle;
+}
+
+::-ms-input-placeholder { /* Edge */
+  vertical-align: middle;
+}
+
+:placeholder-shown { /* Standard one last! */
+  vertical-align: middle;
 }
 
 .navbar-inner {

@@ -140,30 +140,32 @@ class PrinterProfileManager(object):
 	"""
 
 	default = dict(
-		id = "_default",
-		name = "Default",
-		model = "Generic RepRap Printer",
+		id = "biobot1",
+		name = "BioBot 1",
+		model = "BioBot 1",
 		color = "default",
 		volume=dict(
-			width = 200,
-			depth = 200,
-			height = 200,
+			width = 136,
+			depth = 86,
+			height = 75,
 			formFactor = BedTypes.RECTANGULAR,
 			origin = BedOrigin.LOWERLEFT
 		),
 		heatedBed = False,
 		extruder=dict(
-			count = 1,
+			count = 3,
 			offsets = [
+				(0, 0),
+				(49, 0),
 				(0, 0)
 			],
-			nozzleDiameter = 0.4
+			nozzleDiameter = 0.2
 		),
 		axes=dict(
-			x = dict(speed=6000, inverted=False),
-			y = dict(speed=6000, inverted=False),
-			z = dict(speed=200, inverted=False),
-			e = dict(speed=300, inverted=False)
+			x = dict(speed=1000, inverted=False),
+			y = dict(speed=1000, inverted=False),
+			z = dict(speed=1000, inverted=False),
+			e = dict(speed=1000, inverted=False)
 		)
 	)
 
@@ -205,6 +207,7 @@ class PrinterProfileManager(object):
 		return self._remove_from_path(self._get_profile_path(identifier))
 
 	def save(self, profile, allow_overwrite=False, make_default=False):
+		print 
 		if "id" in profile:
 			identifier = profile["id"]
 		elif "name" in profile:
@@ -216,7 +219,7 @@ class PrinterProfileManager(object):
 		profile["id"] = identifier
 		profile = dict_clean(profile, self.__class__.default)
 
-		if identifier == "_default":
+		if identifier == "biobot1":
 			default_profile = dict_merge(self._load_default(), profile)
 			if not self._ensure_valid_profile(default_profile):
 				raise InvalidProfileError()
@@ -262,7 +265,7 @@ class PrinterProfileManager(object):
 	def exists(self, identifier):
 		if identifier is None:
 			return False
-		elif identifier == "_default":
+		elif identifier == "biobot1":
 			return True
 		else:
 			path = self._get_profile_path(identifier)
@@ -401,7 +404,7 @@ class PrinterProfileManager(object):
 			try:
 				convert_value(profile, path, int)
 			except Exception as e:
-				self._logger.warn("Profile has invalid value for path {path!r}: {msg}".format(path=".".join(path), msg=str(e)))
+				self._logger.warn("Profile has invalid value for path {path!r}".format(path=".".join(path)))
 				return False
 
 		# convert floats
@@ -409,7 +412,7 @@ class PrinterProfileManager(object):
 			try:
 				convert_value(profile, path, float)
 			except:
-				self._logger.warn("Profile has invalid value for path {path!r}: {msg}".format(path=".".join(path), msg=str(e)))
+				self._logger.warn("Profile has invalid value for path {path!r}".format(path=".".join(path)))
 				return False
 
 		# convert booleans
@@ -417,7 +420,7 @@ class PrinterProfileManager(object):
 			try:
 				convert_value(profile, path, bool)
 			except:
-				self._logger.warn("Profile has invalid value for path {path!r}: {msg}".format(path=".".join(path), msg=str(e)))
+				self._logger.warn("Profile has invalid value for path {path!r}".format(path=".".join(path)))
 				return False
 
 		# validate form factor

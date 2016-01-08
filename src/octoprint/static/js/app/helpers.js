@@ -407,13 +407,18 @@ function formatFilament(filament) {
 }
 
 function cleanTemperature(temp) {
-    if (!temp || temp < 10) return gettext("off");
+    if (!temp || temp < 0) return gettext("0");
     return temp;
 }
 
 function formatTemperature(temp) {
-    if (!temp || temp < 10) return gettext("off");
+    if (!temp || temp < 0) return gettext("0&deg;C");
     return _.sprintf("%.1f&deg;C", temp);
+}
+
+function formatPressure(pressure) {
+    if (!pressure || pressure < 0) return gettext("0 <span class='unit'>PSI</span>");
+    return _.sprintf("%.1f <span class='unit'>PSI</span>", pressure);
 }
 
 function pnotifyAdditionalInfo(inner) {

@@ -38,6 +38,7 @@ def connectionCommand():
 	}
 
 	command, data, response = get_json_command_from_request(request, valid_commands)
+
 	if response is not None:
 		return response
 
@@ -65,7 +66,9 @@ def connectionCommand():
 			printerProfileManager.set_default(printerProfile)
 		if "autoconnect" in data.keys():
 			settings().setBoolean(["serial", "autoconnect"], data["autoconnect"])
+		
 		settings().save()
+
 		printer.connect(port=port, baudrate=baudrate, profile=printerProfile)
 	elif command == "disconnect":
 		printer.disconnect()

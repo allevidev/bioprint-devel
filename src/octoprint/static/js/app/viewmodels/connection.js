@@ -123,6 +123,8 @@ $(function() {
                     "autoconnect": self.settings.serial_autoconnect()
                 };
 
+                console.log(data);
+
                 if (self.saveSettings())
                     data["save"] = true;
 

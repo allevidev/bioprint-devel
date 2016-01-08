@@ -244,9 +244,11 @@ def printerPrintheadCommand():
 	valid_commands = {
 		"jog": [],
 		"home": ["axes"],
-		"feedrate": ["factor"]
+		"feedrate": ["factor"],
+		"position": ["positions"]
 	}
 	command, data, response = get_json_command_from_request(request, valid_commands)
+
 	if response is not None:
 		return response
 
@@ -290,6 +292,13 @@ def printerPrintheadCommand():
 			printer.feed_rate(factor)
 		except ValueError as e:
 			return make_response("Invalid value for feed rate: %s" % str(e), 400)
+
+	elif command == "position":
+		positions = data["positions"]
+
+		print positions
+
+		printer.set_extruder_positions(positions)
 
 	return NO_CONTENT
 

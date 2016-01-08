@@ -161,6 +161,8 @@ $(function() {
 
             if (!CONFIG_TEMPERATURE_GRAPH) return;
 
+            console.log(tools);
+
             self.temperatures = self._processTemperatureData(serverTime, data, self.temperatures);
             self.updatePlot();
         };
@@ -370,9 +372,9 @@ $(function() {
 
     }
 
-    OCTOPRINT_VIEWMODELS.push([
-        TemperatureViewModel,
-        ["loginStateViewModel", "settingsViewModel"],
-        "#temp"
-    ]);
+    // OCTOPRINT_VIEWMODELS.push([
+    //     TemperatureViewModel,
+    //     ["loginStateViewModel", "settingsViewModel"],
+    //     "#temp"
+    // ]);
 });

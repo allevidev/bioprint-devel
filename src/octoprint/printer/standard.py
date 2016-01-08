@@ -64,6 +64,8 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 
 		self._position = None
 
+		self.extruder_positions = None
+
 		self._progress = None
 		self._printTime = None
 		self._printTimeLeft = None
@@ -287,6 +289,9 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		tool_num = int(tool[len("tool"):])
 		self.commands("T%d" % tool_num)
 
+	def set_extruder_positions(self, extruder_positions):
+		self.extruder_positions = extruder_positions
+
 	def set_temperature(self, heater, value):
 		print heater, value
 		if not PrinterInterface.valid_heater_regex.match(heater):
@@ -369,7 +374,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 			return
 
 		self._printAfterSelect = printAfterSelect
-		self._comm.selectFile("/" + path if sd else path, sd)
+		self._comm.selectFile("/" + path if sd else path, sd, self.extruder_positions)
 		self._setProgressData(0, None, None, None)
 		self._setCurrentZ(None)
 
@@ -390,6 +395,8 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 			return
 		if self._selectedFile is None:
 			return
+		if self.extruder_positions is None:
+			return 
 
 		rolling_window = None
 		threshold = None
@@ -409,7 +416,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		self._lastProgressReport = None
 		self._setProgressData(0, None, None, None)
 		self._setCurrentZ(None)
-		self._comm.startPrint()
+		self._comm.startPrint(self.extruder_positions)
 
 	def toggle_pause_print(self):
 		"""
