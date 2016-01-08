@@ -207,6 +207,7 @@ class PrinterProfileManager(object):
 		return self._remove_from_path(self._get_profile_path(identifier))
 
 	def save(self, profile, allow_overwrite=False, make_default=False):
+		print 
 		if "id" in profile:
 			identifier = profile["id"]
 		elif "name" in profile:
@@ -264,7 +265,7 @@ class PrinterProfileManager(object):
 	def exists(self, identifier):
 		if identifier is None:
 			return False
-		elif identifier == "_default":
+		elif identifier == "biobot1":
 			return True
 		else:
 			path = self._get_profile_path(identifier)
