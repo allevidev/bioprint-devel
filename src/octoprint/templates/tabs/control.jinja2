@@ -25,7 +25,7 @@
 {% endif %}
 <div class="row-fluid">
     <div class="span6">
-        <div id="motion" class="jog-panel" style="display: none;" data-bind="visible: loginState.isUser">
+        <div id="motion" class="jog-panel">
             <div class="row-fluid">
                 <!-- XY jogging control panel -->
                 <div id="motion-control">
@@ -80,11 +80,11 @@
                     </div>
                 </div>
                 <button class="btn btn-block" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M18'}) }">{{ _('Motors off') }}</button>
-                <button class="btn btn-block" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M112'}) }">{{ _('Emergency Stop') }}</button>
+                <button class="btn btn-block" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendEmergencyStop() }">{{ _('Emergency Stop') }}</button>
                 <hr>
                 <!-- Light Intensity -->
                 <input style="width: 226px; margin-left" type="number" data-bind="slider: {min: 0, max: 100, step: 1, value: lightIntensity, tooltip: 'hide'}">
-                <button class="btn btn-block control-box" data-bind="enable: isOperational() && loginState.isUser(), click: function() { $root.sendLightIntensity() }">{{ _('Light Intensity: ') }}<span data-bind="text: lightIntensity() + '%'"></span></button>
+                <button class="btn btn-block control-box btn-checkbox" data-bind="enable: isOperational() && loginState.isUser(), click: function() { $root.sendLightIntensity() }" data-toggle="button">{{ _('Light Intensity: ') }}<span data-bind="text: lightIntensity() + '%'"></span></button>
                 <hr>
                 <select class="form-control" style="width: 250px" id="wellPlate" data-bind="enable: isOperational() && loginState.isUser() && isHomed()">
                         <option selected="selected">Select Plate Type</option>
@@ -105,7 +105,7 @@
             <!-- /ko -->
 
             <script type="text/html" id="extruder-template">
-                <div class="span5 jog-panel" style="display: none;" data-bind="visible: $root.loginState.isUser">
+                <div class="span5 jog-panel">
                     <h1 data-bind="text: name"></h1>
                     <div>
                         <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && $root.loginState.isUser(), click: function() { $root.sendPressureIncrease(key()) }">{{ _('+') }}</button>
@@ -140,13 +140,13 @@
                         <hr>
                         <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting() && $root.loginState.isUser(), click: function() { $root.saveToolChangeDist(key()) }">{{ _('Set Tool Distance') }}</button>
                         <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting() && $root.loginState.isUser() && !$root.extruderSelected(key()), click: function() { $root.switchTool(key()) }">{{ _('Select Tool') }}</button>
-                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting() && $root.loginState.isUser(), click: function() { $root.startExtrude(key()) }">{{ _('Extrude') }}</button>
-                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting() && $root.loginState.isUser(), click: function() { $root.stopExtrude(key()) }">{{ _('Stop') }}</button>
+                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting() && $root.loginState.isUser() && !$root.checkExtruding(key()), click: function() { $root.startExtrude(key()) }">{{ _('Extrude') }}</button>
+                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting() && $root.loginState.isUser() && $root.checkExtruding(key()), click: function() { $root.stopExtrude(key()) }">{{ _('Stop') }}</button>
                     </div>
                 </div>
             </script>
         <div class="row-fluid">
-            <button class="span10 btn btn-block" data-bind="enable: isOperational() && loginState.isUser() && isHomed(), click: function() { $root.toolMid() }">Extruder Midpoint</button>
+            <button class="span10 btn btn-block" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser() && isHomed(), click: function() { $root.toolMid() }">Extruder Midpoint</button>
         </div>
     </div>
 </div>

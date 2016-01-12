@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['run'],
-             pathex=['/Users/karanhiremath/Documents/Programming/BioBots/OctoPrint'],
+             pathex=['/Users/karanhiremath/Documents/Programming/BioBots/bioprint'],
              binaries=None,
              datas=None,
              hiddenimports=[],
@@ -18,11 +18,16 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
           a.scripts,
-          a.binaries,
-          a.zipfiles,
-          a.datas,
+          exclude_binaries=True,
           name='run',
           debug=False,
           strip=None,
           upx=True,
           console=True )
+coll = COLLECT(exe,
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=None,
+               upx=True,
+               name='run')

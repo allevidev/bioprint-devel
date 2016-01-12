@@ -39,15 +39,17 @@ $(function() {
         self.extruder1TempTarget = ko.observable(undefined);
         self.extruder1Pos = -1;
         self.extruder1Selected = ko.observable(false);
-
+        self.extruder1Extruding = ko.observable(false);
 
         self.extruder2Pressure = ko.observable(undefined);
         self.extruder2Temp = ko.observable(undefined);
         self.extruder2TempTarget = ko.observable(undefined);
         self.extruder2Pos = -1;
         self.extruder2Selected = ko.observable(false);
+        self.extruder2Extruding = ko.observable(false);
 
         self.lightIntensity = ko.observable(0);
+        self.lightOn = ko.observable(false);
 
         self.isHomed = ko.observable(false);
         self.homed = {
@@ -860,7 +862,9 @@ $(function() {
         self.startExtrude = function (extruder) {
             if (extruder == "tool0") {
                 var pin = 16;
+                self.extruder1Extruding(true)
             } else if (extruder == "tool1") {
+                self.extruder2Extruding(true)
                 var pin = 17;
             }
             self.sendCustomCommand({
@@ -875,7 +879,9 @@ $(function() {
         self.stopExtrude = function (extruder) {
             if (extruder == "tool0") {
                 var pin = 16;
+                self.extruder1Extruding(false)
             } else if (extruder == "tool1") {
+                self.extruder2Extruding(false)
                 var pin = 17;
             }
             self.sendCustomCommand({
@@ -886,6 +892,14 @@ $(function() {
                 ]
             })
         };
+
+        self.checkExtruding = function (extruder) {
+            if (extruder == "tool0") {
+                return self.extruder1Extruding();
+            } else if (extruder == "tool1") {
+                return self.extruder2Extruding();
+            }
+        }
 
         self.sendPressureIncrease = function(extruder) {
             if (extruder == "tool0") {
@@ -953,10 +967,15 @@ $(function() {
                 case '12':
                     break;
                 case '24':
-                    break;
+                    var x = 11.2;
+                    var y = 63;
                 case '96':
                     break;
             }
+            self.sendPrintHeadCommand({
+                "command": "wellplate",
+                "wellplate": parseInt(self.wellPlate)
+            });
             self.sendCustomCommand({
                 type: 'commands',
                 commands: [
@@ -1013,6 +1032,8 @@ $(function() {
             self.sendCustomCommand({
                 type: 'commands',
                 commands: [
+                    'G90',
+                    'G1 Z25 F1000',
                     'T0',
                     'M400',
                     'G1 E' + self.midpoint + ' F1000.00',
@@ -1064,10 +1085,20 @@ $(function() {
         }
 
         self.sendLightIntensity = function () {
-            self.sendToolCommand({
-                "command": "light",
-                "intensity": self.lightIntensity()
-            });
+            if (self.lightOn()) {
+                self.sendToolCommand({
+                    "command": "light",
+                    "intensity": 0
+                });
+                self.lightOn(false)
+            } else {
+                self.sendToolCommand({
+                    "command": "light",
+                    "intensity": self.lightIntensity()
+                });
+                self.lightOn(true)
+            }
+            
         }
 
         self.sendFlowRateCommand = function () {
@@ -1156,6 +1187,15 @@ $(function() {
                 data: JSON.stringify(data)
             })
         };
+
+        self.sendEmergencyStop = function () {
+            console.log(self.selectedPort());
+
+            self.sendCustomCommand({
+                type: 'command',
+                command: 'M112'
+            });
+        }
 
         self.displayMode = function (customControl) {
             if (customControl.hasOwnProperty("children")) {

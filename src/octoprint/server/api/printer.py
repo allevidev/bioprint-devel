@@ -245,7 +245,8 @@ def printerPrintheadCommand():
 		"jog": [],
 		"home": ["axes"],
 		"feedrate": ["factor"],
-		"position": ["positions"]
+		"position": ["positions"],
+		"wellplate": ["wellplate"]
 	}
 	command, data, response = get_json_command_from_request(request, valid_commands)
 
@@ -296,9 +297,12 @@ def printerPrintheadCommand():
 	elif command == "position":
 		positions = data["positions"]
 
-		print positions
-
 		printer.set_extruder_positions(positions)
+
+	elif command == "wellplate":
+		wellplate = data["wellplate"]
+		
+		printer.set_wellplate(wellplate)
 
 	return NO_CONTENT
 
