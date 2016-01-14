@@ -158,6 +158,10 @@ h3 {
   vertical-align: middle;
 }
 
+.terminal {
+  margin: 10px 0;
+}
+
 .navbar-inner {
   padding: 20px 0;
 }

@@ -380,7 +380,9 @@ def stop_extrude(extruder, e0_pos, e1_pos):
     commands = [
         'M400 ; wait for commands to complete',
         'M42 P' + str(offPin) + ' S0' 
-        ' ; turn extruder ' + str(extruder) + ' off']
+        ' ; turn extruder ' + str(extruder) + ' off',
+        'M400',
+        'G1 E' + str(mid) + ' F1000 ; Move extruder to mid point']
     return '\n'.join(commands)
 
 

@@ -142,7 +142,7 @@ default_settings = {
         "maxExtruders": 10
     },
     "feature": {
-        "temperatureGraph": True,
+        "temperatureGraph": False,
         "waitForStartOnConnect": False,
         "alwaysSendChecksum": False,
         "sendChecksumWithUnknownCommands": False,
