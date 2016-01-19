@@ -51,6 +51,13 @@ $(function() {
         self.lightIntensity = ko.observable(0);
         self.lightOn = ko.observable(false);
 
+        self.cl_layers = ko.observable(0);
+        self.cl_intensity = ko.observable(0);
+        self.cl_duration = ko.observable(0);
+        self.cl_end = ko.observable(false);
+        self.cl_end_intensity = ko.observable(0);
+        self.cl_end_duration = ko.observable(0);
+
         self.isHomed = ko.observable(false);
         self.homed = {
             'x,y': false,
@@ -445,7 +452,35 @@ $(function() {
             );
         };
 
-         self._sendToolCommand = function(command, type, temp, successCb, errorCb) {
+
+        self.set_clParams = function(){
+            
+            var cl_params = {
+                "cl_layers": parseInt(self.cl_layers()),
+                "cl_intensity": Math.round((parseFloat(self.cl_intensity()) / 100) * 255),
+                "cl_duration": parseInt(self.cl_duration()),
+                "cl_end": self.cl_end(),
+                "cl_end_intensity": Math.round((parseFloat(self.cl_end_intensity()) / 100) * 255),
+                "cl_end_duration": parseInt(self.cl_end_duration())
+            }
+
+            console.log(cl_params);
+
+            self.sendToolCommand({
+                "command": "crosslink",
+                "cl_params" : cl_params
+            });
+        };
+
+        self.end_clText = function() {
+            if (self.cl_end()) {
+                return "Disable End of Print Crosslinking"
+            } else {
+                return "Enable End of Print Crosslinking"
+            }
+        }
+        
+        self._sendToolCommand = function(command, type, temp, successCb, errorCb) {
             var data = {
                 command: command
             };
@@ -608,6 +643,8 @@ $(function() {
                     self.setTarget(item);
                 } else if (type == "offset") {
                     self.setOffset(item);
+                } else if (type == "cl_params") {
+                    self.set_clParams();
                 }
             }
         };

@@ -71,9 +71,10 @@ def printerToolCommand():
 		"offset": ["offsets"],
 		"extrude": ["amount"],
 		"flowrate": ["factor"],
-		"light": ["intensity"]
+		"crosslink": ["cl_params"]
 	}
 	command, data, response = get_json_command_from_request(request, valid_commands)
+
 	if response is not None:
 		return response
 
@@ -144,14 +145,24 @@ def printerToolCommand():
 		except ValueError as e:
 			return make_response("Invalid value for flow rate: %s" % str(e), 400)
 
-	elif command == "light":
-		intensity = data["intensity"]
-		if not isinstance(intensity, (int, long, float)):
-			return make_response("Not a number for light intensity: %r" % intensity, 400)
+	elif command == "crosslink":
+		cl_params = data["cl_params"]
+		if not isinstance(cl_params["cl_layers"], (int)):
+			return make_response("Not a number for cl_layers: %r" % cl_params["cl_layers"], 400)
+		if not isinstance(cl_params["cl_intensity"], (int)):
+			return make_response("Not a number for cl_intensity: %r" % cl_params["cl_intensity"], 400)
+		if not isinstance(cl_params["cl_duration"], (int, long, float)):
+			return make_response("Not a number for cl_duration: %r" % cl_params["cl_duration"], 400)
+		if not isinstance(cl_params["cl_end"], (bool)):
+			return make_response("Not a bool for cl_end: %r" % cl_params["cl_end"], 400)
+		if not isinstance(cl_params["cl_end_intensity"], (int)):
+			return make_response("Not a number for cl_end_intensity: %r" % cl_params["cl_end_intensity"], 400)
+		if not isinstance(cl_params["cl_end_duration"], (int, long, float)):
+			return make_response("Not a number for cl_end_duration: %r" % cl_params["cl_end_duration"], 400)
 		try:
-			printer.light_intensity(intensity)
+			printer.crosslink(cl_params)
 		except ValueError as e:
-			return make_response("Invalid value for light intensity: %s" % str(e), 400)
+			return make_response("Invalid value for cl_params: %s" % str(e), 400)
 
 	return NO_CONTENT
 

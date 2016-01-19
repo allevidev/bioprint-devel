@@ -33,7 +33,8 @@ INSTALL_REQUIRES = [
 	"requests==2.7.0",
 	"semantic_version==2.4.2",
 	"psutil==3.2.1",
-	"appdirs==1.4.0"
+	"appdirs==1.4.0",
+	"boto3==1.2.3"
 ]
 
 # Additional requirements for optional install options

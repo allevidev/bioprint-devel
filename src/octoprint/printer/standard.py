@@ -66,7 +66,14 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 
 		self.extruder_positions = None
 		self.wellplate = None
-
+		self.cl_params = {
+			"cl_layers": 0,
+			"cl_intensity": 0,
+			"cl_duration": 0,
+			"cl_end": False,
+			"cl_end_duration": 0
+		}
+		
 		self._progress = None
 		self._printTime = None
 		self._printTimeLeft = None
@@ -368,6 +375,9 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		factor = self._convert_rate_value(factor, min=75, max=125)
 		self.commands("M221 S%d" % factor)
 
+	def crosslink(self, cl_params):
+		self.cl_params = cl_params
+
 	def light_intensity(self, intensity):
 		intensity = self._convert_intensity_value(intensity)
 		self.commands("M42 P4 S%d" % intensity)
@@ -378,7 +388,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 			return
 
 		self._printAfterSelect = printAfterSelect
-		self._comm.selectFile("/" + path if sd else path, sd, self.extruder_positions, self.wellplate)
+		self._comm.selectFile("/" + path if sd else path, sd, self.extruder_positions, self.wellplate, self.cl_params)
 		self._setProgressData(0, None, None, None)
 		self._setCurrentZ(None)
 

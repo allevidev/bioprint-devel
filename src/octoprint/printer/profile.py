@@ -140,7 +140,7 @@ class PrinterProfileManager(object):
 	"""
 
 	default = dict(
-		id = "biobot1",
+		id = "_default",
 		name = "BioBot 1",
 		model = "BioBot 1",
 		color = "default",
@@ -148,16 +148,15 @@ class PrinterProfileManager(object):
 			width = 136,
 			depth = 86,
 			height = 75,
-			formFactor = BedTypes.RECTANGULAR,
-			origin = BedOrigin.LOWERLEFT
+			formFactor = BedTypes.CIRCULAR,
+			origin = BedOrigin.CENTER
 		),
 		heatedBed = False,
 		extruder=dict(
-			count = 3,
+			count = 2,
 			offsets = [
 				(0, 0),
-				(49, 0),
-				(0, 0)
+				(48.33, 0)
 			],
 			nozzleDiameter = 0.2
 		),
@@ -219,7 +218,7 @@ class PrinterProfileManager(object):
 		profile["id"] = identifier
 		profile = dict_clean(profile, self.__class__.default)
 
-		if identifier == "biobot1":
+		if identifier == "_default":
 			default_profile = dict_merge(self._load_default(), profile)
 			if not self._ensure_valid_profile(default_profile):
 				raise InvalidProfileError()
@@ -265,7 +264,7 @@ class PrinterProfileManager(object):
 	def exists(self, identifier):
 		if identifier is None:
 			return False
-		elif identifier == "biobot1":
+		elif identifier == "_default":
 			return True
 		else:
 			path = self._get_profile_path(identifier)

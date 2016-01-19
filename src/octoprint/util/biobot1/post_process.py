@@ -408,8 +408,20 @@ def switch_extruder(extruder, e0_pos, e1_pos):
 
     return '\n'.join(commands)
 
+def crosslink(x, y, cl_duration, cl_intensity):
+    commands = [
+        'G1 E' + str(mid) + ' F' + str(e_rate),
+        'G1 X' + str(x) + ' Y' + str(y),
+        'M400',
+        'M42 P4 S' + str(cl_intensity) + ' ; CROSSLINK HERE',
+        'G4 P' + str(cl_duration),
+        'M42 P4 S0'
+    ]
 
-def post_process(payload, positions, wellPlate):
+    return '\n'.join(commands)
+
+
+def post_process(payload, positions, wellPlate, cl_params):
     '''
     Read a gcode file and add M106 after E1.000 lines and
     M107, M126, M127 after each E peak.
@@ -426,14 +438,20 @@ def post_process(payload, positions, wellPlate):
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime(timeformat)
     outputFile = fName + '_processed_'+ timestamp + '.' + fType
     
+    with open(filename, 'r') as f:
+        if f.readline() is "; POST PROCESSED":
+            f.close()
+            return payload
+
     with open(outputFile, 'w') as o:
+        o.write('; POST PROCESSED\n')
         active_e = 0
         last_e = 0
         extruding = False
         for r in rows:
             columns = sorted(wellPlatePositions[wellPlate][r].keys())
             for c in columns:
-                print wellPlatePositions[wellPlate][r][c]
+                layer = 0
                 e0_Xctr = wellPlatePositions[wellPlate][r][c][0]["X"]
                 e0_Yctr = wellPlatePositions[wellPlate][r][c][0]["Y"]
 
@@ -441,6 +459,11 @@ def post_process(payload, positions, wellPlate):
                 e1_Yctr = wellPlatePositions[wellPlate][r][c][1]["Y"]
                 with open(filename, 'r') as f:
                     for i, line in enumerate(f):
+                        if z_value(line) is not None:
+                            layer += 1
+                            if cl_params["cl_layers"] != 0:
+                                if layer % cl_params["cl_layers"] == 0 and layer != 0:
+                                    o.write(crosslink(e1_Xctr, e1_Yctr, cl_params["cl_duration"], cl_params["cl_intensity"]) + '\n')
                         if m_value(line) == 190.0 or m_value(line) == 104.0 or m_value(line) == 109.0:
                             next
                         else:
@@ -458,7 +481,6 @@ def post_process(payload, positions, wellPlate):
                                             if not extruding:
                                                 o.write(start_extrude(active_e, e0_pos, e1_pos) + '\n')
                                                 extruding = not extruding
-
                                             if active_e == 0:
                                                 o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
                                             elif active_e == 1:
@@ -491,6 +513,8 @@ def post_process(payload, positions, wellPlate):
                                 o.write(stop_extrude(active_e, e0_pos, e1_pos) + '\n')
                             else:
                                 o.write(line)
+                if cl_params["cl_end"]:
+                    o.write(crosslink(e1_Xctr, e1_Yctr, cl_params["cl_end_duration"], cl_params["cl_end_intensity"])+ '\n')
                 f.close()
     o.close()
     
@@ -502,8 +526,8 @@ def post_process(payload, positions, wellPlate):
 
 test_payload = {
     'origin': 'local', 
-    'file': '/Users/karanhiremath/Library/Application Support/BioPrint/uploads/pluronic_lattice_1.5_mm_pores.gcode',
-    'filename': u'pluronic_lattice_1.5_mm_pores.gcode'
+    'file': '/Users/karanhiremath/Downloads/PediatricBronchi.gcode',
+    'filename': u'/Users/karanhiremath/Downloads/PediatricBronchi.gcode'
 }
 
 test_positions = {
@@ -511,4 +535,12 @@ test_positions = {
     "tool1": 24
 }
 
-# post_process(test_payload, test_positions, 24)
+cl_params = {
+    "cl_layers": 3,
+    "cl_duration": 200,
+    "cl_intensity": 10,
+    "cl_end": True,
+    "cl_end_duration": 2000
+}
+
+# post_process(test_payload, test_positions, 1, cl_params)

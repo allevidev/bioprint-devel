@@ -83,8 +83,54 @@
                 <button class="btn btn-block" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendEmergencyStop() }">{{ _('Emergency Stop') }}</button>
                 <hr>
                 <!-- Light Intensity -->
-                <input style="width: 226px; margin-left" type="number" data-bind="slider: {min: 0, max: 100, step: 1, value: lightIntensity, tooltip: 'hide'}">
-                <button class="btn btn-block control-box btn-checkbox" data-bind="enable: isOperational() && loginState.isUser(), click: function() { $root.sendLightIntensity() }" data-toggle="button">{{ _('Light Intensity: ') }}<span data-bind="text: lightIntensity() + '%'"></span></button>
+                <h1>Print Crosslinking Parameters</h1>
+                <div class="row-fluid">
+                    <div class="span4">
+                        <h2>Frequency:</h2>
+                    </div>
+                    <div class="span4">
+                        <h2>Intensity:</h2>
+                    </div>
+                    <div class="span4">
+                        <h2>Duration:</h2>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="input-append span4">
+                        <input type="text" class="input text-right clInput" data-bind="attr: {placeholder: cl_layers() }, value: cl_layers, enable: $root.isOperational() && $root.loginState.isUser(), event: { keyup: function(d, e) {$root.handleEnter(e, 'cl_params', $data);} }">
+                        <span class="add-on clAddOn"> layers</span>
+                    </div>
+                    <div class="input-append span4">
+                        <input type="text" class="input text-right clInput" data-bind="attr: {placeholder: cl_intensity() }, value: cl_intensity, enable: $root.isOperational() && $root.loginState.isUser(), event: { keyup: function(d, e) {$root.handleEnter(e, 'cl_params', $data);} }">
+                        <span class="add-on clAddOn">%</span>
+                    </div>
+                    <div class="input-append span4">
+                        <input type="text" class="input text-right clInput" data-bind="attr: {placeholder: cl_duration() }, value: cl_duration, enable: $root.isOperational() && $root.loginState.isUser(), event: { keyup: function(d, e) {$root.handleEnter(e, 'cl_params', $data);} }">
+                        <span class="add-on clAddOn"> milliseconds</span>
+                    </div>
+                </div>
+                <h1>PostPrint Crosslinking Parameters</h1>
+                <div class="row-fluid">
+                    <div class="span4">
+                    </div>
+                    <div class="span4">
+                        <h2>Intensity:</h2>
+                    </div>
+                    <div class="span4">
+                        <h2>Duration:</h2>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <button type="button" class="btn btn-block control-box span4" data-toggle="button" data-bind="enable: $root.isOperational() && $root.loginState.isUser(), click: function() { if(cl_end()) { cl_end(false) } else { cl_end(true)} $root.set_clParams()}, text: $root.end_clText()" aria-pressed="false" autocomplete="off"></button>
+                    <div class="input-append span4">
+                        <input type="text" class="input text-right clInput" data-bind="attr: {placeholder: cl_duration() }, value: cl_end_intensity, enable: $root.isOperational() && $root.loginState.isUser(), event: { keyup: function(d, e) {$root.handleEnter(e, 'cl_params', $data);} }">
+                        <span class="add-on clAddOn">%</span>
+                    </div>
+                    <div class="input-append span4">
+                        <input type="text" class="input text-right clInput" data-bind="attr: {placeholder: cl_duration() }, value: cl_end_duration, enable: $root.isOperational() && $root.loginState.isUser(), event: { keyup: function(d, e) {$root.handleEnter(e, 'cl_params', $data);} }">
+                        <span class="add-on clAddOn"> milliseconds</span>
+                    </div>
+                </div>
                 <hr>
                 <select class="form-control" style="width: 250px" id="wellPlate" data-bind="enable: isOperational() && loginState.isUser() && isHomed()">
                         <option selected="selected">Select Plate Type</option>
