@@ -1,5 +1,52 @@
+@font-face {
+  font-family: 'DINPro';
+  src: url('../font/dinproregular.eot');
+  src: url('../font/dinproregular.eot?#iefix') format('embedded-opentype'),
+       url('../font/dinproregular.woff') format('woff'),
+       url('../font/dinproregular.ttf') format('truetype'),
+       url('../font/dinproregular.svg#dinproregular') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro-Medium';
+  src: url('../font/dinpromedium.eot');
+  src: url('../font/dinpromedium.eot?#iefix') format('embedded-opentype'),
+       url('../font/dinpromedium.woff') format('woff'),
+       url('../font/dinpromedium.ttf') format('truetype'),
+       url('../font/dinpromedium.svg#dinpromedium') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro-Bold';
+  src: url('../font/dinprobold.eot');
+  src: url('../font/dinprobold.eot?#iefix') format('embedded-opentype'),
+       url('../font/dinprobold.woff') format('woff'),
+       url('../font/dinprobold.ttf') format('truetype'),
+       url('../font/dinprobold.svg#dinprobold') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DINPro-Light';
+  src: url('../font/dinprolight.eot');
+  src: url('../font/dinprolight.eot?#iefix') format('embedded-opentype'),
+       url('../font/dinprolight.woff') format('woff'),
+       url('../font/dinprolight.ttf') format('truetype'),
+       url('../font/dinprolight.svg#dinprolight') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+html, body, input, button, select, textarea {
+  font-family: 'DINPro';
+}
+
+
+
 a {
-  color: #FF1025;
+  color: #e63131;
 }
 
 /* Portrait tablet to landscape and desktop */
@@ -65,23 +112,36 @@ a {
   color: #fff;
 }
 
+h1 {
+  font-family: 'DINPro';
+}
+
 h2 {
+  font-family: 'DINPro';
   font-weight: 100;
   line-height: 20px;
 }
 
 h3 {
+  font-family: 'DINPro';
   font-weight: 100;
   font-size: 15px;
   line-height: 10px;
-  color: #FF1025;
+  color: #e63131;
 }
 
 .btn {
-  background-color: #FF1025;
+  font-family: 'DINPro-Medium';
+  text-transform: uppercase;
+  background-color: #e63131;
   background-image: none;
   color: #fff;
-  border-radius: 0px;
+  border-radius: 5px;
+}
+
+.btn:hover {
+    background: #ececec;
+    color: #008387;
 }
 
 .btn-group {

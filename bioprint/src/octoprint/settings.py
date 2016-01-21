@@ -74,7 +74,7 @@ def settings(init=False, basedir=None, configfile=None):
 default_settings = {
     "serial": {
         "port": None,
-        "baudrate": None,
+        "baudrate": 250000,
         "autoconnect": False,
         "log": False,
         "timeout": {
@@ -89,7 +89,7 @@ default_settings = {
     },
     "server": {
         "host": "0.0.0.0",
-        "port": 5000,
+        "port": 80,
         "firstRun": True,
         "secretKey": None,
         "reverseProxy": {
@@ -204,7 +204,7 @@ default_settings = {
                 "settings": [
                     "section_printer", "serial", "printerprofiles", "temperatures", "terminalfilters", "gcodescripts",
                     "section_features", "features", "webcam", "accesscontrol", "api",
-                    "section_octoprint", "server", "folders", "appearance", "logs", "plugin_pluginmanager", "plugin_softwareupdate"
+                    "section_octoprint", "server", "folders", "appearance", "logs", "plugin_pluginmanager" 
                 ],
                 "usersettings": ["access", "interface"],
                 "generic": []
@@ -252,13 +252,13 @@ default_settings = {
         { "name": "Suppress M27 requests/responses", "regex": "(Send: M27)|(Recv: SD printing byte)" }
     ],
     "plugins": {
-        "_disabled": []
+        "_disabled": ["plugin_softwareupdate"]
     },
     "scripts": {
         "gcode": {
-            "afterPrintCancelled": "; disable motors\nM84\n\n;disable all heaters\n{% snippet 'disable_hotends' %}\nM140 S0\n\n;disable fan\nM106 S0",
+            "afterPrintCancelled": "",
             "snippets": {
-                "disable_hotends": "{% for tool in range(printer_profile.extruder.count) %}M104 T{{ tool }} S0\n{% endfor %}"
+                "disable_hotends": ""
             }
         }
     },

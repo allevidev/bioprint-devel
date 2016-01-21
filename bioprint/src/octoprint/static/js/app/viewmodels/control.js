@@ -474,9 +474,9 @@ $(function() {
 
         self.end_clText = function() {
             if (self.cl_end()) {
-                return "Disable End of Print Crosslinking"
+                return "Disable"
             } else {
-                return "Enable End of Print Crosslinking"
+                return "Enable"
             }
         }
         

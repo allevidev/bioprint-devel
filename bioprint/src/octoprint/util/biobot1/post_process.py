@@ -17,11 +17,14 @@
 import re
 import time
 import datetime
+import boto3
 
 # from octoprint.settings import settings
 
 e_rate = 1000.00
 x_rate = 2000.00
+
+x_travel = 48.33
 
 wellPlatePositions = {
     1: {
@@ -386,24 +389,36 @@ def stop_extrude(extruder, e0_pos, e1_pos):
     return '\n'.join(commands)
 
 
-def switch_extruder(extruder, e0_pos, e1_pos):
+def switch_extruder(extruder, e0_pos, e1_pos, e0_Xctr, e0_Yctr, e1_Xctr, e1_Yctr):
     if extruder is 0:
         onPin = 16
         offPin = 17
         direction = -1
         target = e0_pos
+        x = e0_Xctr
+        y = e0_Yctr
     elif extruder is 1:
         onPin = 17
         offPin = 16
         direction = 1
         target = e1_pos
+        x = e1_Xctr
+        y = e1_Yctr
 
     commands = [
+        'G91',
+        'G1 Z25 F1000',
+        'G90',
         'T0 ; ensure we keep T0 active to prevent changing pressure',
         'M400 ; wait for commands to complete',
         'G1 E' + str(mid) + ' F' + str(e_rate) +
         ' ; move extruder to midpoint',
-        'M400 ; wait for commands to complete'
+        'M400 ; wait for commands to complete',
+        'G1 X' + str(x) + ' Y' + str(y) + ' F' + str(x_rate),
+        'M400',
+        'G91',
+        'G1 Z-25 F1000',
+        'G90' 
         ]
 
     return '\n'.join(commands)
@@ -506,7 +521,7 @@ def post_process(payload, positions, wellPlate, cl_params):
                                     o.write(line)
                             elif line.startswith('T') and t_value(line) is not None:
                                 active_e = int(t_value(line))
-                                o.write(switch_extruder(active_e, e0_pos, e1_pos) + '\n')
+                                o.write(switch_extruder(active_e, e0_pos, e1_pos, e0_Xctr, e0_Yctr, e1_Xctr, e1_Yctr) + '\n')
                             elif m_value(line) == 106.0:
                                 o.write(start_extrude(active_e, e0_pos, e1_pos) + '\n')
                             elif m_value(line) == 107.0:

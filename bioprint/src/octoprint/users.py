@@ -118,7 +118,7 @@ class UserManager(object):
 				# old hash doesn't match either, wrong password
 				return False
 
-	def addUser(self, username, password, active, roles):
+	def addUser(self, username, password, email, serial, active, roles):
 		pass
 
 	def changeUserActivation(self, username, active):
@@ -200,7 +200,7 @@ class FilebasedUserManager(UserManager):
 					settings = dict()
 					if "settings" in attributes:
 						settings = attributes["settings"]
-					self._users[name] = User(name, attributes["password"], attributes["active"], attributes["roles"], apikey=apikey, settings=settings)
+					self._users[name] = User(name, attributes["password"], attributes["email"], attributes["serial"], attributes["active"], attributes["roles"], apikey=apikey, settings=settings)
 		else:
 			self._customized = False
 
@@ -213,6 +213,8 @@ class FilebasedUserManager(UserManager):
 			user = self._users[name]
 			data[name] = {
 				"password": user._passwordHash,
+				"email": user._email,
+				"serial": user._serial,
 				"active": user._active,
 				"roles": user._roles,
 				"apikey": user._apikey,
@@ -224,14 +226,14 @@ class FilebasedUserManager(UserManager):
 			self._dirty = False
 		self._load()
 
-	def addUser(self, username, password, active=False, roles=None, apikey=None):
+	def addUser(self, username, password, email, serial, active=False, roles=None, apikey=None):
 		if not roles:
 			roles = ["user"]
 
 		if username in self._users.keys():
 			raise UserAlreadyExists(username)
 
-		self._users[username] = User(username, UserManager.createPasswordHash(password), active, roles, apikey=apikey)
+		self._users[username] = User(username, UserManager.createPasswordHash(password), email, serial, active, roles, apikey=apikey)
 		self._dirty = True
 		self._save()
 
@@ -398,9 +400,11 @@ class UnknownRole(Exception):
 ##~~ User object
 
 class User(UserMixin):
-	def __init__(self, username, passwordHash, active, roles, apikey=None, settings=None):
+	def __init__(self, username, passwordHash, email, serial, active, roles, apikey=None, settings=None):
 		self._username = username
 		self._passwordHash = passwordHash
+		self._email = email
+		self._serial = serial
 		self._active = active
 		self._roles = roles
 		self._apikey = apikey
@@ -412,6 +416,8 @@ class User(UserMixin):
 	def asDict(self):
 		return {
 			"name": self._username,
+			"email": self._email,
+			"serial": self._serial,
 			"active": self.is_active(),
 			"admin": self.is_admin(),
 			"user": self.is_user(),
@@ -427,6 +433,12 @@ class User(UserMixin):
 
 	def get_name(self):
 		return self._username
+
+	def get_email(self):
+		return self._email
+
+	def get_serial(self):
+		return self._serial
 
 	def is_active(self):
 		return self._active
@@ -480,11 +492,11 @@ class User(UserMixin):
 		return True
 
 	def __repr__(self):
-		return "User(id=%s,name=%s,active=%r,user=%r,admin=%r)" % (self.get_id(), self.get_name(), self.is_active(), self.is_user(), self.is_admin())
+		return "User(id=%s,name=%s,email=%s,serial=%s,active=%r,user=%r,admin=%r)" % (self.get_id(), self.get_name(), self.get_email(), self.get_serial(), self.is_active(), self.is_user(), self.is_admin())
 
 class SessionUser(User):
 	def __init__(self, user):
-		User.__init__(self, user._username, user._passwordHash, user._active, user._roles, user._apikey, user._settings)
+		User.__init__(self, user._username, user._passwordHash, user._email, user._serial, user._active, user._roles, user._apikey, user._settings)
 
 		import string
 		import random
@@ -503,7 +515,7 @@ class SessionUser(User):
 
 class DummyUser(User):
 	def __init__(self):
-		User.__init__(self, "dummy", "", True, UserManager.valid_roles)
+		User.__init__(self, "dummy", "", "", "", True, UserManager.valid_roles)
 
 	def check_password(self, passwordHash):
 		return True
@@ -521,4 +533,4 @@ def dummy_identity_loader():
 
 class ApiUser(User):
 	def __init__(self):
-		User.__init__(self, "_api", "", True, UserManager.valid_roles)
+		User.__init__(self, "_api", "", "", "", True, UserManager.valid_roles)

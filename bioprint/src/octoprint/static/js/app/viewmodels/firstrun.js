@@ -5,6 +5,8 @@ $(function() {
         self.username = ko.observable(undefined);
         self.password = ko.observable(undefined);
         self.confirmedPassword = ko.observable(undefined);
+        self.email = ko.observable(undefined);
+        self.serial = ko.observable(undefined);
 
         self.passwordMismatch = ko.computed(function() {
             return self.password() != self.confirmedPassword();
@@ -18,9 +20,19 @@ $(function() {
             return self.password() && self.password().trim() != "";
         });
 
+        self.validEmail = ko.computed(function() {
+            return self.email() && self.email().trim() != "";
+        })
+
+        self.validSerial = ko.computed(function() {
+            return self.serial() && self.serial().trim() != "";
+        })
+
         self.validData = ko.computed(function() {
-            return !self.passwordMismatch() && self.validUsername() && self.validPassword();
+            return !self.passwordMismatch() && self.validUsername() && self.validPassword() && self.validEmail() && self.validSerial();
         });
+
+
 
         self.keepAccessControl = function() {
             if (!self.validData()) return;
@@ -29,7 +41,9 @@ $(function() {
                 "ac": true,
                 "user": self.username(),
                 "pass1": self.password(),
-                "pass2": self.confirmedPassword()
+                "pass2": self.confirmedPassword(),
+                "email": self.email(),
+                "serial": self.serial()
             };
             self._sendData(data);
         };
@@ -42,7 +56,9 @@ $(function() {
                 $("#confirmation_dialog").modal("hide");
 
                 var data = {
-                    "ac": false
+                    "ac": false,
+                    "email": self.email(),
+                    "serial": self.serial()
                 };
                 self._sendData(data, function() {
                     // if the user indeed disables access control, we'll need to reload the page for this to take effect
