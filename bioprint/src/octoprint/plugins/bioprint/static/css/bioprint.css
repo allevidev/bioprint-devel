@@ -145,18 +145,15 @@ h3 {
 }
 
 .btn-group {
-  border-radius: 0px;
   margin: 0px;
   width:100%;
 }
 
 .btn-group .btn {
-  border-radius: 0px;
   margin: 0px;
 }
 
 .btn-group>.btn:first-child {
-  border-radius: 0px;
   margin: 0px; 
 }
 
@@ -278,7 +275,6 @@ h3 {
   width: 50%;
 }
 
-
-
-
-
+.terminal {
+  text-align: left;
+}

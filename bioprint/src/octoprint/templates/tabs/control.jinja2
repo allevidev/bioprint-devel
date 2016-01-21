@@ -203,7 +203,7 @@
                 </div>
                 <div class="input-append span4">
                     <input type="text" class="input text-right clInput" data-bind="attr: {placeholder: cl_duration() }, value: cl_duration, enable: $root.isOperational() && $root.loginState.isUser(), event: { keyup: function(d, e) {$root.handleEnter(e, 'cl_params', $data);} }">
-                    <span class="add-on clAddOn"> milliseconds</span>
+                    <span class="add-on clAddOn"> ms</span>
                 </div>
             </div>
             <h1>PostPrint Crosslinking Parameters</h1>
@@ -225,7 +225,7 @@
                 </div>
                 <div class="input-append span4">
                     <input type="text" class="input text-right clInput" data-bind="attr: {placeholder: cl_duration() }, value: cl_end_duration, enable: $root.isOperational() && $root.loginState.isUser(), event: { keyup: function(d, e) {$root.handleEnter(e, 'cl_params', $data);} }">
-                    <span class="add-on clAddOn"> milliseconds</span>
+                    <span class="add-on clAddOn"> ms</span>
                 </div>
             </div>
         </div>
