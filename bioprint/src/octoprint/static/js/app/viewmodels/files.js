@@ -194,8 +194,6 @@ $(function() {
         self.loadFile = function(file, printAfterLoad) {
             if (!file || !file.refs || !file.refs.hasOwnProperty("resource")) return;
 
-            console.log(self.cl_layers);
-
             $.ajax({
                 url: file.refs.resource,
                 type: "POST",

@@ -9,7 +9,7 @@ from flask import request, jsonify, make_response, url_for
 
 from octoprint.filemanager.destinations import FileDestinations
 from octoprint.settings import settings, valid_boolean_trues
-from octoprint.server import printer, fileManager, slicingManager, eventManager, NO_CONTENT
+from octoprint.server import printer, fileManager, slicingManager, eventManager, userManager, NO_CONTENT
 from octoprint.server.util.flask import restricted_access, get_json_command_from_request
 from octoprint.server.api import api
 from octoprint.events import Events
