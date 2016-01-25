@@ -509,7 +509,7 @@ class SessionUser(User):
 		return self._session
 
 	def __repr__(self):
-		return "SessionUser(id=%s,name=%s,active=%r,user=%r,admin=%r,session=%s,created=%s)" % (self.get_id(), self.get_name(), self.is_active(), self.is_user(), self.is_admin(), self._session, self._created)
+		return "SessionUser(id=%s,name=%s,email=%s,serial=%s,active=%r,user=%r,admin=%r,session=%s,created=%s)" % (self.get_id(), self.get_name(), self.get_email(), self.get_serial(), self.is_active(), self.is_user(), self.is_admin(), self._session, self._created)
 
 ##~~ DummyUser object to use when accessControl is disabled
 

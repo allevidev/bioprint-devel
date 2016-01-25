@@ -14,10 +14,24 @@
 # resume motion script
 
 
-import re
-import time
-import datetime
 import boto3
+import datetime
+import time
+import re
+import requests
+import json
+from flask.ext.login import current_user
+
+# biobots_url = 'http://data.biobots.io/'
+biobots_url = 'http://data.biobots.io/'
+
+def connected_to_biobots(url='http://data.biobots.io/', timeout=5):
+    try:
+        _ = requests.get(url, timeout=timeout)
+        return True
+    except requests.ConnectionError:
+        print("No internet connection available.")
+    return False
 
 # from octoprint.settings import settings
 
@@ -451,7 +465,9 @@ def post_process(payload, positions, wellPlate, cl_params):
     fType = str.split(filename, '.')[-1]
     timeformat = '%Y-%m-%d-%H-%M-%S'
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime(timeformat)
-    outputFile = fName + '_processed_'+ timestamp + '.' + fType
+    inputFileName = '.'.join(str.split(str.split(filename, '/')[-1], '.')[0:-1]) + '.' + fType
+    outputFileName = inputFileName + '_processed_' + timestamp + '.' + fType
+    outputFile = fName + '_processed_' + timestamp + '.' + fType
     
     with open(filename, 'r') as f:
         if f.readline() is "; POST PROCESSED":
@@ -532,6 +548,41 @@ def post_process(payload, positions, wellPlate, cl_params):
                     o.write(crosslink(e1_Xctr, e1_Yctr, cl_params["cl_end_duration"], cl_params["cl_end_intensity"])+ '\n')
                 f.close()
     o.close()
+    if connected_to_biobots():
+        # print_info = {
+        #     'email': current_user.get_email(),
+        #     'serial': current_user.get_serial()
+        # }
+        user_info = {
+            'email': 'karan@biobots.io',
+            'serial': 1
+        }
+
+        permission = requests.post(biobots_url+'/permission', json=user_info)
+        credentials = json.loads(permission.text)["Credentials"]
+        print credentials
+        s3 = boto3.resource('s3', aws_access_key_id=credentials["AccessKeyId"], aws_secret_access_key=credentials["SecretAccessKey"], aws_session_token=credentials["SessionToken"])
+        # s3 = boto3.client('s3')
+        folder = user_info['email'] + '/' + str(user_info['serial']) + '/' + timestamp + '/'
+        # s3.upload_file(filename, 'biobots-analytics', folder + inputFileName, )
+        inputObject = s3.Object('biobots-analytics', folder + inputFileName);
+        inputObject.put(ACL='public-read', Body=open(filename, 'rb'))
+        outputObject = s3.Object('biobots-analytics', folder + outputFileName);
+        outputObject.put(ACL='public-read', Body=open(outputFile, 'rb'))
+
+        print_info = {
+            'input': inputObject.key,
+            'output': outputObject.key,
+            'positions': positions,
+            'wellPlate': wellPlate,
+            'cl_params': cl_params
+        }
+
+        data = {
+            'user_info': user_info,
+            'print_info': print_info
+        };
+        print requests.post(biobots_url+'/analytics', json=data).text;
     
     return {
         "file": outputFile,
@@ -555,7 +606,8 @@ cl_params = {
     "cl_duration": 200,
     "cl_intensity": 10,
     "cl_end": True,
-    "cl_end_duration": 2000
+    "cl_end_duration": 2000,
+    "cl_end_intensity": 100
 }
 
-# post_process(test_payload, test_positions, 1, cl_params)
+post_process(test_payload, test_positions, 1, cl_params)

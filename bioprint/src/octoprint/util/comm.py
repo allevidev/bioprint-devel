@@ -16,6 +16,7 @@ import serial
 import octoprint.plugin
 
 from collections import deque
+from flask.ext.login import current_user
 
 from octoprint.util.avr_isp import stk500v2
 from octoprint.util.avr_isp import ispBase
@@ -635,6 +636,7 @@ class MachineCom(object):
         self._callback.on_comm_file_transfer_started(remoteFilename, self._currentFile.getFilesize())
 
     def selectFile(self, filename, sd, extruder_positions, wellplate, cl_params):
+
         if self.isBusy():
             return
 

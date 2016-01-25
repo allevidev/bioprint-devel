@@ -307,6 +307,8 @@ def gcodeFileCommand(filename, target):
 			sd = True
 		else:
 			filenameToSelect = fileManager.path_on_disk(target, filename)
+
+		print '\n\n\n\n\n\n\n', 
 		printer.select_file(filenameToSelect, sd, printAfterLoading)
 
 	elif command == "slice":

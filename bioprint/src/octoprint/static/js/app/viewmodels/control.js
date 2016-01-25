@@ -239,7 +239,6 @@ $(function() {
         });
 
         self.fromCurrentData = function (data) {
-            console.log(data)
             self._processStateData(data.state);
             self._processPositionData(data.position);
             self._processTemperatureUpdateData(data.serverTime, data.temps);
@@ -874,6 +873,7 @@ $(function() {
         };
 
         self.sendHomeCommand = function (axis) {
+            console.log('\n\n\n\n\n', self.position, '\n\n\n\n\n');
             self.sendPrintHeadCommand({
                 "command": "home",
                 "axes": axis
