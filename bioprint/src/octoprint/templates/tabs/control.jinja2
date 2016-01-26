@@ -24,7 +24,7 @@
     </div>
 {% endif %}
 <div class="row-fluid">
-    <div class="span6">
+    <div class="span6 panel-blue">
         <div id="motion" class="jog-panel">
             <div class="row-fluid">
                 <!-- XY jogging control panel -->
@@ -84,17 +84,17 @@
                 <hr>
                 <div class="row-fluid">
                     <div class="span4">
-                    <select class="form-control span12"  id="wellPlate" data-bind="enable: isOperational() && loginState.isUser() && isHomed()">
-                        <option selected="selected">Select Plate Type</option>
-                        <option value="1">Petri Dish</option>
-                        <option value="6">6-Well Plate</option>
-                        <option value="12">12-Well Plate</option>
-                        <option value="24">24-Well Plate</option>
-                        <option value="96">96-Well Plate</option>
-                    </select>
+                        <select class="form-control span12"  id="wellPlate" data-bind="enable: isOperational() && loginState.isUser() && isHomed()">
+                            <option selected="selected">Select Plate Type</option>
+                            <option value="1">Petri Dish</option>
+                            <option value="6">6-Well Plate</option>
+                            <option value="12">12-Well Plate</option>
+                            <option value="24">24-Well Plate</option>
+                            <option value="96">96-Well Plate</option>
+                        </select>
                     </div>
                     <div class="span8">
-                    <button class="btn btn-block span12" data-bind="enable: isOperational() && loginState.isUser() && isHomed(), click: function() { $root.selectWellPlate() }">Select Well Plate</button>
+                        <button class="btn btn-block span12" data-bind="enable: isOperational() && loginState.isUser() && isHomed(), click: function() { $root.selectWellPlate() }">Select Well Plate</button>
                     </div>
                 </div>
             </div>
@@ -303,6 +303,3 @@
     <button class="btn" data-bind="text: name, enable: $root.isCustomEnabled($data), click: function() { $root.clickCustom($data) }"></button>
 </script>
 <!-- End of templates for custom controls -->
-
-
-</div>

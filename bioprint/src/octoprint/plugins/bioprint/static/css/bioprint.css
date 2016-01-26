@@ -58,6 +58,29 @@ a {
   color: #e63131;
 }
 
+.panel-blue .btn {
+  background-color: #008081;
+  text-shadow: none;
+}
+
+
+.panel-blue .btn.active {
+  color: #fff;
+
+}
+
+.panel-blue .btn.disabled, .panel-blue .btn[disabled] {
+  background-color: #e6e6e6;
+  background-image: none;
+  color: #008081;
+}
+
+/*.panel-blue .btn-primary:hover, .panel-blue .btn-primary:focus, .panel-blue .btn-primary:active, .panel-blue .btn-primary.active, .panel-blue .btn-primary.disabled, .panel-blue .btn-primary[disabled] {
+  background-color: #FF1025;
+  background-image: none;
+  color: #fff;
+}*/
+
 /* Portrait tablet to landscape and desktop */
 @media (min-width: 768px) and (max-width: 979px) { 
   #sidebar {
@@ -154,16 +177,7 @@ h3 {
 }
 
 .btn-group {
-  margin: 0px;
   width:100%;
-}
-
-.btn-group .btn {
-  margin: 0px;
-}
-
-.btn-group>.btn:first-child {
-  margin: 0px; 
 }
 
 .btn-group .tempSubmit {
