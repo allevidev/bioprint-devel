@@ -43,7 +43,16 @@ html, body, input, button, select, textarea {
   font-family: 'DINPro';
 }
 
+.octoprint-container .tab-content h1 {
+  margin-bottom: 5px;
+  border-bottom: 5px solid #e63131;
+}
 
+hr {
+  margin: 10px 0;
+  border-top: 1px solid #e63131;
+  border-bottom: none;
+}
 
 a {
   color: #e63131;
@@ -216,11 +225,24 @@ h3 {
 }
 
 .terminal {
-  margin: 10px 0;
+  margin: 0 0;
+}
+
+select {
+  margin-bottom: 0;
 }
 
 .navbar-inner {
   padding: 20px 0;
+}
+
+.progress .bar {
+  background-color: #008081;
+}
+
+#control .jog-panel {
+  margin: 0;
+  padding: 0 5px;
 }
 
 #navbar .navbar-inner{

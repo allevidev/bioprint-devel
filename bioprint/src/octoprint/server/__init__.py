@@ -22,7 +22,6 @@ import os
 import logging
 import logging.config
 import atexit
-import requests
 import signal
 
 SUCCESS = {}

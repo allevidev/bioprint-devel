@@ -539,6 +539,10 @@ def post_process(payload, positions, wellPlate, cl_params):
                                     if e_value(line) is not None:
                                         d_e = e_value(line) - last_e
                                         if d_e > 0:
+                                            if active_e == 0:
+                                                o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
+                                            elif active_e == 1:
+                                                o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
                                             if not extruding:
                                                 o.write(start_extrude(active_e, e0_pos, e1_pos) + '\n')
                                                 extruding = not extruding

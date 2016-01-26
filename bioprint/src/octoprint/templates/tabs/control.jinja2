@@ -82,15 +82,21 @@
                 <button class="btn btn-block" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendCustomCommand({type:'command',command:'M18'}) }">{{ _('Motors off') }}</button>
                 <button class="btn btn-block" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendEmergencyStop() }">{{ _('Emergency Stop') }}</button>
                 <hr>
-                <select class="form-control" style="width: 250px" id="wellPlate" data-bind="enable: isOperational() && loginState.isUser() && isHomed()">
+                <div class="row-fluid">
+                    <div class="span4">
+                    <select class="form-control span12"  id="wellPlate" data-bind="enable: isOperational() && loginState.isUser() && isHomed()">
                         <option selected="selected">Select Plate Type</option>
                         <option value="1">Petri Dish</option>
                         <option value="6">6-Well Plate</option>
                         <option value="12">12-Well Plate</option>
                         <option value="24">24-Well Plate</option>
                         <option value="96">96-Well Plate</option>
-                </select>
-                <button class="btn btn-block" data-bind="enable: isOperational() && loginState.isUser() && isHomed(), click: function() { $root.selectWellPlate() }">Select Well Plate</button>
+                    </select>
+                    </div>
+                    <div class="span8">
+                    <button class="btn btn-block span12" data-bind="enable: isOperational() && loginState.isUser() && isHomed(), click: function() { $root.selectWellPlate() }">Select Well Plate</button>
+                    </div>
+                </div>
             </div>
             <hr>
             <div class="row-fluid">
@@ -134,7 +140,7 @@
             <!-- /ko -->
 
             <script type="text/html" id="extruder-template">
-                <div class="span5 jog-panel">
+                <div class="span6 jog-panel">
                     <h1 data-bind="text: name"></h1>
                     <div>
                         <button class="btn btn-block control-box" data-bind="enable: $root.isOperational(), click: function() { $root.sendPressureIncrease(key()) }">{{ _('+') }}</button>
@@ -174,11 +180,11 @@
                     </div>
                 </div>
             </script>
-        <div class="row-fluid">
-            <button class="span10 btn btn-block" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser() && isHomed(), click: function() { $root.toolMid() }">Extruder Midpoint</button>
         </div>
         <div class="row-fluid">
-            <hr>
+                <button class="span12 btn btn-block" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser() && isHomed(), click: function() { $root.toolMid() }">Extruder Midpoint</button>
+        </div>
+        <div class="row-fluid">
             <!-- Light Intensity -->
             <h1>Print Crosslinking Parameters</h1>
             <div class="row-fluid">
