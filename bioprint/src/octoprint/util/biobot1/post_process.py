@@ -23,7 +23,7 @@ import json
 from flask.ext.login import current_user
 
 # biobots_url = 'http://data.biobots.io/'
-biobots_url = 'http://data.biobots.io/'
+biobots_url = 'http://data.biobots.io'
 
 def connected_to_biobots(url='http://data.biobots.io/', timeout=5):
     try:
@@ -40,7 +40,7 @@ x_rate = 2000.00
 
 x_travel = 48.33
 
-wellPlatePositions = {
+wellPlatePositions_old = {
     1: {
         "A": {
             0: {
@@ -420,19 +420,11 @@ def switch_extruder(extruder, e0_pos, e1_pos, e0_Xctr, e0_Yctr, e1_Xctr, e1_Yctr
         y = e1_Yctr
 
     commands = [
-        'G91',
-        'G1 Z25 F1000',
-        'G90',
         'T0 ; ensure we keep T0 active to prevent changing pressure',
         'M400 ; wait for commands to complete',
         'G1 E' + str(mid) + ' F' + str(e_rate) +
         ' ; move extruder to midpoint',
-        'M400 ; wait for commands to complete',
-        'G1 X' + str(x) + ' Y' + str(y) + ' F' + str(x_rate),
-        'M400',
-        'G91',
-        'G1 Z-25 F1000',
-        'G90' 
+        'M400 ; wait for commands to complete'
         ]
 
     return '\n'.join(commands)
@@ -449,16 +441,55 @@ def crosslink(x, y, cl_duration, cl_intensity):
 
     return '\n'.join(commands)
 
+def calculate_wellplate_positions(positions):
+    petri = {
+        "A": {
+            0: {
+                0: {
+                    "X": float(positions["tool0"]["X"]),
+                    "Y": float(positions["tool0"]["Y"])
+                },
+                1: {
+                    "X": float(positions["tool1"]["X"]),
+                    "Y": float(positions["tool1"]["Y"])
+                }
+            }
+        }
+    }
+    row_24 = ["A", "B", "C"]
+    column_24 = 6
+    out_24 = {}
+    for i in xrange(len(row_24)):
+        row_out = {}
+        for j in xrange(column_24):
+            row_out[j] = {
+                0: {
+                    "X": float(positions["tool0"]["X"]) + j * 19.3,
+                    "Y": float(positions["tool0"]["Y"]) + i * 19.3
+                },
+                1: {
+                    "X": float(positions["tool1"]["X"]) + j * 19.3,
+                    "Y": float(positions["tool1"]["Y"]) + i * 19.3
+                }
+            }
+        out_24[row_24[i]] = row_out
+
+    return {
+        1: petri,
+        24: out_24
+    }
+
 
 def post_process(payload, positions, wellPlate, cl_params):
     '''
     Read a gcode file and add M106 after E1.000 lines and
     M107, M126, M127 after each E peak.
     '''
+    wellPlatePositions = calculate_wellplate_positions(positions)
     rows = sorted(wellPlatePositions[wellPlate].keys())
 
-    e0_pos = positions["tool0"]
-    e1_pos = positions["tool1"]
+    e0_pos = positions["tool0"]["E"]
+    e1_pos = positions["tool1"]["E"]
     filename = str(payload["file"])
 
     fName = '.'.join(str.split(filename, '.')[0:-1])
@@ -501,8 +532,7 @@ def post_process(payload, positions, wellPlate, cl_params):
                             if g_value(line) is not None:
                                 if g_value(line) == 28.0:
                                     o.write('G1 Z45\n')
-                                    o.write('G1 E' + str(e1_pos) + '\n')
-                                    o.write('G28 X Y\n')
+                                    o.write('G1 E' + str(mid) + '\n')
                                     o.write('G21\n')
                                     o.write('G1 X' + str(e0_Xctr) + ' Y' + str(e0_Yctr) + ' F1000\n')
                                 elif g_value(line) == 1 or e_value(line) is not None:
@@ -559,8 +589,9 @@ def post_process(payload, positions, wellPlate, cl_params):
         }
 
         permission = requests.post(biobots_url+'/permission', json=user_info)
+        
         credentials = json.loads(permission.text)["Credentials"]
-        print credentials
+        
         s3 = boto3.resource('s3', aws_access_key_id=credentials["AccessKeyId"], aws_secret_access_key=credentials["SecretAccessKey"], aws_session_token=credentials["SessionToken"])
         # s3 = boto3.client('s3')
         folder = user_info['email'] + '/' + str(user_info['serial']) + '/' + timestamp + '/'
@@ -582,7 +613,7 @@ def post_process(payload, positions, wellPlate, cl_params):
             'user_info': user_info,
             'print_info': print_info
         };
-        print requests.post(biobots_url+'/analytics', json=data).text;
+        requests.post(biobots_url+'/analytics', json=data).text;
     
     return {
         "file": outputFile,
@@ -597,8 +628,16 @@ test_payload = {
 }
 
 test_positions = {
-    "tool0": 24,
-    "tool1": 24
+    "tool0": {
+        "X": 11.20,
+        "Y": 63,
+        "E": 24
+    },
+    "tool1": {
+        "X": 59.53,
+        "Y": 63,
+        "E": 24
+    },
 }
 
 cl_params = {
@@ -610,4 +649,6 @@ cl_params = {
     "cl_end_intensity": 100
 }
 
-post_process(test_payload, test_positions, 1, cl_params)
+# post_process(test_payload, test_positions, 1, cl_params)
+# print calculate_wellplate_positions(test_positions, 24)
+

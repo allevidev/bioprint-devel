@@ -4,7 +4,6 @@ from __future__ import absolute_import
 __author__ = "Gina Häußge <osd@foosel.net>"
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
 __copyright__ = "Copyright (C) 2014 The OctoPrint Project - Released under terms of the AGPLv3 License"
-biobots_url = 'http://127.0.0.1:8080'
 
 
 import uuid
@@ -89,10 +88,6 @@ def on_identity_loaded(sender, identity):
 		identity.provides.add(RoleNeed("user"))
 	if user.is_admin():
 		identity.provides.add(RoleNeed("admin"))
-
-	permission = requests.post(biobots_url+'/permission', json=user.asDict());
-	session['permission'] = permission.text
-	print session['permission']
 
 def load_user(id):
 	if id == "_api":

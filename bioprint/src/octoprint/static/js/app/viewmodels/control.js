@@ -37,14 +37,18 @@ $(function() {
         self.extruder1Pressure = ko.observable(undefined);
         self.extruder1Temp = ko.observable(undefined);
         self.extruder1TempTarget = ko.observable(undefined);
-        self.extruder1Pos = -1;
+        self.extruder1XPos = -1;
+        self.extruder1YPos = -1;
+        self.extruder1EPos = -1;
         self.extruder1Selected = ko.observable(false);
         self.extruder1Extruding = ko.observable(false);
 
         self.extruder2Pressure = ko.observable(undefined);
         self.extruder2Temp = ko.observable(undefined);
         self.extruder2TempTarget = ko.observable(undefined);
-        self.extruder2Pos = -1;
+        self.extruder2XPos = -1;
+        self.extruder2YPos = -1;
+        self.extruder2EPos = -1;
         self.extruder2Selected = ko.observable(false);
         self.extruder2Extruding = ko.observable(false);
 
@@ -882,11 +886,14 @@ $(function() {
             if (self.homed['x,y'] == true && self.homed['z'] == true && self.homed['e'] == true) {
                 self.isHomed(true);
             }
-            if (axis == 'E' || axis == 'Z') {
-                self.extruder1Pos = -1;
-                self.extruder2Pos = -1;
-            }
-            console.log(self.homed);
+            
+            self.extruder1XPos = -1;
+            self.extruder1YPos = -1;
+            self.extruder1EPos = -1;
+            
+            self.extruder2XPos = -1;
+            self.extruder2YPos = -1;
+            self.extruder2EPos = -1;
         };
 
         self.sendFeedRateCommand = function () {
@@ -1025,21 +1032,32 @@ $(function() {
 
         self.saveToolChangeDist = function (tool) {
             if (tool == 'tool0') {
-                self.extruder1Pos = self.position["E"]
+                self.extruder1XPos = self.position["X"]
+                self.extruder1YPos = self.position["Y"]
+                self.extruder1EPos = self.position["E"]
             } else if (tool == 'tool1') {
-                self.extruder2Pos = self.position["E"]
+                self.extruder2XPos = self.position["X"]
+                self.extruder2YPos = self.position["Y"]
+                self.extruder2EPos = self.position["E"]
             }
             if (tool == 'tool0') {
                 self.switchTool('tool1');
             } else if (tool == 'tool1') {
                 self.switchTool('tool0');
             }
-            console.log("HERE")
             self.sendPrintHeadCommand({
                 "command": "position",
                 "positions": {
-                    "tool0" : self.extruder1Pos,
-                    "tool1" : self.extruder2Pos
+                    "tool0" : {
+                        "X": self.extruder1XPos,
+                        "Y": self.extruder1YPos,
+                        "E": self.extruder1EPos
+                    },
+                    "tool1" : {
+                        "X": self.extruder2XPos,
+                        "Y": self.extruder2YPos,
+                        "E": self.extruder2EPos
+                    }
                 }
             });
         }
@@ -1048,8 +1066,8 @@ $(function() {
             var target;
             var dir;
             if (tool == 'tool0') {
-                if (self.extruder1Pos != -1) {
-                    target = self.extruder1Pos;    
+                if (self.extruder1EPos != -1) {
+                    target = self.extruder1EPos;    
                 } else {
                     target = self.midpoint;
                 }
@@ -1057,8 +1075,8 @@ $(function() {
                 self.extruder2Selected(false);
                 self.extruder1Selected(true);
             } else if (tool == 'tool1') {
-                if (self.extruder2Pos != -1) {
-                    target = self.extruder2Pos;    
+                if (self.extruder2EPos != -1) {
+                    target = self.extruder2EPos;    
                 } else {
                     target = self.midpoint;
                 }
