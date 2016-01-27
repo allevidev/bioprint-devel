@@ -58,6 +58,10 @@ a {
   color: #e63131;
 }
 
+.octoprint-container .tab-content .panel-blue h1 {
+  border-bottom: 5px solid #008081;
+}
+
 .panel-blue .btn {
   background-color: #008081;
   text-shadow: none;
@@ -177,7 +181,7 @@ h3 {
     color: #008387;
 }
 
-.btn-group {
+.distance .btn-group {
   width:100%;
 }
 
