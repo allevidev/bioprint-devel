@@ -65,7 +65,8 @@ a {
 
 
 .panel-blue .btn.active {
-  color: #fff;
+  background-color: #e6e6e6;
+  color: #008081;
 
 }
 
@@ -252,6 +253,11 @@ select {
 
 .progress .bar {
   background-color: #008081;
+  background-image: -moz-linear-gradient(top,#008081,#008081);
+  background-image: -webkit-gradient(linear,0 0,0 100%,from(#008081),to(#008081));
+  background-image: -webkit-linear-gradient(top,#008081,#008081);
+  background-image: -o-linear-gradient(top,#008081,#008081);
+  background-image: linear-gradient(to bottom,#008081,#008081);
 }
 
 #control .jog-panel {
