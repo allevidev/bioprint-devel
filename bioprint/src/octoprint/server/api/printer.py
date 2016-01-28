@@ -71,6 +71,7 @@ def printerToolCommand():
 		"offset": ["offsets"],
 		"extrude": ["amount"],
 		"flowrate": ["factor"],
+		"light": ["intensity"],
 		"crosslink": ["cl_params"]
 	}
 	command, data, response = get_json_command_from_request(request, valid_commands)
@@ -144,6 +145,10 @@ def printerToolCommand():
 			printer.flow_rate(factor)
 		except ValueError as e:
 			return make_response("Invalid value for flow rate: %s" % str(e), 400)
+
+	elif command == "light":
+		intensity = int(data["intensity"])
+		printer.light_intensity(intensity)
 
 	elif command == "crosslink":
 		cl_params = data["cl_params"]

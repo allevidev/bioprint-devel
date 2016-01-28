@@ -74,7 +74,7 @@ def settings(init=False, basedir=None, configfile=None):
 default_settings = {
     "serial": {
         "port": None,
-        "baudrate": 250000,
+        "baudrate": 115200,
         "autoconnect": False,
         "log": False,
         "timeout": {

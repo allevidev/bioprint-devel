@@ -356,17 +356,6 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 
 		return factor
 
-	def _convert_intensity_value(self, intensity, min=0, max=100, d_min=0, d_max=10):
-		if not isinstance(intensity, (int, float, long)):
-			raise ValueError("intensity is not a number")
-
-		if isinstance(intensity, float):
-			intensity = int(intensity * 100.0)
-
-		factor = max / d_max
-
-		return intensity / factor
-
 	def feed_rate(self, factor):
 		factor = self._convert_rate_value(factor, min=50, max=200)
 		self.commands("M220 S%d" % factor)
@@ -379,7 +368,6 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		self.cl_params = cl_params
 
 	def light_intensity(self, intensity):
-		intensity = self._convert_intensity_value(intensity)
 		self.commands("M42 P4 S%d" % intensity)
 
 	def select_file(self, path, sd, printAfterSelect=False):

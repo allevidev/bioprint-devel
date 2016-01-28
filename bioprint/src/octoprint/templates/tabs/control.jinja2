@@ -234,6 +234,23 @@
                     <span class="add-on clAddOn"> ms</span>
                 </div>
             </div>
+            <h1>Manual Crosslinking Control</h1>
+            <div class="row-fluid">
+                <div class="span4">
+                </div>
+                <div class="span4">
+                    <h3>Intensity:</h3>
+                </div>
+                <div class="span4">
+                </div>
+            </div>
+            <div class="row-fluid">
+                <button type="button" class="btn btn-block control-box span4" data-toggle="button" data-bind="enable: $root.isOperational() && $root.loginState.isUser(), click: function() { $root.sendLightIntensity() }, text: $root.lightIntensityText()" aria-pressed="false" autocomplete="off"></button>
+                <div class="input-append span4">
+                    <input type="text" class="input text-right clInput" data-bind="attr: {placeholder: lightIntensity() }, value: lightIntensity, enable: $root.isOperational() && $root.loginState.isUser()">
+                    <span class="add-on clAddOn">%</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>

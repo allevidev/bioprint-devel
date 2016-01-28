@@ -147,7 +147,7 @@ def serialList():
     return baselist
 
 def baudrateList():
-    ret = [250000]
+    ret = [115200]
     prev = settings().getInt(["serial", "baudrate"])
     if prev in ret:
         ret.remove(prev)

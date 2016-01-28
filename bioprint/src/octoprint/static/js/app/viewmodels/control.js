@@ -1140,6 +1140,8 @@ $(function() {
         }
 
         self.sendLightIntensity = function () {
+
+            console.log(self.lightIntensity());
             if (self.lightOn()) {
                 self.sendToolCommand({
                     "command": "light",
@@ -1154,6 +1156,14 @@ $(function() {
                 self.lightOn(true)
             }
             
+        }
+
+        self.lightIntensityText = function() {
+            if (self.lightOn()) {
+                return "Disable";
+            } else {
+                return "Enable";
+            }
         }
 
         self.sendFlowRateCommand = function () {
