@@ -585,7 +585,7 @@ def post_process(payload, positions, wellPlate, cl_params):
                 f.close()
     o.close()
     if connected_to_biobots():
-        print_info = {
+        user_info = {
             'email': current_user.get_email(),
             'serial': current_user.get_serial()
         }
