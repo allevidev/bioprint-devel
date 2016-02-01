@@ -514,6 +514,8 @@ def post_process(payload, positions, wellPlate, cl_params):
             columns = sorted(wellPlatePositions[wellPlate][r].keys())
             for c in columns:
                 layer = 0
+                x_pos = 0
+                y_pos = 0
                 e0_Xctr = wellPlatePositions[wellPlate][r][c][0]["X"]
                 e0_Yctr = wellPlatePositions[wellPlate][r][c][0]["Y"]
 
@@ -583,13 +585,9 @@ def post_process(payload, positions, wellPlate, cl_params):
                 f.close()
     o.close()
     if connected_to_biobots():
-        # print_info = {
-        #     'email': current_user.get_email(),
-        #     'serial': current_user.get_serial()
-        # }
-        user_info = {
-            'email': 'karan@biobots.io',
-            'serial': 1
+        print_info = {
+            'email': current_user.get_email(),
+            'serial': current_user.get_serial()
         }
 
         permission = requests.post(biobots_url+'/permission', json=user_info)
@@ -597,9 +595,7 @@ def post_process(payload, positions, wellPlate, cl_params):
         credentials = json.loads(permission.text)["Credentials"]
         
         s3 = boto3.resource('s3', aws_access_key_id=credentials["AccessKeyId"], aws_secret_access_key=credentials["SecretAccessKey"], aws_session_token=credentials["SessionToken"])
-        # s3 = boto3.client('s3')
         folder = user_info['email'] + '/' + str(user_info['serial']) + '/' + timestamp + '/'
-        # s3.upload_file(filename, 'biobots-analytics', folder + inputFileName, )
         inputObject = s3.Object('biobots-analytics', folder + inputFileName);
         inputObject.put(ACL='public-read', Body=open(filename, 'rb'))
         outputObject = s3.Object('biobots-analytics', folder + outputFileName);
