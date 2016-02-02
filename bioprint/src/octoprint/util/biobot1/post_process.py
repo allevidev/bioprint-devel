@@ -514,13 +514,13 @@ def post_process(payload, positions, wellPlate, cl_params):
             columns = sorted(wellPlatePositions[wellPlate][r].keys())
             for c in columns:
                 layer = 0
-                x_pos = 0
-                y_pos = 0
                 e0_Xctr = wellPlatePositions[wellPlate][r][c][0]["X"]
                 e0_Yctr = wellPlatePositions[wellPlate][r][c][0]["Y"]
 
                 e1_Xctr = wellPlatePositions[wellPlate][r][c][1]["X"]
                 e1_Yctr = wellPlatePositions[wellPlate][r][c][1]["Y"]
+                x_pos, x_pos_old = [e0_Xctr, e1_Xctr], [e0_Xctr, e1_Xctr]
+                y_pos, y_pos_old = [e0_Yctr, e1_Yctr], [e0_Yctr, e1_Yctr]
                 with open(filename, 'r') as f:
                     for i, line in enumerate(f):
                         if z_value(line) is not None:
@@ -531,6 +531,20 @@ def post_process(payload, positions, wellPlate, cl_params):
                         if m_value(line) == 190.0 or m_value(line) == 104.0 or m_value(line) == 109.0:
                             next
                         else:
+                            if x_value(line) is not None:
+                                x_pos_old[active_e] = x_pos[active_e]
+                                if active_e == 0:
+                                    x_pos[active_e] = x_value(line) + e0_Xctr    
+                                elif active_e == 1:
+                                    x_pos[active_e] = x_value(line) + e1_Xctr
+                            if y_value(line) is not None:
+                                y_pos_old[active_e] = y_pos[active_e]
+                                if active_e == 0:
+                                    y_pos[active_e] = y_value(line) + e0_Yctr    
+                                elif active_e == 1:
+                                    y_pos[active_e] = y_value(line) + e1_Yctr
+                            print x_pos, x_pos_old
+                            print y_pos, y_pos_old
                             if g_value(line) is not None:
                                 if g_value(line) == 28.0:
                                     o.write('G1 Z45\n')
@@ -541,10 +555,7 @@ def post_process(payload, positions, wellPlate, cl_params):
                                     if e_value(line) is not None:
                                         d_e = e_value(line) - last_e
                                         if d_e > 0:
-                                            if active_e == 0:
-                                                o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
-                                            elif active_e == 1:
-                                                o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
+                                            o.write('G1 X' + str(x_pos_old[active_e]) + ' Y' + str(y_pos_old[active_e]) + '\n')
                                             if not extruding:
                                                 o.write(start_extrude(active_e, e0_pos, e1_pos) + '\n')
                                                 extruding = not extruding

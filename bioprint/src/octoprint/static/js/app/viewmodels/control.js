@@ -862,8 +862,10 @@ $(function() {
 
 
         self.sendJogCommand = function (axis, multiplier, distance) {
+
             if (typeof distance === "undefined")
                 distance = $('#jog_distance button.active').data('distance');
+                console.log('\n\n\n\n\n\n', distance);
             if (self.settings.printerProfiles.currentProfileData() && self.settings.printerProfiles.currentProfileData()["axes"] && self.settings.printerProfiles.currentProfileData()["axes"][axis] && self.settings.printerProfiles.currentProfileData()["axes"][axis]["inverted"]()) {
                 multiplier *= -1;
             }
@@ -1140,8 +1142,6 @@ $(function() {
         }
 
         self.sendLightIntensity = function () {
-
-            console.log(self.lightIntensity());
             if (self.lightOn()) {
                 self.sendToolCommand({
                     "command": "light",
@@ -1149,9 +1149,10 @@ $(function() {
                 });
                 self.lightOn(false)
             } else {
+
                 self.sendToolCommand({
                     "command": "light",
-                    "intensity": self.lightIntensity()
+                    "intensity": Math.round((parseFloat(self.lightIntensity()) / 100) * 255),
                 });
                 self.lightOn(true)
             }
