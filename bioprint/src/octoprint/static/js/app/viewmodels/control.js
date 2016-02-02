@@ -460,10 +460,10 @@ $(function() {
             
             var cl_params = {
                 "cl_layers": parseInt(self.cl_layers()),
-                "cl_intensity": Math.round((parseFloat(self.cl_intensity()) / 100) * 255),
+                "cl_intensity": Math.round((parseFloat(self.cl_intensity()) / 100) * 12.75),
                 "cl_duration": parseInt(self.cl_duration()),
                 "cl_end": self.cl_end(),
-                "cl_end_intensity": Math.round((parseFloat(self.cl_end_intensity()) / 100) * 255),
+                "cl_end_intensity": Math.round((parseFloat(self.cl_end_intensity()) / 100) * 12.75),
                 "cl_end_duration": parseInt(self.cl_end_duration())
             }
 
@@ -1152,7 +1152,7 @@ $(function() {
 
                 self.sendToolCommand({
                     "command": "light",
-                    "intensity": Math.round((parseFloat(self.lightIntensity()) / 100) * 255),
+                    "intensity": Math.round((parseFloat(self.lightIntensity()) / 100) * 12.75),
                 });
                 self.lightOn(true)
             }
