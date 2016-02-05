@@ -460,14 +460,13 @@ $(function() {
             
             var cl_params = {
                 "cl_layers": parseInt(self.cl_layers()),
-                "cl_intensity": Math.round((parseFloat(self.cl_intensity()) / 100) * 12.75),
+                "cl_intensity": (parseFloat(self.cl_intensity()) / 100) * 12.75,
                 "cl_duration": parseInt(self.cl_duration()),
                 "cl_end": self.cl_end(),
-                "cl_end_intensity": Math.round((parseFloat(self.cl_end_intensity()) / 100) * 12.75),
+                "cl_end_intensity": (parseFloat(self.cl_end_intensity()) / 100) * 12.75,
                 "cl_end_duration": parseInt(self.cl_end_duration())
             }
 
-            console.log(cl_params);
 
             self.sendToolCommand({
                 "command": "crosslink",
@@ -1152,7 +1151,7 @@ $(function() {
 
                 self.sendToolCommand({
                     "command": "light",
-                    "intensity": Math.round((parseFloat(self.lightIntensity()) / 100) * 12.75),
+                    "intensity": (parseFloat(self.lightIntensity()) / 100) * 12.75,
                 });
                 self.lightOn(true)
             }

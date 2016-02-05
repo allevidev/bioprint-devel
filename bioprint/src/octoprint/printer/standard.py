@@ -368,7 +368,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		self.cl_params = cl_params
 
 	def light_intensity(self, intensity):
-		self.commands("M42 P4 S%d" % intensity)
+		self.commands("M42 P4 S" + str(intensity))
 
 	def select_file(self, path, sd, printAfterSelect=False):
 		if self._comm is None or (self._comm.isBusy() or self._comm.isStreaming()):
