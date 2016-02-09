@@ -543,8 +543,6 @@ def post_process(payload, positions, wellPlate, cl_params):
                                     y_pos[active_e] = y_value(line) + e0_Yctr    
                                 elif active_e == 1:
                                     y_pos[active_e] = y_value(line) + e1_Yctr
-                            print x_pos, x_pos_old
-                            print y_pos, y_pos_old
                             if g_value(line) is not None:
                                 if g_value(line) == 28.0:
                                     o.write('G1 Z45\n')
@@ -576,10 +574,21 @@ def post_process(payload, positions, wellPlate, cl_params):
                                             last_e = e_value(line)
                                             next
                                     elif g_value(line) == 1:
-                                        if active_e == 0:
-                                            o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
-                                        elif active_e == 1:
-                                            o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
+                                        if e_value(line) is None and last_e > 0:
+                                            if active_e == 0:
+                                                o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
+                                            elif active_e == 1:
+                                                o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
+                                            if extruding:
+                                                o.write(stop_extrude(active_e, e0_pos, e1_pos) + '\n')   
+                                                extruding = not extruding
+                                            last_e = 0
+                                            next
+                                        else:
+                                            if active_e == 0:
+                                                o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
+                                            elif active_e == 1:
+                                                o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
                                 else:
                                     o.write(line)
                             elif line.startswith('T') and t_value(line) is not None:
@@ -596,9 +605,13 @@ def post_process(payload, positions, wellPlate, cl_params):
                 f.close()
     o.close()
     if connected_to_biobots():
+        # user_info = {
+        #     'email': current_user.get_email(),
+        #     'serial': current_user.get_serial()
+        # }
         user_info = {
-            'email': current_user.get_email(),
-            'serial': current_user.get_serial()
+            'email': 'karan@biobots.io',
+            'serial': 1
         }
 
         permission = requests.post(biobots_url+'/permission', json=user_info)
@@ -634,8 +647,8 @@ def post_process(payload, positions, wellPlate, cl_params):
 
 test_payload = {
     'origin': 'local', 
-    'file': '/Users/karanhiremath/Downloads/PediatricBronchi.gcode',
-    'filename': u'/Users/karanhiremath/Downloads/PediatricBronchi.gcode'
+    'file': '/Users/karanhiremath/Downloads/walker_chevron.gcode',
+    'filename': u'/Users/karanhiremath/Downloads/walker_chevron.gcode'
 }
 
 test_positions = {
@@ -652,14 +665,14 @@ test_positions = {
 }
 
 cl_params = {
-    "cl_layers": 3,
-    "cl_duration": 200,
+    "cl_layers": 0,
+    "cl_duration": 20,
     "cl_intensity": 10,
-    "cl_end": True,
+    "cl_end": False,
     "cl_end_duration": 2000,
     "cl_end_intensity": 100
 }
 
-# post_process(test_payload, test_positions, 1, cl_params)
+post_process(test_payload, test_positions, 1, cl_params)
 # print calculate_wellplate_positions(test_positions, 24)
 
