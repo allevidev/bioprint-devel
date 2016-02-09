@@ -673,6 +673,6 @@ cl_params = {
     "cl_end_intensity": 100
 }
 
-post_process(test_payload, test_positions, 1, cl_params)
+# post_process(test_payload, test_positions, 1, cl_params)
 # print calculate_wellplate_positions(test_positions, 24)
 
