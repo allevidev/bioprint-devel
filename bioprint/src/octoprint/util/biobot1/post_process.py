@@ -605,13 +605,9 @@ def post_process(payload, positions, wellPlate, cl_params):
                 f.close()
     o.close()
     if connected_to_biobots():
-        # user_info = {
-        #     'email': current_user.get_email(),
-        #     'serial': current_user.get_serial()
-        # }
         user_info = {
-            'email': 'karan@biobots.io',
-            'serial': 1
+            'email': current_user.get_email(),
+            'serial': current_user.get_serial()
         }
 
         permission = requests.post(biobots_url+'/permission', json=user_info)
