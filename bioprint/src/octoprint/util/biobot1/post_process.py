@@ -456,6 +456,40 @@ def calculate_wellplate_positions(positions):
             }
         }
     }
+    row_6 = ["A", "B"]
+    column_6 = 3
+    out_6 = {}
+    for i in xrange(len(row_6)):
+        row_out = {}
+        for j in xrange(column_6):
+            row_out[j] = {
+                0: {
+                    "X": float(positions["tool0"]["X"]) + j * 39.12,
+                    "Y": float(positions["tool0"]["Y"]) + i * 39.12
+                },
+                1: {
+                    "X": float(positions["tool1"]["X"]) + j * 39.12,
+                    "Y": float(positions["tool1"]["Y"]) + i * 39.12
+                }
+            }
+        out_6[row_6[i]] = row_out
+    row_12 = ["A", "B"]
+    column_12 = 4
+    out_12 = {}
+    for i in xrange(len(row_12)):
+        row_out = {}
+        for j in xrange(column_12):
+            row_out[j] = {
+                0: {
+                    "X": float(positions["tool0"]["X"]) + j * 26.01,
+                    "Y": float(positions["tool0"]["Y"]) + i * 26.01
+                },
+                1: {
+                    "X": float(positions["tool1"]["X"]) + j * 26.01,
+                    "Y": float(positions["tool1"]["Y"]) + i * 26.01
+                }
+            }
+        out_6[row_6[i]] = row_out
     row_24 = ["A", "B", "C"]
     column_24 = 6
     out_24 = {}
@@ -473,12 +507,43 @@ def calculate_wellplate_positions(positions):
                 }
             }
         out_24[row_24[i]] = row_out
+    row_96 = ["A", "B", "C", "D", "E", "F"]
+    column_96 = 12
+    out_96 = {}
+    for i in xrange(len(row_96)):
+        row_out = {}
+        for j in xrange(column_96):
+            row_out[j] = {
+                0: {
+                    "X": float(positions["tool0"]["X"]) + j * 9,
+                    "Y": float(positions["tool0"]["Y"]) + i * 9
+                },
+                1: {
+                    "X": float(positions["tool1"]["X"]) + j * 9,
+                    "Y": float(positions["tool1"]["Y"]) + i * 9
+                }
+            }
+        out_96[row_96[i]] = row_out
 
     return {
         1: petri,
-        24: out_24
+        6: out_6,
+        12: out_12,
+        24: out_24,
+        96: out_96
     }
 
+def end_print():
+    x_end_pos = 0
+    y_end_pos = 0
+    z_end_pos = 50
+    commands = [
+        'M42 P16 S0',
+        'M42 P17 S0',
+        'G1 Z' + str(z_end_pos),
+        'G1 X' + str(x_end_pos) + ' Y' + str(y_end_pos)
+    ]
+    return '\n'.join(commands)
 
 def post_process(payload, positions, wellPlate, cl_params):
     '''
@@ -522,6 +587,10 @@ def post_process(payload, positions, wellPlate, cl_params):
                 x_pos, x_pos_old = [e0_Xctr, e1_Xctr], [e0_Xctr, e1_Xctr]
                 y_pos, y_pos_old = [e0_Yctr, e1_Yctr], [e0_Yctr, e1_Yctr]
                 with open(filename, 'r') as f:
+                    o.write('G1 Z45\n')
+                    o.write('G1 E' + str(mid) + '\n')
+                    o.write('G21\n')
+                    o.write('G1 X' + str(e0_Xctr) + ' Y' + str(e0_Yctr) + ' F1000\n')
                     for i, line in enumerate(f):
                         if z_value(line) is not None:
                             layer += 1
@@ -545,10 +614,7 @@ def post_process(payload, positions, wellPlate, cl_params):
                                     y_pos[active_e] = y_value(line) + e1_Yctr
                             if g_value(line) is not None:
                                 if g_value(line) == 28.0:
-                                    o.write('G1 Z45\n')
-                                    o.write('G1 E' + str(mid) + '\n')
-                                    o.write('G21\n')
-                                    o.write('G1 X' + str(e0_Xctr) + ' Y' + str(e0_Yctr) + ' F1000\n')
+                                    next
                                 elif g_value(line) == 1 or e_value(line) is not None:
                                     if e_value(line) is not None:
                                         d_e = e_value(line) - last_e
@@ -603,6 +669,7 @@ def post_process(payload, positions, wellPlate, cl_params):
                 if cl_params["cl_end"]:
                     o.write(crosslink(e1_Xctr, e1_Yctr, cl_params["cl_end_duration"], cl_params["cl_end_intensity"])+ '\n')
                 f.close()
+        o.write(end_print() + '\n')
     o.close()
     if connected_to_biobots():
         user_info = {
@@ -643,8 +710,8 @@ def post_process(payload, positions, wellPlate, cl_params):
 
 test_payload = {
     'origin': 'local', 
-    'file': '/Users/karanhiremath/Downloads/walker_chevron.gcode',
-    'filename': u'/Users/karanhiremath/Downloads/walker_chevron.gcode'
+    'file': '/Users/karanhiremath/Downloads/dual_ring_0.2mm.gcode',
+    'filename': u'/Users/karanhiremath/Downloads/dual_ring_0.2mm.gcode'
 }
 
 test_positions = {
@@ -661,10 +728,10 @@ test_positions = {
 }
 
 cl_params = {
-    "cl_layers": 0,
+    "cl_layers": 2,
     "cl_duration": 20,
     "cl_intensity": 10,
-    "cl_end": False,
+    "cl_end": True,
     "cl_end_duration": 2000,
     "cl_end_intensity": 100
 }

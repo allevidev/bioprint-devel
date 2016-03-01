@@ -71,9 +71,21 @@ $(function() {
 
         self.wellPlate = ko.observable(0);
         self.wellPlatePositions = {
+            '6': {
+                'X': 18.00,
+                'Y': 70.2
+            },
+            '12': {
+                'X': 18.40,
+                'Y': 62.90
+            },
             '24': {
                 'X': 33.3,
                 'Y': 193.5
+            },
+            '96': {
+                'X': 8.10,
+                'Y': 58.30
             }
         }
 
@@ -1008,14 +1020,17 @@ $(function() {
                     var y = 90;
                     break;
                 case '6':
-                    break;
+                    var x = 18.00;
+                    var y = 70.2
                 case '12':
-                    break;
+                    var x = 18.40;
+                    var y = 62.90
                 case '24':
                     var x = 11.2;
                     var y = 63;
                 case '96':
-                    break;
+                    var x = 8.10;
+                    var y = 58.30;
             }
             self.sendPrintHeadCommand({
                 "command": "wellplate",
