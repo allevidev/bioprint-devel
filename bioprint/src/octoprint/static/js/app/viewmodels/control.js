@@ -893,7 +893,7 @@ $(function() {
             if (axis == 'e') {
                 console.log(self.position['Z']);
                 if (self.homed['z'] == false) {
-                    self.sendHomeCommand('z')
+                    self.sendHomeCommand('z');
                 } else if (parseFloat(self.position['Z']) < 25.00) {
                      self.sendCustomCommand({
                         type: "commands",
@@ -905,7 +905,7 @@ $(function() {
             }
             if (axis == 'x,y') {
                 if (self.homed['z'] == false) {
-                    self.sendHomeCommand('z')   
+                    self.sendHomeCommand('z');
                 } else if (parseFloat(self.position['Z']) < 25.00) {
                      self.sendCustomCommand({
                         type: "commands",
@@ -915,7 +915,7 @@ $(function() {
                     });
                 }
                 if (self.homed['e'] == false) {
-                    self.sendHomeCommand('e')   
+                    self.sendHomeCommand('e');
                 } else if (parseFloat(self.position['E']) > 24.00) {
                      self.sendCustomCommand({
                         type: "commands",

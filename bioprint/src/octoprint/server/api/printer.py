@@ -302,10 +302,9 @@ def printerPrintheadCommand():
 		# execute the home command
 		
 		if validated_values == ['x', 'y']:
-			printer.home(['y'])
-			printer.home(['x'])
-		else:
-			printer.home(validated_values)
+			validated_values = ['y', 'x']
+		
+		printer.home(validated_values)
 
 	elif command == "feedrate":
 		factor = data["factor"]
