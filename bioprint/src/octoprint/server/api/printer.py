@@ -293,13 +293,19 @@ def printerPrintheadCommand():
 	elif command == "home":
 		validated_values = []
 		axes = data["axes"]
+		
 		for axis in axes:
 			if not axis in valid_axes:
 				return make_response("Invalid axis: %s" % axis, 400)
 			validated_values.append(axis)
 
 		# execute the home command
-		printer.home(validated_values)
+		
+		if validated_values == ['x', 'y']:
+			printer.home(['y'])
+			printer.home(['x'])
+		else:
+			printer.home(validated_values)
 
 	elif command == "feedrate":
 		factor = data["factor"]

@@ -890,7 +890,42 @@ $(function() {
         };
 
         self.sendHomeCommand = function (axis) {
-            console.log('\n\n\n\n\n', self.position, '\n\n\n\n\n');
+            if (axis == 'e') {
+                console.log(self.position['Z']);
+                if (self.homed['z'] == false) {
+                    self.sendHomeCommand('z')
+                } else if (parseFloat(self.position['Z']) < 25.00) {
+                     self.sendCustomCommand({
+                        type: "commands",
+                        commands: [
+                            "G1 Z50 F1000"
+                        ]
+                    });
+                }
+            }
+            if (axis == 'x,y') {
+                if (self.homed['z'] == false) {
+                    self.sendHomeCommand('z')   
+                } else if (parseFloat(self.position['Z']) < 25.00) {
+                     self.sendCustomCommand({
+                        type: "commands",
+                        commands: [
+                            "G1 Z50 F1000"
+                        ]
+                    });
+                }
+                if (self.homed['e'] == false) {
+                    self.sendHomeCommand('e')   
+                } else if (parseFloat(self.position['E']) > 24.00) {
+                     self.sendCustomCommand({
+                        type: "commands",
+                        commands: [
+                            "G1 E0 F1000"
+                        ]
+                    });
+                }
+            }
+
             self.sendPrintHeadCommand({
                 "command": "home",
                 "axes": axis
@@ -899,14 +934,22 @@ $(function() {
             if (self.homed['x,y'] == true && self.homed['z'] == true && self.homed['e'] == true) {
                 self.isHomed(true);
             }
+
+            if (axis == ['e']) {
+                self.extruder1EPos = -1;
+                self.extruder2EPos = -1;
+            }
+
+            if (axis == ['x', 'y']) {
+                self.extruder1XPos = -1;
+                self.extruder1YPos = -1;
+                   
+                self.extruder2XPos = -1;
+                self.extruder2YPos = -1;    
+            }
             
-            self.extruder1XPos = -1;
-            self.extruder1YPos = -1;
-            self.extruder1EPos = -1;
             
-            self.extruder2XPos = -1;
-            self.extruder2YPos = -1;
-            self.extruder2EPos = -1;
+            
         };
 
         self.sendFeedRateCommand = function () {
