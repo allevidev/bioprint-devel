@@ -920,7 +920,7 @@ $(function() {
                      self.sendCustomCommand({
                         type: "commands",
                         commands: [
-                            "G1 E0 F1000"
+                            "G1 E24 F1000"
                         ]
                     });
                 }
