@@ -389,7 +389,7 @@ def start_extrude(extruder, e0_pos, e1_pos):
     return '\n'.join(commands)
 
 
-def stop_extrude(extruder, e0_pos, e1_pos):
+def stop_extrude(extruder):
     if extruder is 0:
         offPin = 16
     elif extruder is 1:
@@ -429,14 +429,26 @@ def switch_extruder(extruder, e0_pos, e1_pos, e0_Xctr, e0_Yctr, e1_Xctr, e1_Yctr
 
     return '\n'.join(commands)
 
-def crosslink(x, y, cl_duration, cl_intensity):
+def crosslink(cl_x, cl_y, target_x, target_y, z, wellplate, cl_duration, cl_intensity):
+    cl_z = {
+        1: 0,
+        6: 0,
+        12: 0,
+        24: 0,
+        96: 0
+    }
     commands = [
+        'G1 Z50 F1000',
         'G1 E' + str(mid) + ' F' + str(e_rate),
-        'G1 X' + str(x) + ' Y' + str(y),
+        'G1 X' + str(cl_x) + ' Y' + str(cl_y),
+        'G1 Z' + str(cl_z[wellplate] + z),
         'M400',
         'M42 P4 S' + str(cl_intensity) + ' ; CROSSLINK HERE',
         'G4 P' + str(cl_duration),
-        'M42 P4 S0'
+        'M42 P4 S0',
+        'G1 Z50 F1000',
+        'G1 X' + str(target_x) + ' Y' + str(target_y),
+        'G1 Z' + str(z)
     ]
 
     return '\n'.join(commands)
@@ -575,10 +587,12 @@ def post_process(payload, positions, wellPlate, cl_params):
         active_e = 0
         last_e = 0
         extruding = False
+        layer_z = 0
         for r in rows:
             columns = sorted(wellPlatePositions[wellPlate][r].keys())
             for c in columns:
                 layer = 0
+
                 e0_Xctr = wellPlatePositions[wellPlate][r][c][0]["X"]
                 e0_Yctr = wellPlatePositions[wellPlate][r][c][0]["Y"]
 
@@ -593,10 +607,21 @@ def post_process(payload, positions, wellPlate, cl_params):
                     o.write('G1 X' + str(e0_Xctr) + ' Y' + str(e0_Yctr) + ' F1000\n')
                     for i, line in enumerate(f):
                         if z_value(line) is not None:
-                            layer += 1
-                            if cl_params["cl_layers"] != 0:
+                            o.write(stop_extrude(active_e) + '\n')
+                            last_e = 0
+                            extruding = False
+                            if cl_params["cl_layers_enabled"]:
                                 if layer % cl_params["cl_layers"] == 0 and layer != 0:
-                                    o.write(crosslink(e1_Xctr, e1_Yctr, cl_params["cl_duration"], cl_params["cl_intensity"]) + '\n')
+                                    if active_e == 0:
+                                        target_x = e0_Xctr
+                                        target_y = e0_Yctr
+                                    elif active_e == 1:
+                                        target_x = e1_Xctr
+                                        target_y = e1_Yctr
+                                    o.write(crosslink(e1_Xctr, e1_Yctr, target_x, target_y, layer_z, wellPlate, cl_params["cl_duration"], cl_params["cl_intensity"]) + '\n')
+                            o.write(line)
+                            layer_z = z_value(line)
+                            layer += 1
                         if m_value(line) == 190.0 or m_value(line) == 104.0 or m_value(line) == 109.0:
                             next
                         else:
@@ -622,7 +647,7 @@ def post_process(payload, positions, wellPlate, cl_params):
                                             o.write('G1 X' + str(x_pos_old[active_e]) + ' Y' + str(y_pos_old[active_e]) + '\n')
                                             if not extruding:
                                                 o.write(start_extrude(active_e, e0_pos, e1_pos) + '\n')
-                                                extruding = not extruding
+                                                extruding = True
                                             if active_e == 0:
                                                 o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
                                             elif active_e == 1:
@@ -635,8 +660,8 @@ def post_process(payload, positions, wellPlate, cl_params):
                                             elif active_e == 1:
                                                 o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
                                             if extruding:
-                                                o.write(stop_extrude(active_e, e0_pos, e1_pos) + '\n')   
-                                                extruding = not extruding
+                                                o.write(stop_extrude(active_e) + '\n')   
+                                                extruding = False
                                             last_e = e_value(line)
                                             next
                                     elif g_value(line) == 1:
@@ -646,7 +671,7 @@ def post_process(payload, positions, wellPlate, cl_params):
                                             elif active_e == 1:
                                                 o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
                                             if extruding:
-                                                o.write(stop_extrude(active_e, e0_pos, e1_pos) + '\n')   
+                                                o.write(stop_extrude(active_e) + '\n')   
                                                 extruding = not extruding
                                             last_e = 0
                                             next
@@ -663,15 +688,15 @@ def post_process(payload, positions, wellPlate, cl_params):
                             elif m_value(line) == 106.0:
                                 o.write(start_extrude(active_e, e0_pos, e1_pos) + '\n')
                             elif m_value(line) == 107.0:
-                                o.write(stop_extrude(active_e, e0_pos, e1_pos) + '\n')
+                                o.write(stop_extrude(active_e) + '\n')
                             else:
                                 o.write(line)
                 if cl_params["cl_end"]:
-                    o.write(crosslink(e1_Xctr, e1_Yctr, cl_params["cl_end_duration"], cl_params["cl_end_intensity"])+ '\n')
+                    o.write(crosslink(e1_Xctr, e1_Yctr, e1_Xctr, e1_Yctr, layer_z, wellPlate, cl_params["cl_end_duration"], cl_params["cl_end_intensity"])+ '\n')
                 f.close()
         o.write(end_print() + '\n')
     o.close()
-    if connected_to_biobots():
+    if connected_to_biobots() and current_user:
         user_info = {
             'email': current_user.get_email(),
             'serial': current_user.get_serial()
@@ -728,14 +753,15 @@ test_positions = {
 }
 
 cl_params = {
-    "cl_layers": 2,
-    "cl_duration": 20,
-    "cl_intensity": 10,
+    "cl_layers_enabled": True,
+    "cl_layers": 1,
+    "cl_duration": 2000,
+    "cl_intensity": 25,
     "cl_end": True,
     "cl_end_duration": 2000,
     "cl_end_intensity": 100
 }
 
-# post_process(test_payload, test_positions, 1, cl_params)
+post_process(test_payload, test_positions, 1, cl_params)
 # print calculate_wellplate_positions(test_positions, 24)
 

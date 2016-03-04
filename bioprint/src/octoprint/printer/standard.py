@@ -67,6 +67,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		self.extruder_positions = None
 		self.wellplate = None
 		self.cl_params = {
+			"cl_layers_enabled": False,
 			"cl_layers": 0,
 			"cl_intensity": 0,
 			"cl_duration": 0,
@@ -365,6 +366,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		self.commands("M221 S%d" % factor)
 
 	def crosslink(self, cl_params):
+		print "HERE"
 		self.cl_params = cl_params
 
 	def light_intensity(self, intensity):
@@ -376,6 +378,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 			return
 
 		self._printAfterSelect = printAfterSelect
+		print '\n\n\n\n\n', self.cl_params, '\n\n\n\n\n\n'
 		self._comm.selectFile("/" + path if sd else path, sd, self.extruder_positions, self.wellplate, self.cl_params)
 		self._setProgressData(0, None, None, None)
 		self._setCurrentZ(None)

@@ -324,3 +324,7 @@ select {
 .terminal {
   text-align: left;
 }
+
+#terminal-command {
+  width:50%;
+}

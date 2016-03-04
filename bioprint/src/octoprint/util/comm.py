@@ -637,6 +637,8 @@ class MachineCom(object):
 
     def selectFile(self, filename, sd, extruder_positions, wellplate, cl_params):
 
+        print cl_params
+
         if self.isBusy():
             return
 

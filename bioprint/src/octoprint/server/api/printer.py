@@ -152,18 +152,19 @@ def printerToolCommand():
 
 	elif command == "crosslink":
 		cl_params = data["cl_params"]
-		if not isinstance(cl_params["cl_layers"], (int)):
-			return make_response("Not a number for cl_layers: %r" % cl_params["cl_layers"], 400)
-		if not isinstance(cl_params["cl_intensity"], (float)):
-			return make_response("Not a number for cl_intensity: %r" % cl_params["cl_intensity"], 400)
-		if not isinstance(cl_params["cl_duration"], (int, long, float)):
-			return make_response("Not a number for cl_duration: %r" % cl_params["cl_duration"], 400)
-		if not isinstance(cl_params["cl_end"], (bool)):
-			return make_response("Not a bool for cl_end: %r" % cl_params["cl_end"], 400)
-		if not isinstance(cl_params["cl_end_intensity"], (float)):
-			return make_response("Not a number for cl_end_intensity: %r" % cl_params["cl_end_intensity"], 400)
-		if not isinstance(cl_params["cl_end_duration"], (int, long, float)):
-			return make_response("Not a number for cl_end_duration: %r" % cl_params["cl_end_duration"], 400)
+		print '\n\n\n\n\n\n', cl_params, '\n\n\n\n\n'
+		# if not isinstance(cl_params["cl_layers"], (int)):
+		# 	return make_response("Not a number for cl_layers: %r" % cl_params["cl_layers"], 400)
+		# if not isinstance(cl_params["cl_intensity"], (float)):
+		# 	return make_response("Not a number for cl_intensity: %r" % cl_params["cl_intensity"], 400)
+		# if not isinstance(cl_params["cl_duration"], (int, long, float)):
+		# 	return make_response("Not a number for cl_duration: %r" % cl_params["cl_duration"], 400)
+		# if not isinstance(cl_params["cl_end"], (bool)):
+		# 	return make_response("Not a bool for cl_end: %r" % cl_params["cl_end"], 400)
+		# if not isinstance(cl_params["cl_end_intensity"], (float)):
+		# 	return make_response("Not a number for cl_end_intensity: %r" % cl_params["cl_end_intensity"], 400)
+		# if not isinstance(cl_params["cl_end_duration"], (int, long, float)):
+		# 	return make_response("Not a number for cl_end_duration: %r" % cl_params["cl_end_duration"], 400)
 		try:
 			printer.crosslink(cl_params)
 		except ValueError as e:

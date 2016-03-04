@@ -55,6 +55,7 @@ $(function() {
         self.lightIntensity = ko.observable(0);
         self.lightOn = ko.observable(false);
 
+        self.cl_layers_enabled = ko.observable(false);
         self.cl_layers = ko.observable(0);
         self.cl_intensity = ko.observable(0);
         self.cl_duration = ko.observable(0);
@@ -471,6 +472,7 @@ $(function() {
         self.set_clParams = function(){
             
             var cl_params = {
+                "cl_layers_enabled": self.cl_layers_enabled(),
                 "cl_layers": parseInt(self.cl_layers()),
                 "cl_intensity": (parseFloat(self.cl_intensity()) / 100) * 12.75,
                 "cl_duration": parseInt(self.cl_duration()),
@@ -485,6 +487,14 @@ $(function() {
                 "cl_params" : cl_params
             });
         };
+
+        self.layers_clText = function() {
+            if (self.cl_layers_enabled()) {
+                return "Disable";
+            } else {
+                return "Enable";
+            }
+        }
 
         self.end_clText = function() {
             if (self.cl_end()) {
@@ -876,7 +886,6 @@ $(function() {
 
             if (typeof distance === "undefined")
                 distance = $('#jog_distance button.active').data('distance');
-                console.log('\n\n\n\n\n\n', distance);
             if (self.settings.printerProfiles.currentProfileData() && self.settings.printerProfiles.currentProfileData()["axes"] && self.settings.printerProfiles.currentProfileData()["axes"][axis] && self.settings.printerProfiles.currentProfileData()["axes"][axis]["inverted"]()) {
                 multiplier *= -1;
             }
@@ -1057,6 +1066,7 @@ $(function() {
 
         self.selectWellPlate = function (select) {
             self.wellPlate = $('#wellPlate').val();
+            console.log('\n\n\n\n\n',self.wellplate,'\n\n\n\n\n');
             switch(self.wellPlate) {
                 case '1':
                     var x = 56;
@@ -1066,7 +1076,7 @@ $(function() {
                     var x = 18.00;
                     var y = 70.2
                 case '12':
-                    var x = 18.40;
+                    var x = 18;
                     var y = 62.90
                 case '24':
                     var x = 11.2;
