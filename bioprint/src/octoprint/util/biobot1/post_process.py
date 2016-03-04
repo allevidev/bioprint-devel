@@ -562,6 +562,7 @@ def post_process(payload, positions, wellPlate, cl_params):
     Read a gcode file and add M106 after E1.000 lines and
     M107, M126, M127 after each E peak.
     '''
+    print positions
     wellPlatePositions = calculate_wellplate_positions(positions)
     rows = sorted(wellPlatePositions[wellPlate].keys())
 

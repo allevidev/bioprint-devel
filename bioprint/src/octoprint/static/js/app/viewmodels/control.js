@@ -474,10 +474,10 @@ $(function() {
             var cl_params = {
                 "cl_layers_enabled": self.cl_layers_enabled(),
                 "cl_layers": parseInt(self.cl_layers()),
-                "cl_intensity": (parseFloat(self.cl_intensity()) / 100) * 12.75,
+                "cl_intensity": (parseFloat(self.cl_intensity()) / 100) * 75,
                 "cl_duration": parseInt(self.cl_duration()),
                 "cl_end": self.cl_end(),
-                "cl_end_intensity": (parseFloat(self.cl_end_intensity()) / 100) * 12.75,
+                "cl_end_intensity": (parseFloat(self.cl_end_intensity()) / 100) * 75,
                 "cl_end_duration": parseInt(self.cl_end_duration())
             }
 
@@ -1065,9 +1065,9 @@ $(function() {
         };
 
         self.selectWellPlate = function (select) {
-            self.wellPlate = $('#wellPlate').val();
-            console.log('\n\n\n\n\n',self.wellplate,'\n\n\n\n\n');
-            switch(self.wellPlate) {
+            self.wellPlate($('#wellPlate').val());
+            console.log('\n\n\n\n\n',self.wellPlate(),'\n\n\n\n\n');
+            switch(self.wellPlate()) {
                 case '1':
                     var x = 56;
                     var y = 90;
@@ -1075,25 +1075,29 @@ $(function() {
                 case '6':
                     var x = 18.00;
                     var y = 70.2
+                    break;
                 case '12':
                     var x = 18;
                     var y = 62.90
+                    break;
                 case '24':
                     var x = 11.2;
                     var y = 63;
+                    break;
                 case '96':
                     var x = 8.10;
                     var y = 58.30;
+                    break;
             }
             self.sendPrintHeadCommand({
                 "command": "wellplate",
-                "wellplate": parseInt(self.wellPlate)
+                "wellplate": parseInt(self.wellPlate())
             });
             self.sendCustomCommand({
                 type: 'commands',
                 commands: [
                     'G90',
-                    'G1 E24 F1000',
+                    'G1 Z50 E24 F1000',
                     'G1 X' + x + ' Y' + y + ' F2000',
                     'G1 Z0 F1000']
             });
@@ -1109,6 +1113,10 @@ $(function() {
                 self.extruder2YPos = self.position["Y"]
                 self.extruder2EPos = self.position["E"]
             }
+
+            console.log('\n\n\n\n\n\n', self.extruder1EPos, '\n\n\n\n\n');
+            console.log('\n\n\n\n\n\n', self.extruder2EPos, '\n\n\n\n\n');
+
             if (tool == 'tool0') {
                 self.switchTool('tool1');
             } else if (tool == 'tool1') {
