@@ -117,6 +117,28 @@ def getSettings():
 				"snippets": dict()
 			}
 		},
+		"positions": {
+			"1": {
+				"X": s.get(["positions", "1", "X"]),
+				"Y": s.get(["positions", "1", "Y"]),
+			},
+			"6": {
+				"X": s.get(["positions", "6", "X"]),
+				"Y": s.get(["positions", "6", "Y"]),
+			},
+			"12": {
+				"X": s.get(["positions", "12", "X"]),
+				"Y": s.get(["positions", "12", "Y"]),
+			},
+			"24": {
+				"X": s.get(["positions", "24", "X"]),
+				"Y": s.get(["positions", "24", "Y"]),
+			},
+			"96": {
+				"X": s.get(["positions", "96", "X"]),
+				"Y": s.get(["positions", "96", "Y"]),
+			},
+		},
 		"server": {
 			"commands": {
 				"systemShutdownCommand": s.get(["server", "commands", "systemShutdownCommand"]),
@@ -254,6 +276,13 @@ def setSettings():
 
 	if "terminalFilters" in data.keys():
 		s.set(["terminalFilters"], data["terminalFilters"])
+
+	if "position" in data.keys():
+		if "1" in data["position"].keys(): s.set(["position", "1"], data["position", "1"])
+		if "6" in data["position"].keys(): s.set(["position", "6"], data["position", "6"])
+		if "12" in data["position"].keys(): s.set(["position", "12"], data["position", "12"])
+		if "24" in data["position"].keys(): s.set(["position", "24"], data["position", "24"])
+		if "96" in data["position"].keys(): s.set(["position", "96"], data["position", "96"])
 
 	if "system" in data.keys():
 		if "actions" in data["system"].keys(): s.set(["system", "actions"], data["system"]["actions"])

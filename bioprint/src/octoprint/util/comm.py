@@ -635,7 +635,7 @@ class MachineCom(object):
         eventManager().fire(Events.TRANSFER_STARTED, {"local": localFilename, "remote": remoteFilename})
         self._callback.on_comm_file_transfer_started(remoteFilename, self._currentFile.getFilesize())
 
-    def selectFile(self, filename, sd, extruder_positions, wellplate, cl_params):
+    def selectFile(self, filename, sd, extruder_positions, wellplate, cl_params, tempData):
 
         print cl_params
 
@@ -656,7 +656,7 @@ class MachineCom(object):
                 "origin": selectedFile.getFileLocation()
             }
             selectedFile.close()
-            processed = post_process.post_process(payload, extruder_positions, wellplate, cl_params)
+            processed = post_process.post_process(payload, extruder_positions, wellplate, cl_params, tempData)
             self._currentFile = PrintingGcodeFileInformation(processed["file"], offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
 
             eventManager().fire(Events.FILE_SELECTED, {

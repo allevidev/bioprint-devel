@@ -557,7 +557,7 @@ def end_print():
     ]
     return '\n'.join(commands)
 
-def post_process(payload, positions, wellPlate, cl_params):
+def post_process(payload, positions, wellPlate, cl_params, tempData):
     '''
     Read a gcode file and add M106 after E1.000 lines and
     M107, M126, M127 after each E peak.
@@ -714,13 +714,38 @@ def post_process(payload, positions, wellPlate, cl_params):
         outputObject = s3.Object('biobots-analytics', folder + outputFileName);
         outputObject.put(ACL='public-read', Body=open(outputFile, 'rb'))
 
+        tool0 = {
+            "temperature": {
+                "actual": tempData['tool0']['actual'],
+                "target": tempData['tool0']['target']
+            },
+            "pressure": tempData['bed']['actual'],
+            "X": positions["tool0"]["X"],
+            "Y": positions["tool0"]["Y"],
+            "E": positions["tool0"]["E"]
+        }
+        tool1 = {
+            "temperature": {
+                "actual": tempData['tool1']['actual'],
+                "target": tempData['tool1']['target']
+            },
+            "pressure": tempData['tool2']['actual'],
+            "X": positions["tool1"]["X"],
+            "Y": positions["tool1"]["Y"],
+            "E": positions["tool1"]["E"]
+        }
+
         print_info = {
             'input': inputObject.key,
             'output': outputObject.key,
+            'tool0': tool0,
+            'tool1': tool1,
             'positions': positions,
             'wellPlate': wellPlate,
             'cl_params': cl_params
         }
+
+        print print_info
 
         data = {
             'user_info': user_info,

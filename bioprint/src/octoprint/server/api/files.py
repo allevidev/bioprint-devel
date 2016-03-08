@@ -308,7 +308,7 @@ def gcodeFileCommand(filename, target):
 		else:
 			filenameToSelect = fileManager.path_on_disk(target, filename)
 
-		print '\n\n\n\n\n\n\n', 
+		
 		printer.select_file(filenameToSelect, sd, printAfterLoading)
 
 	elif command == "slice":
@@ -456,6 +456,28 @@ def _getCurrentFile():
 		return currentJob["file"]["origin"], currentJob["file"]["name"]
 	else:
 		return None, None
+
+def _getTemperatureData(filter):
+	if not printer.is_operational():
+		return make_response("Printer is not operational", 409)
+
+	tempData = printer.get_current_temperatures()
+
+	if "history" in request.values.keys() and request.values["history"] in valid_boolean_trues:
+		tempHistory = printer.get_temperature_history()
+
+		limit = 300
+		if "limit" in request.values.keys() and unicode(request.values["limit"]).isnumeric():
+			limit = int(request.values["limit"])
+
+		history = list(tempHistory)
+		limit = min(limit, len(history))
+
+		tempData.update({
+			"history": map(lambda x: filter(x), history[-limit:])
+		})
+
+	return filter(tempData)
 
 
 class WerkzeugFileWrapper(octoprint.filemanager.util.AbstractFileWrapper):

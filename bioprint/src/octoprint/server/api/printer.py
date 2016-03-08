@@ -9,6 +9,7 @@ from flask import request, jsonify, make_response, Response
 from werkzeug.exceptions import BadRequest
 import re
 
+from octoprint.events import eventManager, Events
 from octoprint.settings import settings, valid_boolean_trues
 from octoprint.server import printer, NO_CONTENT
 from octoprint.server.api import api
@@ -33,8 +34,6 @@ def printerState():
 			excludes = filter(lambda x: x in ["temperature", "sd", "state"], map(lambda x: x.strip(), excludeStr.split(",")))
 
 	result = {}
-
-	print '\n\n\n\n\n', printer.get_current_data(), '\n\n\n\n\n\n'
 
 	# add temperature information
 	if not "temperature" in excludes:
@@ -318,6 +317,18 @@ def printerPrintheadCommand():
 			return make_response("Invalid value for feed rate: %s" % str(e), 400)
 
 	elif command == "position":
+
+		s = settings()
+
+		s.set(["positions", str(data["wellplate"]), "X"], data["positions"]["tool0"]["X"])
+		s.set(["positions", str(data["wellplate"]), "Y"], data["positions"]["tool0"]["Y"])
+
+		s.save()
+
+		if s.save():
+			eventManager().fire(Events.SETTINGS_UPDATED)
+
+
 		positions = data["positions"]
 
 		printer.set_extruder_positions(positions)

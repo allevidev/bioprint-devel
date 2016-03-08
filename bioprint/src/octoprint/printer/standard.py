@@ -378,8 +378,8 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 			return
 
 		self._printAfterSelect = printAfterSelect
-		print '\n\n\n\n\n', self.cl_params, '\n\n\n\n\n\n'
-		self._comm.selectFile("/" + path if sd else path, sd, self.extruder_positions, self.wellplate, self.cl_params)
+		
+		self._comm.selectFile("/" + path if sd else path, sd, self.extruder_positions, self.wellplate, self.cl_params, self.get_current_temperatures())
 		self._setProgressData(0, None, None, None)
 		self._setCurrentZ(None)
 

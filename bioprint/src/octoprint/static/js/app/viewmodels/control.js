@@ -1065,42 +1065,31 @@ $(function() {
         };
 
         self.selectWellPlate = function (select) {
-            self.wellPlate($('#wellPlate').val());
-            console.log('\n\n\n\n\n',self.wellPlate(),'\n\n\n\n\n');
-            switch(self.wellPlate()) {
-                case '1':
-                    var x = 56;
-                    var y = 90;
-                    break;
-                case '6':
-                    var x = 18.00;
-                    var y = 70.2
-                    break;
-                case '12':
-                    var x = 18;
-                    var y = 62.90
-                    break;
-                case '24':
-                    var x = 11.2;
-                    var y = 63;
-                    break;
-                case '96':
-                    var x = 8.10;
-                    var y = 58.30;
-                    break;
-            }
-            self.sendPrintHeadCommand({
-                "command": "wellplate",
-                "wellplate": parseInt(self.wellPlate())
-            });
-            self.sendCustomCommand({
-                type: 'commands',
-                commands: [
-                    'G90',
-                    'G1 Z50 E24 F1000',
-                    'G1 X' + x + ' Y' + y + ' F2000',
-                    'G1 Z0 F1000']
-            });
+            self.wellPlate(parseInt($('#wellPlate').val()));
+            
+            $.ajax({
+                url: API_BASEURL + "settings",
+                type: "GET",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                success: function (response) {
+                    console.log(self.wellPlate())
+                    positions = response["positions"][self.wellPlate()];
+                 
+                    self.sendPrintHeadCommand({
+                        "command": "wellplate",
+                        "wellplate": self.wellPlate()
+                    });
+                    self.sendCustomCommand({
+                        type: 'commands',
+                        commands: [
+                            'G90',
+                            'G1 Z50 E24 F1000',
+                            'G1 X' + positions["X"] + ' Y' + positions["Y"] + ' F2000',
+                            'G1 Z0 F1000']
+                    });
+                }
+            })            
         }
 
         self.saveToolChangeDist = function (tool) {
@@ -1114,9 +1103,6 @@ $(function() {
                 self.extruder2EPos = self.position["E"]
             }
 
-            console.log('\n\n\n\n\n\n', self.extruder1EPos, '\n\n\n\n\n');
-            console.log('\n\n\n\n\n\n', self.extruder2EPos, '\n\n\n\n\n');
-
             if (tool == 'tool0') {
                 self.switchTool('tool1');
             } else if (tool == 'tool1') {
@@ -1124,6 +1110,7 @@ $(function() {
             }
             self.sendPrintHeadCommand({
                 "command": "position",
+                "wellplate": self.wellPlate(),
                 "positions": {
                     "tool0" : {
                         "X": self.extruder1XPos,
@@ -1174,7 +1161,7 @@ $(function() {
                     'G1 X' + dir * self.xTravel + ' F2000.00',
                     'G90',
                     'M400',
-                    'G1 E' + target + 'F1000.00',
+                    'G1 E' + target + ' F1000.00',
                     'M400'
                 ]
             });
