@@ -8,6 +8,8 @@ cd $DIR
 cd ../bioprint
 sudo python setup.py install
 sudo -- sh -c "echo '127.0.0.1 bioprint' >> /etc/hosts"
+sudo -- sh -c "echo '127.0.0.1:9999 bioprint_firewall' >> /etc/hosts"
+read -p "Press Return to reboot..."
 
 sudo reboot
 
