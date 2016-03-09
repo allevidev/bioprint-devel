@@ -1,21 +1,14 @@
 <div id="first_run_dialog" class="modal hide fade" data-backdrop="static" data-keyboard="false">
     <div class="modal-header">
-        <h3><i class="icon-warning-sign"></i> {{ _('Configure Access Control') }}</h3>
+        <h3><i class="icon-warning-sign"></i> {{ _('Configure Bioprint') }}</h3>
     </div>
     <div class="modal-body">
         {% trans %}<p>
             <strong>Please read the following, it is very important for your printer's health!</strong>
         </p>
             <p>
-                BioPrint ships with Access Control enabled, meaning you won't be able to do anything with the
-                printer unless you login first as a configured user. This is to <strong>prevent strangers - possibly with
-                malicious intent - to gain access to your printer</strong> via the internet or another untrustworthy network
-                and using it in such a way that it is damaged or worse (i.e. causes a fire).
-            </p>
-            <p>
-                It looks like you haven't configured access control yet. Please <strong>set up an username and password</strong> for the
-                initial administrator account who will have full access to both the printer and BioPrint's settings, then click
-                on "Keep Access Control Enabled":
+                Please <strong>set up an username and password</strong> for the
+                initial administrator account who will have full access to both the printer and BioPrint's settings.
             </p>{% endtrans %}
         <form class="form-horizontal">
             <div class="control-group" data-bind="css: {success: validUsername()}">

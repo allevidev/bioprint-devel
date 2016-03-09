@@ -44,6 +44,9 @@ def getSettings():
 			"colorTransparent": s.getBoolean(["appearance", "colorTransparent"]),
 			"defaultLanguage": s.get(["appearance", "defaultLanguage"])
 		},
+		"analytics": {
+			"enabled": s.get(["analytics", "enabled"])
+		},
 		"printer": {
 			"defaultExtrusionLength": s.getInt(["printerParameters", "defaultExtrusionLength"]),
 			"defaultPressure": s.getInt(["printerParameters", "defaultPressure"]),
