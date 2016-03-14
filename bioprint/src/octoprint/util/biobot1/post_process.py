@@ -548,12 +548,14 @@ def calculate_wellplate_positions(positions):
 def end_print():
     x_end_pos = 0
     y_end_pos = 0
+    e_end_pos = 0
     z_end_pos = 50
     commands = [
         'M42 P16 S0',
         'M42 P17 S0',
-        'G1 Z' + str(z_end_pos),
-        'G1 X' + str(x_end_pos) + ' Y' + str(y_end_pos)
+        'G1 Z' + str(z_end_pos) + ' F1000',
+        'G1 E' + str(e_end_pos) + ' F1000',
+        'G1 X' + str(x_end_pos) + ' Y' + str(y_end_pos) + ' F1000'
     ]
     return '\n'.join(commands)
 
