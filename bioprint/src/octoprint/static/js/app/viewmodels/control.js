@@ -93,7 +93,7 @@ $(function() {
         self.position = {}
         
         
-        self.midpoint = 24;
+        self.midpoint = 22;
         self.xTravel = 48.33;
 
         self.tools = ko.observableArray([self._createToolEntry(), self._createToolEntry()]);
@@ -925,11 +925,11 @@ $(function() {
                 }
                 if (self.homed['e'] == false) {
                     self.sendHomeCommand('e');
-                } else if (parseFloat(self.position['E']) > 24.00) {
+                } else if (parseFloat(self.position['E']) > self.midpoint) {
                      self.sendCustomCommand({
                         type: "commands",
                         commands: [
-                            "G1 E24 F1000"
+                            "G1 E"+ str(self.midpoint) + "F1000"
                         ]
                     });
                 }
@@ -1084,7 +1084,7 @@ $(function() {
                         type: 'commands',
                         commands: [
                             'G90',
-                            'G1 Z50 E24 F1000',
+                            'G1 Z50 E'+ self.midpoint +'F1000',
                             'G1 X' + positions["X"] + ' Y' + positions["Y"] + ' F2000',
                             'G1 Z0 F1000']
                     });
