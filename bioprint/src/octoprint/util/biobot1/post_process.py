@@ -22,7 +22,7 @@ import requests
 import json
 from flask.ext.login import current_user
 
-analytics = True
+analytics = False
 # biobots_url = 'http://data.biobots.io/'
 biobots_url = 'http://data.biobots.io'
 
