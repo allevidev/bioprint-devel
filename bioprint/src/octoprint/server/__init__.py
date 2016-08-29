@@ -172,6 +172,7 @@ class Server():
 			self._logger.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_tb))
 		sys.excepthook = exception_logger
 		self._logger.info("Starting OctoPrint %s" % DISPLAY_VERSION)
+		self._logger.info("Bioprint Version %s" % 1.3)
 
 		# then initialize the plugin manager
 		pluginManager = octoprint.plugin.plugin_manager(init=True)

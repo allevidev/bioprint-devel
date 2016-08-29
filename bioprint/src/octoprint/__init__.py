@@ -62,6 +62,7 @@ def main():
 
 	if args.version:
 		print "OctoPrint version %s" % __version__
+		print "BioPrint verion %s" % 1.2 
 		sys.exit(0)
 
 	if args.daemon:
