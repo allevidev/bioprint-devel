@@ -413,7 +413,7 @@ class Server():
 						self._logger.debug("Adding maximum body size of {size}B for {method} requests to {route})".format(**locals()))
 						max_body_sizes.append((method, route, size))
 
-		self._server = util.tornado.CustomHTTPServer(self._tornado_app, max_body_sizes=max_body_sizes, default_max_body_size=s.getInt(["server", "maxSize"]))
+		self._server = util.tornado.CustomHTTPServer(self._tornado_app)
 		self._server.listen(self._port, address=self._host)
 
 		eventManager.fire(events.Events.STARTUP)

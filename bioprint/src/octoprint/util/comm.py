@@ -678,6 +678,10 @@ class MachineCom(object):
         if not self.isOperational() or self.isStreaming():
             return
 
+        self.sendCommand("M42 P16 S0")
+        self.sendCommand("M42 P17 S0")
+        self.sendCommand("M400")
+
         self._changeState(self.STATE_OPERATIONAL)
 
         if self.isSdFileSelected():
@@ -735,6 +739,9 @@ class MachineCom(object):
         elif pause and self.isPrinting():
             if not self._pauseWaitStartTime:
                 self._pauseWaitStartTime = time.time()
+
+            self.sendCommand("M42 P16 S0")
+            self.sendCommand("M42 P17 S0")
 
             self._changeState(self.STATE_PAUSED)
             if self.isSdFileSelected():

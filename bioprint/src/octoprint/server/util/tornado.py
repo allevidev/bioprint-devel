@@ -597,11 +597,19 @@ class CustomHTTPServer(tornado.httpserver.HTTPServer):
 				 decompress_request=False,
 				 chunk_size=None, max_header_size=None,
 				 idle_connection_timeout=None, body_timeout=None,
-				 max_body_sizes=None, default_max_body_size=None, max_buffer_size=None):
+				 max_buffer_size=None):
+
 		self.request_callback = request_callback
 		self.no_keep_alive = no_keep_alive
 		self.xheaders = xheaders
 		self.protocol = protocol
+		max_body_sizes = [
+			("POST", r"/api/files/([^/]*)", 1 * 1024 * 1024 * 1024),
+			("POST", r"/api/languages", 5 * 1024 * 1024)
+		]
+		default_max_body_size=100*1024
+		print max_body_sizes
+		print default_max_body_size
 		self.conn_params = CustomHTTP1ConnectionParameters(
 			decompress=decompress_request,
 			chunk_size=chunk_size,
