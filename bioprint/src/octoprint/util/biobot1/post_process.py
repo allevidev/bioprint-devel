@@ -486,7 +486,7 @@ def calculate_wellplate_positions(positions):
                 }
             }
         out_6[row_6[i]] = row_out
-    row_12 = ["A", "B"]
+    row_12 = ["A", "B", "C"]
     column_12 = 4
     out_12 = {}
     for i in xrange(len(row_12)):
@@ -502,7 +502,7 @@ def calculate_wellplate_positions(positions):
                     "Y": float(positions["tool1"]["Y"]) + i * 26.01
                 }
             }
-        out_6[row_6[i]] = row_out
+        out_12[row_12[i]] = row_out
     row_24 = ["A", "B", "C"]
     column_24 = 6
     out_24 = {}
