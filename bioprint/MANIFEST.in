@@ -1,8 +1,8 @@
-recursive-include src/octoprint/static *
-recursive-include src/octoprint/templates *
-recursive-include src/octoprint/plugins *
-recursive-include src/octoprint/translations *
+recursive-include src/bioprint/static *
+recursive-include src/bioprint/templates *
+recursive-include src/bioprint/plugins *
+recursive-include src/bioprint/translations *
 include versioneer.py
-include src/octoprint/_version.py
+include src/bioprint/_version.py
 include README.md
 include requirements.txt

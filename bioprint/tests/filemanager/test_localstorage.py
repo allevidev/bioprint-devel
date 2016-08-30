@@ -3,7 +3,7 @@ from __future__ import absolute_import
 
 __author__ = "Gina Häußge <osd@foosel.net>"
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
-__copyright__ = "Copyright (C) 2014 The OctoPrint Project - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2014 The bioprint Project - Released under terms of the AGPLv3 License"
 
 import unittest
 import os
@@ -11,7 +11,7 @@ import mock
 
 from ddt import ddt, unpack, data
 
-import octoprint.filemanager.storage
+import bioprint.filemanager.storage
 
 
 class FileWrapper(object):
@@ -42,10 +42,10 @@ class LocalStorageTest(unittest.TestCase):
 	def setUp(self):
 		import tempfile
 		self.basefolder = tempfile.mkdtemp()
-		self.storage = octoprint.filemanager.storage.LocalFileStorage(self.basefolder)
+		self.storage = bioprint.filemanager.storage.LocalFileStorage(self.basefolder)
 
 		# mock file manager module
-		self.filemanager_patcher = mock.patch("octoprint.filemanager")
+		self.filemanager_patcher = mock.patch("bioprint.filemanager")
 		self.filemanager = self.filemanager_patcher.start()
 
 		self.filemanager.valid_file_type.return_value = True

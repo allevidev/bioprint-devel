@@ -3,7 +3,7 @@ from __future__ import absolute_import
 
 __author__ = "Gina Häußge <osd@foosel.net>"
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
-__copyright__ = "Copyright (C) 2014 The OctoPrint Project - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2014 The bioprint Project - Released under terms of the AGPLv3 License"
 
 import unittest
 
@@ -22,7 +22,7 @@ class TestCommHelpers(unittest.TestCase):
 	)
 	@unpack
 	def test_strip_comment(self, input, expected):
-		from octoprint.util import comm
+		from bioprint.util import comm
 		self.assertEquals(expected, comm.strip_comment(input))
 
 	@data(
@@ -33,7 +33,7 @@ class TestCommHelpers(unittest.TestCase):
 	)
 	@unpack
 	def test_process_gcode_line(self, input, offsets, current_tool, expected):
-		from octoprint.util import comm
+		from bioprint.util import comm
 		self.assertEquals(expected, comm.process_gcode_line(input, offsets=offsets, current_tool=current_tool))
 
 	@data(
@@ -54,7 +54,7 @@ class TestCommHelpers(unittest.TestCase):
 	)
 	@unpack
 	def test_apply_temperature_offsets(self, input, offsets, current_tool, expected):
-		from octoprint.util import comm
+		from bioprint.util import comm
 		actual = comm.apply_temperature_offsets(input, offsets, current_tool=current_tool)
 
 		if expected is None:
@@ -80,7 +80,7 @@ class TestCommHelpers(unittest.TestCase):
 			dict(regex="regex", type="unknown")
 		]
 
-		from octoprint.util import comm
+		from bioprint.util import comm
 		trigger_matchers = comm.convert_pause_triggers(configured_triggers)
 
 		self.assertIsNotNone(trigger_matchers)
@@ -124,7 +124,7 @@ class TestCommHelpers(unittest.TestCase):
 			])
 		]
 
-		from octoprint.util import comm
+		from bioprint.util import comm
 		controls, matcher = comm.convert_feedback_controls(configured_controls)
 
 		self.assertEquals(2, len(controls))
@@ -171,7 +171,7 @@ class TestCommHelpers(unittest.TestCase):
 	)
 	@unpack
 	def test_parameter_regexes(self, line, parameter, should_match, expected_value):
-		from octoprint.util.comm import regexes_parameters
+		from bioprint.util.comm import regexes_parameters
 
 		regex = regexes_parameters[parameter]
 		match = regex.search(line)
@@ -194,7 +194,7 @@ class TestCommHelpers(unittest.TestCase):
 	)
 	@unpack
 	def test_gcode_command_for_cmd(self, cmd, expected):
-		from octoprint.util.comm import gcode_command_for_cmd
+		from bioprint.util.comm import gcode_command_for_cmd
 		result = gcode_command_for_cmd(cmd)
 		self.assertEquals(expected, result)
 
@@ -207,7 +207,7 @@ class TestCommHelpers(unittest.TestCase):
 	)
 	@unpack
 	def test_process_temperature_line(self, line, current, expected_result, expected_max):
-		from octoprint.util.comm import parse_temperature_line
+		from bioprint.util.comm import parse_temperature_line
 		maxtool, result = parse_temperature_line(line, current)
 		self.assertDictEqual(expected_result, result)
 		self.assertEquals(expected_max, maxtool)
@@ -225,7 +225,7 @@ class TestCommHelpers(unittest.TestCase):
 	)
 	@unpack
 	def test_canonicalize_temperatures(self, parsed, current, expected):
-		from octoprint.util.comm import canonicalize_temperatures
+		from bioprint.util.comm import canonicalize_temperatures
 		result = canonicalize_temperatures(parsed, current)
 		self.assertDictEqual(expected, result)
 
