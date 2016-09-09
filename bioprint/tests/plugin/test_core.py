@@ -1,8 +1,8 @@
 import unittest
 import mock
 
-import octoprint.plugin
-import octoprint.plugin.core
+import bioprint.plugin
+import bioprint.plugin.core
 
 
 class PluginTestCase(unittest.TestCase):
@@ -17,9 +17,9 @@ class PluginTestCase(unittest.TestCase):
 		self.plugin_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), "_plugins")
 
 		plugin_folders = [self.plugin_folder]
-		plugin_types = [octoprint.plugin.SettingsPlugin, octoprint.plugin.StartupPlugin, octoprint.plugin.AssetPlugin]
+		plugin_types = [bioprint.plugin.SettingsPlugin, bioprint.plugin.StartupPlugin, bioprint.plugin.AssetPlugin]
 		plugin_entry_points = None
-		self.plugin_manager = octoprint.plugin.core.PluginManager(plugin_folders, plugin_types, plugin_entry_points, plugin_disabled_list=[], logging_prefix="logging_prefix.")
+		self.plugin_manager = bioprint.plugin.core.PluginManager(plugin_folders, plugin_types, plugin_entry_points, plugin_disabled_list=[], logging_prefix="logging_prefix.")
 		self.plugin_manager.initialize_implementations()
 
 	def test_plugin_loading(self):
@@ -29,20 +29,20 @@ class PluginTestCase(unittest.TestCase):
 		self.assertEquals(3, len(self.plugin_manager.plugin_implementations_by_type))
 
 		# hook_plugin
-		self.assertTrue("octoprint.core.startup" in self.plugin_manager.plugin_hooks)
-		self.assertEquals(1, len(self.plugin_manager.plugin_hooks["octoprint.core.startup"]))
+		self.assertTrue("bioprint.core.startup" in self.plugin_manager.plugin_hooks)
+		self.assertEquals(1, len(self.plugin_manager.plugin_hooks["bioprint.core.startup"]))
 
 		# TestStartupPlugin & TestMixedPlugin
-		self.assertTrue(octoprint.plugin.StartupPlugin in self.plugin_manager.plugin_implementations_by_type)
-		self.assertEquals(2, len(self.plugin_manager.plugin_implementations_by_type[octoprint.plugin.StartupPlugin]))
+		self.assertTrue(bioprint.plugin.StartupPlugin in self.plugin_manager.plugin_implementations_by_type)
+		self.assertEquals(2, len(self.plugin_manager.plugin_implementations_by_type[bioprint.plugin.StartupPlugin]))
 
 		# TestSettingsPlugin & TestMixedPlugin
-		self.assertTrue(octoprint.plugin.SettingsPlugin in self.plugin_manager.plugin_implementations_by_type)
-		self.assertEquals(2, len(self.plugin_manager.plugin_implementations_by_type[octoprint.plugin.SettingsPlugin]))
+		self.assertTrue(bioprint.plugin.SettingsPlugin in self.plugin_manager.plugin_implementations_by_type)
+		self.assertEquals(2, len(self.plugin_manager.plugin_implementations_by_type[bioprint.plugin.SettingsPlugin]))
 
 		# TestDeprecatedAssetPlugin, NOT TestSecondaryDeprecatedAssetPlugin
-		self.assertTrue(octoprint.plugin.AssetPlugin in self.plugin_manager.plugin_implementations_by_type)
-		self.assertEquals(1, len(self.plugin_manager.plugin_implementations_by_type[octoprint.plugin.AssetPlugin]))
+		self.assertTrue(bioprint.plugin.AssetPlugin in self.plugin_manager.plugin_implementations_by_type)
+		self.assertEquals(1, len(self.plugin_manager.plugin_implementations_by_type[bioprint.plugin.AssetPlugin]))
 
 	def test_plugin_initializing(self):
 
@@ -111,25 +111,25 @@ class PluginTestCase(unittest.TestCase):
 		self.assertIsNone(plugin_info)
 
 	def test_get_hooks(self):
-		hooks = self.plugin_manager.get_hooks("octoprint.core.startup")
+		hooks = self.plugin_manager.get_hooks("bioprint.core.startup")
 		self.assertEquals(1, len(hooks))
 		self.assertTrue("hook_plugin" in hooks)
 		self.assertEquals("success", hooks["hook_plugin"]())
 
-		hooks = self.plugin_manager.get_hooks("octoprint.printing.print")
+		hooks = self.plugin_manager.get_hooks("bioprint.printing.print")
 		self.assertEquals(0, len(hooks))
 
 	def test_get_implementation(self):
-		implementations = self.plugin_manager.get_implementations(octoprint.plugin.StartupPlugin)
+		implementations = self.plugin_manager.get_implementations(bioprint.plugin.StartupPlugin)
 		self.assertEquals(2, len(implementations)) # startup_plugin, mixed_plugin
 
-		implementations = self.plugin_manager.get_implementations(octoprint.plugin.SettingsPlugin)
+		implementations = self.plugin_manager.get_implementations(bioprint.plugin.SettingsPlugin)
 		self.assertEquals(2, len(implementations)) # settings_plugin, mixed_plugin
 
-		implementations = self.plugin_manager.get_implementations(octoprint.plugin.StartupPlugin, octoprint.plugin.SettingsPlugin)
+		implementations = self.plugin_manager.get_implementations(bioprint.plugin.StartupPlugin, bioprint.plugin.SettingsPlugin)
 		self.assertEquals(1, len(implementations)) # mixed_plugin
 
-		implementations = self.plugin_manager.get_implementations(octoprint.plugin.AssetPlugin)
+		implementations = self.plugin_manager.get_implementations(bioprint.plugin.AssetPlugin)
 		self.assertEquals(1, len(implementations)) # deprecated_plugin, but only first implementation!
 
 	def test_client_registration(self):

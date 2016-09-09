@@ -1,32 +1,32 @@
 #!/bin/sh
 
 ### BEGIN INIT INFO
-# Provides:          octoprint
+# Provides:          bioprint
 # Required-Start:    $local_fs networking
 # Required-Stop:
 # Should-Start:
 # Should-Stop:
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: OctoPrint daemon
-# Description:       Starts the OctoPrint daemon with the user specified in
-#                    /etc/default/octoprint.
+# Short-Description: bioprint daemon
+# Description:       Starts the bioprint daemon with the user specified in
+#                    /etc/default/bioprint.
 ### END INIT INFO
 
 # Author: Sami Olmari
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DESC="Octoprint Daemon"
-NAME="Octoprint"
-DAEMON=/usr/local/bin/octoprint
+DESC="bioprint Daemon"
+NAME="bioprint"
+DAEMON=/usr/local/bin/bioprint
 PIDFILE=/var/run/$NAME.pid
-PKGNAME=octoprint
+PKGNAME=bioprint
 SCRIPTNAME=/etc/init.d/$PKGNAME
 
 # Read configuration variable file if it is present
 [ -r /etc/default/$PKGNAME ] && . /etc/default/$PKGNAME
 
-# Exit if the octoprint is not installed
+# Exit if the bioprint is not installed
 [ -x "$DAEMON" ] || exit 0
 
 # Load the VERBOSE setting and other rcS variables
@@ -42,9 +42,9 @@ then
    exit 0
 fi
 
-if [ -z "$OCTOPRINT_USER" ]
+if [ -z "$bioprint_USER" ]
 then
-    log_warning_msg "Not starting $PKGNAME, OCTOPRINT_USER not set in /etc/default/$PKGNAME."
+    log_warning_msg "Not starting $PKGNAME, bioprint_USER not set in /etc/default/$PKGNAME."
     exit 0
 fi
 
@@ -73,7 +73,7 @@ do_start()
 
    if [ $RETVAL != 0 ]; then
        start-stop-daemon --start --background --quiet --pidfile $PIDFILE --make-pidfile \
-       --exec $DAEMON --chuid $OCTOPRINT_USER --user $OCTOPRINT_USER --umask $UMASK --nicelevel=$NICELEVEL \
+       --exec $DAEMON --chuid $bioprint_USER --user $bioprint_USER --umask $UMASK --nicelevel=$NICELEVEL \
        -- $DAEMON_ARGS
        RETVAL="$?"
    fi
@@ -90,7 +90,7 @@ do_stop()
    #   2 if daemon could not be stopped
    #   other if a failure occurred
 
-   start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --user $OCTOPRINT_USER --pidfile $PIDFILE
+   start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --user $bioprint_USER --pidfile $PIDFILE
    RETVAL="$?"
    [ "$RETVAL" = "2" ] && return 2
 
