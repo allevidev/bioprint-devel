@@ -3,21 +3,21 @@ from __future__ import absolute_import
 
 __author__ = "Gina Häußge <osd@foosel.net>"
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
-__copyright__ = "Copyright (C) 2014 The OctoPrint Project - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2014 The bioprint Project - Released under terms of the AGPLv3 License"
 
 
 import io
 import unittest
 import mock
 
-import octoprint.filemanager
-import octoprint.filemanager.util
+import bioprint.filemanager
+import bioprint.filemanager.util
 
 class FilemanagerMethodTest(unittest.TestCase):
 
 	def setUp(self):
 		# mock plugin manager
-		self.plugin_manager_patcher = mock.patch("octoprint.plugin.plugin_manager")
+		self.plugin_manager_patcher = mock.patch("bioprint.plugin.plugin_manager")
 		self.plugin_manager_getter = self.plugin_manager_patcher.start()
 
 		self.plugin_manager = mock.MagicMock()
@@ -27,14 +27,14 @@ class FilemanagerMethodTest(unittest.TestCase):
 			other_plugin=lambda: dict(dict(model=dict(amf=["amf"]))),
 			mime_map=lambda: dict(
 				mime_map=dict(
-					mime_map_yes=octoprint.filemanager.ContentTypeMapping(["mime_map_yes"], "application/mime_map_yes")
+					mime_map_yes=bioprint.filemanager.ContentTypeMapping(["mime_map_yes"], "application/mime_map_yes")
 				)
 			),
 			mime_detect=lambda: dict(
 				dict(
 					machinecode=dict(
-						mime_detect_yes=octoprint.filemanager.ContentTypeDetector(["mime_detect_yes"], lambda x: "application/mime_detect_yes"),
-						mime_detect_no=octoprint.filemanager.ContentTypeDetector(["mime_detect_no"], lambda x: None)
+						mime_detect_yes=bioprint.filemanager.ContentTypeDetector(["mime_detect_yes"], lambda x: "application/mime_detect_yes"),
+						mime_detect_no=bioprint.filemanager.ContentTypeDetector(["mime_detect_no"], lambda x: None)
 					)
 				)
 			)
@@ -47,10 +47,10 @@ class FilemanagerMethodTest(unittest.TestCase):
 		self.plugin_manager_patcher.stop()
 
 	def test_full_extension_tree(self):
-		full = octoprint.filemanager.full_extension_tree()
+		full = bioprint.filemanager.full_extension_tree()
 		self.assertTrue("machinecode" in full)
 		self.assertTrue("gcode" in full["machinecode"])
-		self.assertTrue(isinstance(full["machinecode"]["gcode"], octoprint.filemanager.ContentTypeMapping))
+		self.assertTrue(isinstance(full["machinecode"]["gcode"], bioprint.filemanager.ContentTypeMapping))
 		self.assertItemsEqual(["gcode", "gco", "g"], full["machinecode"]["gcode"].extensions)
 		self.assertTrue("foo" in full["machinecode"])
 		self.assertTrue(isinstance(full["machinecode"]["foo"], list))
@@ -58,85 +58,85 @@ class FilemanagerMethodTest(unittest.TestCase):
 
 		self.assertTrue("model" in full)
 		self.assertTrue("stl" in full["model"])
-		self.assertTrue(isinstance(full["model"]["stl"], octoprint.filemanager.ContentTypeMapping))
+		self.assertTrue(isinstance(full["model"]["stl"], bioprint.filemanager.ContentTypeMapping))
 		self.assertItemsEqual(["stl"], full["model"]["stl"].extensions)
 		self.assertTrue("amf" in full["model"])
 		self.assertTrue(isinstance(full["model"]["amf"], list))
 		self.assertItemsEqual(["amf"], full["model"]["amf"])
 
 	def test_get_mimetype(self):
-		self.assertEquals(octoprint.filemanager.get_mime_type("foo.stl"), "application/sla")
-		self.assertEquals(octoprint.filemanager.get_mime_type("foo.gcode"), "text/plain")
-		self.assertEquals(octoprint.filemanager.get_mime_type("foo.unknown"), "application/octet-stream")
-		self.assertEquals(octoprint.filemanager.get_mime_type("foo.mime_map_yes"), "application/mime_map_yes")
-		self.assertEquals(octoprint.filemanager.get_mime_type("foo.mime_map_no"), "application/octet-stream")
-		self.assertEquals(octoprint.filemanager.get_mime_type("foo.mime_detect_yes"), "application/mime_detect_yes")
-		self.assertEquals(octoprint.filemanager.get_mime_type("foo.mime_detect_no"), "application/octet-stream")
+		self.assertEquals(bioprint.filemanager.get_mime_type("foo.stl"), "application/sla")
+		self.assertEquals(bioprint.filemanager.get_mime_type("foo.gcode"), "text/plain")
+		self.assertEquals(bioprint.filemanager.get_mime_type("foo.unknown"), "application/octet-stream")
+		self.assertEquals(bioprint.filemanager.get_mime_type("foo.mime_map_yes"), "application/mime_map_yes")
+		self.assertEquals(bioprint.filemanager.get_mime_type("foo.mime_map_no"), "application/octet-stream")
+		self.assertEquals(bioprint.filemanager.get_mime_type("foo.mime_detect_yes"), "application/mime_detect_yes")
+		self.assertEquals(bioprint.filemanager.get_mime_type("foo.mime_detect_no"), "application/octet-stream")
 
 	def test_valid_file_type(self):
-		self.assertTrue(octoprint.filemanager.valid_file_type("foo.stl", type="model"))
-		self.assertTrue(octoprint.filemanager.valid_file_type("foo.stl", type="stl"))
-		self.assertFalse(octoprint.filemanager.valid_file_type("foo.stl", type="machinecode"))
-		self.assertTrue(octoprint.filemanager.valid_file_type("foo.foo", type="machinecode"))
-		self.assertTrue(octoprint.filemanager.valid_file_type("foo.foo", type="foo"))
-		self.assertTrue(octoprint.filemanager.valid_file_type("foo.foo"))
-		self.assertTrue(octoprint.filemanager.valid_file_type("foo.mime_map_yes"))
-		self.assertTrue(octoprint.filemanager.valid_file_type("foo.mime_detect_yes"))
-		self.assertFalse(octoprint.filemanager.valid_file_type("foo.unknown"))
+		self.assertTrue(bioprint.filemanager.valid_file_type("foo.stl", type="model"))
+		self.assertTrue(bioprint.filemanager.valid_file_type("foo.stl", type="stl"))
+		self.assertFalse(bioprint.filemanager.valid_file_type("foo.stl", type="machinecode"))
+		self.assertTrue(bioprint.filemanager.valid_file_type("foo.foo", type="machinecode"))
+		self.assertTrue(bioprint.filemanager.valid_file_type("foo.foo", type="foo"))
+		self.assertTrue(bioprint.filemanager.valid_file_type("foo.foo"))
+		self.assertTrue(bioprint.filemanager.valid_file_type("foo.mime_map_yes"))
+		self.assertTrue(bioprint.filemanager.valid_file_type("foo.mime_detect_yes"))
+		self.assertFalse(bioprint.filemanager.valid_file_type("foo.unknown"))
 
 	def test_get_file_type(self):
-		self.assertEquals(["machinecode", "gcode"], octoprint.filemanager.get_file_type("foo.gcode"))
-		self.assertEquals(["machinecode", "gcode"], octoprint.filemanager.get_file_type("foo.gco"))
-		self.assertEquals(["machinecode", "foo"], octoprint.filemanager.get_file_type("foo.f"))
-		self.assertEquals(["model", "stl"], octoprint.filemanager.get_file_type("foo.stl"))
-		self.assertEquals(["model", "amf"], octoprint.filemanager.get_file_type("foo.amf"))
-		self.assertIsNone(octoprint.filemanager.get_file_type("foo.unknown"))
+		self.assertEquals(["machinecode", "gcode"], bioprint.filemanager.get_file_type("foo.gcode"))
+		self.assertEquals(["machinecode", "gcode"], bioprint.filemanager.get_file_type("foo.gco"))
+		self.assertEquals(["machinecode", "foo"], bioprint.filemanager.get_file_type("foo.f"))
+		self.assertEquals(["model", "stl"], bioprint.filemanager.get_file_type("foo.stl"))
+		self.assertEquals(["model", "amf"], bioprint.filemanager.get_file_type("foo.amf"))
+		self.assertIsNone(bioprint.filemanager.get_file_type("foo.unknown"))
 
 	def test_hook_failure(self):
 		def hook():
 			raise RuntimeError("Boo!")
 		self.plugin_manager.get_hooks.return_value = dict(hook=hook)
 
-		with mock.patch("octoprint.filemanager.logging") as patched_logging:
+		with mock.patch("bioprint.filemanager.logging") as patched_logging:
 			logger = mock.MagicMock()
 			patched_logging.getLogger.return_value = logger
 
-			octoprint.filemanager.get_all_extensions()
+			bioprint.filemanager.get_all_extensions()
 
 			self.assertEquals(1, len(logger.mock_calls))
 
 class FileManagerTest(unittest.TestCase):
 
 	def setUp(self):
-		import octoprint.slicing
-		import octoprint.filemanager.storage
-		import octoprint.printer.profile
+		import bioprint.slicing
+		import bioprint.filemanager.storage
+		import bioprint.printer.profile
 
 		self.addCleanup(self.cleanUp)
 
 		# mock event manager
-		self.event_manager_patcher = mock.patch("octoprint.filemanager.eventManager")
+		self.event_manager_patcher = mock.patch("bioprint.filemanager.eventManager")
 		event_manager = self.event_manager_patcher.start()
 		event_manager.return_value.fire = mock.MagicMock()
 		self.fire_event = event_manager.return_value.fire
 
 		# mock plugin manager
-		self.plugin_manager_patcher = mock.patch("octoprint.plugin.plugin_manager")
+		self.plugin_manager_patcher = mock.patch("bioprint.plugin.plugin_manager")
 		self.plugin_manager = self.plugin_manager_patcher.start()
 
-		self.analysis_queue = mock.MagicMock(spec=octoprint.filemanager.AnalysisQueue)
+		self.analysis_queue = mock.MagicMock(spec=bioprint.filemanager.AnalysisQueue)
 
-		self.slicing_manager = mock.MagicMock(spec=octoprint.slicing.SlicingManager)
+		self.slicing_manager = mock.MagicMock(spec=bioprint.slicing.SlicingManager)
 
-		self.printer_profile_manager = mock.MagicMock(spec=octoprint.printer.profile.PrinterProfileManager)
+		self.printer_profile_manager = mock.MagicMock(spec=bioprint.printer.profile.PrinterProfileManager)
 
-		self.local_storage = mock.MagicMock(spec=octoprint.filemanager.storage.LocalFileStorage)
+		self.local_storage = mock.MagicMock(spec=bioprint.filemanager.storage.LocalFileStorage)
 		self.local_storage.analysis_backlog = iter([])
 
 		self.storage_managers = dict()
-		self.storage_managers[octoprint.filemanager.FileDestinations.LOCAL] = self.local_storage
+		self.storage_managers[bioprint.filemanager.FileDestinations.LOCAL] = self.local_storage
 
-		self.file_manager = octoprint.filemanager.FileManager(self.analysis_queue, self.slicing_manager, self.printer_profile_manager, initial_storage_managers=self.storage_managers)
+		self.file_manager = bioprint.filemanager.FileManager(self.analysis_queue, self.slicing_manager, self.printer_profile_manager, initial_storage_managers=self.storage_managers)
 
 	def cleanUp(self):
 		self.event_manager_patcher.stop()
@@ -151,57 +151,57 @@ class FileManagerTest(unittest.TestCase):
 		test_profile = dict(id="_default", name="My Default Profile")
 		self.printer_profile_manager.get_current_or_default.return_value = test_profile
 
-		file_path = self.file_manager.add_file(octoprint.filemanager.FileDestinations.LOCAL, "test.file", wrapper)
+		file_path = self.file_manager.add_file(bioprint.filemanager.FileDestinations.LOCAL, "test.file", wrapper)
 
 		self.assertEquals(("", "test.file"), file_path)
 		self.local_storage.add_file.assert_called_once_with("test.file", wrapper, printer_profile=test_profile, allow_overwrite=False, links=None)
-		self.fire_event.assert_called_once_with(octoprint.filemanager.Events.UPDATED_FILES, dict(type="printables"))
+		self.fire_event.assert_called_once_with(bioprint.filemanager.Events.UPDATED_FILES, dict(type="printables"))
 
 	def test_remove_file(self):
-		self.file_manager.remove_file(octoprint.filemanager.FileDestinations.LOCAL, "test.file")
+		self.file_manager.remove_file(bioprint.filemanager.FileDestinations.LOCAL, "test.file")
 
 		self.local_storage.remove_file.assert_called_once_with("test.file")
-		self.fire_event.assert_called_once_with(octoprint.filemanager.Events.UPDATED_FILES, dict(type="printables"))
+		self.fire_event.assert_called_once_with(bioprint.filemanager.Events.UPDATED_FILES, dict(type="printables"))
 
 	def test_add_folder(self):
 		self.local_storage.add_folder.return_value = ("", "test_folder")
 
-		folder_path = self.file_manager.add_folder(octoprint.filemanager.FileDestinations.LOCAL, "test_folder")
+		folder_path = self.file_manager.add_folder(bioprint.filemanager.FileDestinations.LOCAL, "test_folder")
 
 		self.assertEquals(("", "test_folder"), folder_path)
 		self.local_storage.add_folder.assert_called_once_with("test_folder", ignore_existing=True)
-		self.fire_event.assert_called_once_with(octoprint.filemanager.Events.UPDATED_FILES, dict(type="printables"))
+		self.fire_event.assert_called_once_with(bioprint.filemanager.Events.UPDATED_FILES, dict(type="printables"))
 
 	def test_add_folder_not_ignoring_existing(self):
 		self.local_storage.add_folder.side_effect = RuntimeError("already there")
 
 		try:
-			self.file_manager.add_folder(octoprint.filemanager.FileDestinations.LOCAL, "test_folder", ignore_existing=False)
+			self.file_manager.add_folder(bioprint.filemanager.FileDestinations.LOCAL, "test_folder", ignore_existing=False)
 			self.fail("Expected an exception to occur!")
 		except RuntimeError as e:
 			self.assertEquals("already there", e.message)
 		self.local_storage.add_folder.assert_called_once_with("test_folder", ignore_existing=False)
 
 	def test_remove_folder(self):
-		self.file_manager.remove_folder(octoprint.filemanager.FileDestinations.LOCAL, "test_folder")
+		self.file_manager.remove_folder(bioprint.filemanager.FileDestinations.LOCAL, "test_folder")
 
 		self.local_storage.remove_folder.assert_called_once_with("test_folder", recursive=True)
-		self.fire_event.assert_called_once_with(octoprint.filemanager.Events.UPDATED_FILES, dict(type="printables"))
+		self.fire_event.assert_called_once_with(bioprint.filemanager.Events.UPDATED_FILES, dict(type="printables"))
 
 	def test_remove_folder_nonrecursive(self):
-		self.file_manager.remove_folder(octoprint.filemanager.FileDestinations.LOCAL, "test_folder", recursive=False)
+		self.file_manager.remove_folder(bioprint.filemanager.FileDestinations.LOCAL, "test_folder", recursive=False)
 		self.local_storage.remove_folder.assert_called_once_with("test_folder", recursive=False)
 
 	def test_get_metadata(self):
 		expected = dict(key="value")
 		self.local_storage.get_metadata.return_value = expected
 
-		metadata = self.file_manager.get_metadata(octoprint.filemanager.FileDestinations.LOCAL, "test.file")
+		metadata = self.file_manager.get_metadata(bioprint.filemanager.FileDestinations.LOCAL, "test.file")
 
 		self.assertEquals(metadata, expected)
 		self.local_storage.get_metadata.assert_called_once_with("test.file")
 
-	@mock.patch("octoprint.filemanager.util.atomic_write")
+	@mock.patch("bioprint.filemanager.util.atomic_write")
 	@mock.patch("io.FileIO")
 	@mock.patch("shutil.copyfileobj")
 	@mock.patch("os.remove")
@@ -258,7 +258,7 @@ class FileManagerTest(unittest.TestCase):
 			self.assertIsNone(position)
 			self.assertIsNotNone(on_progress)
 			self.assertIsNotNone(on_progress_args)
-			self.assertTupleEqual(("some_slicer", octoprint.filemanager.FileDestinations.LOCAL, "source.file", octoprint.filemanager.FileDestinations.LOCAL, "dest.file"), on_progress_args)
+			self.assertTupleEqual(("some_slicer", bioprint.filemanager.FileDestinations.LOCAL, "source.file", bioprint.filemanager.FileDestinations.LOCAL, "dest.file"), on_progress_args)
 			self.assertIsNone(on_progress_kwargs)
 
 			if not callback_args:
@@ -267,11 +267,11 @@ class FileManagerTest(unittest.TestCase):
 		self.slicing_manager.slice.side_effect = slice
 
 		##~~ execute tested method
-		self.file_manager.slice("some_slicer", octoprint.filemanager.FileDestinations.LOCAL, "source.file", octoprint.filemanager.FileDestinations.LOCAL, "dest.file", callback=callback, callback_args=callback_args)
+		self.file_manager.slice("some_slicer", bioprint.filemanager.FileDestinations.LOCAL, "source.file", bioprint.filemanager.FileDestinations.LOCAL, "dest.file", callback=callback, callback_args=callback_args)
 
 		# assert that events where fired
-		expected_events = [mock.call(octoprint.filemanager.Events.SLICING_STARTED, {"stl": "source.file", "gcode": "dest.file", "progressAvailable": False}),
-		                   mock.call(octoprint.filemanager.Events.SLICING_DONE, {"stl": "source.file", "gcode": "dest.file", "time": 15.694000005722046})]
+		expected_events = [mock.call(bioprint.filemanager.Events.SLICING_STARTED, {"stl": "source.file", "gcode": "dest.file", "progressAvailable": False}),
+		                   mock.call(bioprint.filemanager.Events.SLICING_DONE, {"stl": "source.file", "gcode": "dest.file", "time": 15.694000005722046})]
 		self.fire_event.call_args_list = expected_events
 
 		# assert that model links were added
@@ -286,7 +286,7 @@ class FileManagerTest(unittest.TestCase):
 		# assert that shutil was asked to copy the concatenated multistream
 		self.assertEquals(1, len(mocked_shutil.call_args_list))
 		shutil_call_args = mocked_shutil.call_args_list[0]
-		self.assertTrue(isinstance(shutil_call_args[0][0], octoprint.filemanager.util.MultiStream))
+		self.assertTrue(isinstance(shutil_call_args[0][0], bioprint.filemanager.util.MultiStream))
 		multi_stream = shutil_call_args[0][0]
 		self.assertEquals(2, len(multi_stream.streams))
 		self.assertTrue(isinstance(multi_stream.streams[0], io.BytesIO))
@@ -331,7 +331,7 @@ class FileManagerTest(unittest.TestCase):
 			self.assertIsNone(position)
 			self.assertIsNotNone(on_progress)
 			self.assertIsNotNone(on_progress_args)
-			self.assertTupleEqual(("some_slicer", octoprint.filemanager.FileDestinations.LOCAL, "source.file", octoprint.filemanager.FileDestinations.LOCAL, "dest.file"), on_progress_args)
+			self.assertTupleEqual(("some_slicer", bioprint.filemanager.FileDestinations.LOCAL, "source.file", bioprint.filemanager.FileDestinations.LOCAL, "dest.file"), on_progress_args)
 			self.assertIsNone(on_progress_kwargs)
 
 			if not callback_args:
@@ -340,11 +340,11 @@ class FileManagerTest(unittest.TestCase):
 		self.slicing_manager.slice.side_effect = slice
 
 		##~~ execute tested method
-		self.file_manager.slice("some_slicer", octoprint.filemanager.FileDestinations.LOCAL, "source.file", octoprint.filemanager.FileDestinations.LOCAL, "dest.file", callback=callback, callback_args=callback_args)
+		self.file_manager.slice("some_slicer", bioprint.filemanager.FileDestinations.LOCAL, "source.file", bioprint.filemanager.FileDestinations.LOCAL, "dest.file", callback=callback, callback_args=callback_args)
 
 		# assert that events where fired
-		expected_events = [mock.call(octoprint.filemanager.Events.SLICING_STARTED, {"stl": "source.file", "gcode": "dest.file"}),
-		                   mock.call(octoprint.filemanager.Events.SLICING_FAILED, {"stl": "source.file", "gcode": "dest.file", "reason": "Something went wrong"})]
+		expected_events = [mock.call(bioprint.filemanager.Events.SLICING_STARTED, {"stl": "source.file", "gcode": "dest.file"}),
+		                   mock.call(bioprint.filemanager.Events.SLICING_FAILED, {"stl": "source.file", "gcode": "dest.file", "reason": "Something went wrong"})]
 		self.fire_event.call_args_list = expected_events
 
 		# assert that the temporary file was deleted

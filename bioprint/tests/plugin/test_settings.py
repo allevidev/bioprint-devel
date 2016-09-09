@@ -3,7 +3,7 @@ from __future__ import absolute_import
 
 __author__ = "Gina Häußge <osd@foosel.net>"
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
-__copyright__ = "Copyright (C) 2014 The OctoPrint Project - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2014 The bioprint Project - Released under terms of the AGPLv3 License"
 
 
 import unittest
@@ -12,8 +12,8 @@ import warnings
 
 from ddt import ddt, unpack, data
 
-import octoprint.plugin
-import octoprint.settings
+import bioprint.plugin
+import bioprint.settings
 
 @ddt
 class SettingsTestCase(unittest.TestCase):
@@ -23,7 +23,7 @@ class SettingsTestCase(unittest.TestCase):
 
 		self.plugin_key = "test_plugin"
 
-		self.settings = mock.create_autospec(octoprint.settings.Settings)
+		self.settings = mock.create_autospec(bioprint.settings.Settings)
 
 		self.defaults = dict(
 			some_raw_key="some_raw_value",
@@ -48,7 +48,7 @@ class SettingsTestCase(unittest.TestCase):
 			)
 		)
 
-		self.plugin_settings = octoprint.plugin.PluginSettings(self.settings,
+		self.plugin_settings = bioprint.plugin.PluginSettings(self.settings,
 		                                                       self.plugin_key,
 		                                                       defaults=self.defaults,
 		                                                       get_preprocessors=self.get_preprocessors,

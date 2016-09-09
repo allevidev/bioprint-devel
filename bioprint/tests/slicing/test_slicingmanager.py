@@ -3,12 +3,12 @@ from __future__ import absolute_import
 
 __author__ = "Gina Häußge <osd@foosel.net>"
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
-__copyright__ = "Copyright (C) 2014 The OctoPrint Project - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2014 The bioprint Project - Released under terms of the AGPLv3 License"
 
 import unittest
 import mock
 
-import octoprint.slicing
+import bioprint.slicing
 
 class TestSlicingManager(unittest.TestCase):
 
@@ -23,19 +23,19 @@ class TestSlicingManager(unittest.TestCase):
 		self.slicer_plugin.is_slicer_configured.return_value = True
 
 		# mock plugin manager
-		self.plugin_manager_patcher = mock.patch("octoprint.plugin.plugin_manager")
+		self.plugin_manager_patcher = mock.patch("bioprint.plugin.plugin_manager")
 		self.plugin_manager = self.plugin_manager_patcher.start()
 		self._mock_slicer_plugins(self.slicer_plugin)
 
 		# mock profile manager
-		self.printer_profile_manager = mock.MagicMock(spec=octoprint.printer.profile.PrinterProfileManager)
+		self.printer_profile_manager = mock.MagicMock(spec=bioprint.printer.profile.PrinterProfileManager)
 
 		# mock settings
-		self.settings_patcher = mock.patch("octoprint.slicing.settings")
+		self.settings_patcher = mock.patch("bioprint.slicing.settings")
 		settings = self.settings_patcher.start()
 		self.settings = settings.return_value
 
-		self.slicing_manager = octoprint.slicing.SlicingManager(self.profile_path, self.printer_profile_manager)
+		self.slicing_manager = bioprint.slicing.SlicingManager(self.profile_path, self.printer_profile_manager)
 		self.slicing_manager.initialize()
 
 	def tearDown(self):
@@ -48,8 +48,8 @@ class TestSlicingManager(unittest.TestCase):
 
 	def _mock_slicer_plugins(self, *plugins):
 		def get_implementations(*types):
-			import octoprint.plugin
-			if octoprint.plugin.SlicerPlugin in types:
+			import bioprint.plugin
+			if bioprint.plugin.SlicerPlugin in types:
 				return plugins
 			return dict()
 		self.plugin_manager.return_value.get_implementations.side_effect = get_implementations
@@ -94,7 +94,7 @@ class TestSlicingManager(unittest.TestCase):
 			return dict()
 		self.settings.get.side_effect = get
 
-		default_profile = octoprint.slicing.SlicingProfile("mock", "default", dict(layer_height=0.2, fill_density=40))
+		default_profile = bioprint.slicing.SlicingProfile("mock", "default", dict(layer_height=0.2, fill_density=40))
 		self.slicer_plugin.get_slicer_default_profile.return_value = default_profile
 
 		# mock threading

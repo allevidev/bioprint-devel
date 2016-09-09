@@ -7,7 +7,7 @@ import versioneer
 
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "src"))
-import octoprint_setuptools
+import bioprint_setuptools
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -39,7 +39,7 @@ INSTALL_REQUIRES = [
 
 # Additional requirements for optional install options
 EXTRA_REQUIRES = dict(
-	# Dependencies for developing OctoPrint
+	# Dependencies for developing bioprint
 	develop=[
 		# Testing dependencies
 		"mock>=1.0.1",
@@ -52,7 +52,7 @@ EXTRA_REQUIRES = dict(
 		"sphinx_rtd_theme"
 	],
 
-	# Dependencies for developing OctoPrint plugins
+	# Dependencies for developing bioprint plugins
 	plugins=[
 		"cookiecutter"
 	]
@@ -63,8 +63,8 @@ DEPENDENCY_LINKS = []
 
 # Versioneer configuration
 versioneer.VCS = 'git'
-versioneer.versionfile_source = 'src/octoprint/_version.py'
-versioneer.versionfile_build = 'octoprint/_version.py'
+versioneer.versionfile_source = 'src/bioprint/_version.py'
+versioneer.versionfile_build = 'bioprint/_version.py'
 versioneer.tag_prefix = ''
 versioneer.parentdir_prefix = ''
 versioneer.lookupfile = '.versioneer-lookup'
@@ -76,19 +76,19 @@ def get_cmdclass():
 	cmdclass = versioneer.get_cmdclass()
 
 	# add clean command
-	cmdclass.update(dict(clean=octoprint_setuptools.CleanCommand.for_options(source_folder="src", eggs=["OctoPrint*.egg-info"])))
+	cmdclass.update(dict(clean=bioprint_setuptools.CleanCommand.for_options(source_folder="src", eggs=["bioprint*.egg-info"])))
 
 	# add translation commands
 	translation_dir = "translations"
 	pot_file = os.path.join(translation_dir, "messages.pot")
-	bundled_dir = os.path.join("src", "octoprint", "translations")
-	cmdclass.update(octoprint_setuptools.get_babel_commandclasses(pot_file=pot_file, output_dir=translation_dir, pack_name_prefix="OctoPrint-i18n-", pack_path_prefix="", bundled_dir=bundled_dir))
+	bundled_dir = os.path.join("src", "bioprint", "translations")
+	cmdclass.update(bioprint_setuptools.get_babel_commandclasses(pot_file=pot_file, output_dir=translation_dir, pack_name_prefix="bioprint-i18n-", pack_path_prefix="", bundled_dir=bundled_dir))
 
 	return cmdclass
 
 
 def params():
-	name = "OctoPrint"
+	name = "bioprint"
 	version = versioneer.get_version()
 	cmdclass = get_cmdclass()
 
@@ -115,7 +115,7 @@ def params():
 	]
 	author = "Gina Häußge"
 	author_email = "osd@foosel.net"
-	url = "http://octoprint.org"
+	url = "http://bioprint.org"
 	license = "AGPLv3"
 
 	packages = find_packages(where="src")
@@ -123,7 +123,7 @@ def params():
 		"": "src"
 	}
 	package_data = {
-		"octoprint": octoprint_setuptools.package_data_dirs('src/octoprint', ['static', 'templates', 'plugins', 'translations'])
+		"bioprint": bioprint_setuptools.package_data_dirs('src/bioprint', ['static', 'templates', 'plugins', 'translations'])
 	}
 
 	include_package_data = True
@@ -140,7 +140,7 @@ def params():
 
 	entry_points = {
 		"console_scripts": [
-			"octoprint = octoprint:main"
+			"bioprint = bioprint:main"
 		]
 	}
 

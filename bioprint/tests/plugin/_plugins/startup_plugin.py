@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
-import octoprint.plugin
+import bioprint.plugin
 
 
-class TestStartupPlugin(octoprint.plugin.StartupPlugin):
+class TestStartupPlugin(bioprint.plugin.StartupPlugin):
 	pass
 
 

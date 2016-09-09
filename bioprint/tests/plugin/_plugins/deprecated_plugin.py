@@ -1,13 +1,13 @@
 # coding=utf-8
 from __future__ import absolute_import
 
-import octoprint.plugin
+import bioprint.plugin
 
-class TestDeprecatedAssetPlugin(octoprint.plugin.AssetPlugin):
+class TestDeprecatedAssetPlugin(bioprint.plugin.AssetPlugin):
 	pass
 
 
-class TestSecondaryDeprecatedAssetPlugin(octoprint.plugin.AssetPlugin):
+class TestSecondaryDeprecatedAssetPlugin(bioprint.plugin.AssetPlugin):
 	pass
 
 
