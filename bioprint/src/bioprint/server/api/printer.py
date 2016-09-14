@@ -320,9 +320,20 @@ def printerPrintheadCommand():
 
 		s = settings()
 
-		s.set(["positions", str(data["wellplate"]), "X"], data["positions"]["tool0"]["X"])
-		s.set(["positions", str(data["wellplate"]), "Y"], data["positions"]["tool0"]["Y"])
+		if data["positions"]["tool0"]["X"] != -1:
+			s.set(["positions", str(data["wellplate"]), "tool0", "X"], data["positions"]["tool0"]["X"])
+		if data["positions"]["tool0"]["Y"] != -1:			
+			s.set(["positions", str(data["wellplate"]), "tool0", "Y"], data["positions"]["tool0"]["Y"])
+		if data["positions"]["tool0"]["Z"] != -1:
+			s.set(["positions", str(data["wellplate"]), "tool0", "Z"], data["positions"]["tool0"]["Z"])
 
+		if data["positions"]["tool1"]["X"] != -1:
+			s.set(["positions", str(data["wellplate"]), "tool1", "X"], data["positions"]["tool1"]["X"])
+		if data["positions"]["tool1"]["Y"] != -1:			
+			s.set(["positions", str(data["wellplate"]), "tool1", "Y"], data["positions"]["tool1"]["Y"])
+		if data["positions"]["tool1"]["Z"] != -1:
+			s.set(["positions", str(data["wellplate"]), "tool1", "Z"], data["positions"]["tool1"]["Z"])
+			
 		s.save()
 
 		if s.save():

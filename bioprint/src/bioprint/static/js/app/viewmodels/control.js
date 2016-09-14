@@ -39,7 +39,8 @@ $(function() {
         self.extruder1TempTarget = ko.observable(undefined);
         self.extruder1XPos = -1;
         self.extruder1YPos = -1;
-        self.extruder1EPos = -1;
+        self.extruder1EPos = 46;
+        self.extruder1ZPos = -1;
         self.extruder1Selected = ko.observable(false);
         self.extruder1Extruding = ko.observable(false);
 
@@ -48,7 +49,8 @@ $(function() {
         self.extruder2TempTarget = ko.observable(undefined);
         self.extruder2XPos = -1;
         self.extruder2YPos = -1;
-        self.extruder2EPos = -1;
+        self.extruder2EPos = 0;
+        self.extruder2ZPos = -1;
         self.extruder2Selected = ko.observable(false);
         self.extruder2Extruding = ko.observable(false);
 
@@ -1073,9 +1075,11 @@ $(function() {
                 dataType: "json",
                 contentType: "application/json; charset=UTF-8",
                 success: function (response) {
-                    console.log(self.wellPlate())
+
                     positions = response["positions"][self.wellPlate()];
                  
+                    console.log(positions);
+
                     self.sendPrintHeadCommand({
                         "command": "wellplate",
                         "wellplate": self.wellPlate()
@@ -1086,7 +1090,7 @@ $(function() {
                             'G90',
                             'G1 Z50 E'+ self.midpoint +'F1000',
                             'G1 X' + positions["X"] + ' Y' + positions["Y"] + ' F2000',
-                            'G1 Z0 F1000']
+                            'G1 E' + self.extruder1EPos + ' F1000']
                     });
                 }
             })            
@@ -1096,11 +1100,11 @@ $(function() {
             if (tool == 'tool0') {
                 self.extruder1XPos = self.position["X"]
                 self.extruder1YPos = self.position["Y"]
-                self.extruder1EPos = self.position["E"]
+                self.extruder1ZPos = self.position["Z"]
             } else if (tool == 'tool1') {
                 self.extruder2XPos = self.position["X"]
                 self.extruder2YPos = self.position["Y"]
-                self.extruder2EPos = self.position["E"]
+                self.extruder2ZPos = self.position["Z"]
             }
 
             if (tool == 'tool0') {
@@ -1115,12 +1119,12 @@ $(function() {
                     "tool0" : {
                         "X": self.extruder1XPos,
                         "Y": self.extruder1YPos,
-                        "E": self.extruder1EPos
+                        "Z": self.extruder1ZPos
                     },
                     "tool1" : {
                         "X": self.extruder2XPos,
                         "Y": self.extruder2YPos,
-                        "E": self.extruder2EPos
+                        "Z": self.extruder2ZPos
                     }
                 }
             });
