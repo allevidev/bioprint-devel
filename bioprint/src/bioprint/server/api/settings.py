@@ -124,22 +124,27 @@ def getSettings():
 			"1": {
 				"X": s.get(["positions", "1", "X"]),
 				"Y": s.get(["positions", "1", "Y"]),
+				"Z": s.get(["positions", "1", "Z"])
 			},
 			"6": {
 				"X": s.get(["positions", "6", "X"]),
 				"Y": s.get(["positions", "6", "Y"]),
+				"Z": s.get(["positions", "6", "Z"])
 			},
 			"12": {
 				"X": s.get(["positions", "12", "X"]),
 				"Y": s.get(["positions", "12", "Y"]),
+				"Z": s.get(["positions", "12", "Z"])
 			},
 			"24": {
 				"X": s.get(["positions", "24", "X"]),
 				"Y": s.get(["positions", "24", "Y"]),
+				"Z": s.get(["positions", "24", "Z"])
 			},
 			"96": {
 				"X": s.get(["positions", "96", "X"]),
 				"Y": s.get(["positions", "96", "Y"]),
+				"Z": s.get(["positions", "96", "Z"])
 			},
 		},
 		"server": {

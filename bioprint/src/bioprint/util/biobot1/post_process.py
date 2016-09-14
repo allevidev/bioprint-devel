@@ -385,7 +385,7 @@ def start_extrude(extruder, e0_pos, e1_pos, z):
         target = e1_pos
     commands = [
         'G1 E' + str(target) + ' ; Move extruder to E' + str(extruder) + ' position of ' + str(target),
-        'G1 Z' + str(z),
+        'G1 Z' + str(z[extruder]),
         'M400 ; wait for commands to complete',
         'M42 P' + str(onPin) + ' S255 ; turn extruder ' + str(extruder) + ' on',
         'M400 ; wait for commands to complete']
@@ -452,7 +452,7 @@ def crosslink(cl_x, cl_y, target_x, target_y, z, wellplate, cl_duration, cl_inte
         'G1 Z50 F1000',
         'G1 E' + str(mid),
         'G1 X' + str(cl_x) + ' Y' + str(cl_y),
-        'G1 Z' + str(cl_z[wellplate] + z),
+        'G1 Z' + str(cl_z[wellplate] + z[1]),
         'G1 E' + str(0),
         'M400',
         'M42 P4 S' + str(cl_intensity) + ' ; CROSSLINK HERE',
@@ -461,7 +461,7 @@ def crosslink(cl_x, cl_y, target_x, target_y, z, wellplate, cl_duration, cl_inte
         'G1 Z50 F1000',
         'G1 E' + str(mid),
         'G1 X' + str(target_x) + ' Y' + str(target_y),
-        'G1 Z' + str(z)
+        'G1 Z' + str(z[1])
     ]
 
     return '\n'.join(commands)
@@ -472,11 +472,13 @@ def calculate_wellplate_positions(positions):
             0: {
                 0: {
                     "X": float(positions["tool0"]["X"]),
-                    "Y": float(positions["tool0"]["Y"])
+                    "Y": float(positions["tool0"]["Y"]),
+                    "Z": float(positions["tool0"]["Z"])
                 },
                 1: {
                     "X": float(positions["tool1"]["X"]),
-                    "Y": float(positions["tool1"]["Y"])
+                    "Y": float(positions["tool1"]["Y"]),
+                    "Z": float(positions["tool1"]["Z"])
                 }
             }
         }
@@ -490,11 +492,13 @@ def calculate_wellplate_positions(positions):
             row_out[j] = {
                 0: {
                     "X": float(positions["tool0"]["X"]) + j * 39.12,
-                    "Y": float(positions["tool0"]["Y"]) + i * 39.12
+                    "Y": float(positions["tool0"]["Y"]) + i * 39.12,
+                    "Z": float(positions["tool0"]["Z"])
                 },
                 1: {
                     "X": float(positions["tool1"]["X"]) + j * 39.12,
-                    "Y": float(positions["tool1"]["Y"]) + i * 39.12
+                    "Y": float(positions["tool1"]["Y"]) + i * 39.12,
+                    "Z": float(positions["tool1"]["Z"])
                 }
             }
         out_6[row_6[i]] = row_out
@@ -507,11 +511,13 @@ def calculate_wellplate_positions(positions):
             row_out[j] = {
                 0: {
                     "X": float(positions["tool0"]["X"]) + j * 26.01,
-                    "Y": float(positions["tool0"]["Y"]) + i * 26.01
+                    "Y": float(positions["tool0"]["Y"]) + i * 26.01,
+                    "Z": float(positions["tool0"]["Z"])
                 },
                 1: {
                     "X": float(positions["tool1"]["X"]) + j * 26.01,
-                    "Y": float(positions["tool1"]["Y"]) + i * 26.01
+                    "Y": float(positions["tool1"]["Y"]) + i * 26.01,
+                    "Z": float(positions["tool1"]["Z"])
                 }
             }
         out_12[row_12[i]] = row_out
@@ -524,11 +530,13 @@ def calculate_wellplate_positions(positions):
             row_out[j] = {
                 0: {
                     "X": float(positions["tool0"]["X"]) + j * 19.3,
-                    "Y": float(positions["tool0"]["Y"]) + i * 19.3
+                    "Y": float(positions["tool0"]["Y"]) + i * 19.3,
+                    "Z": float(positions["tool0"]["Z"])
                 },
                 1: {
                     "X": float(positions["tool1"]["X"]) + j * 19.3,
-                    "Y": float(positions["tool1"]["Y"]) + i * 19.3
+                    "Y": float(positions["tool1"]["Y"]) + i * 19.3,
+                    "Z": float(positions["tool1"]["Z"])
                 }
             }
         out_24[row_24[i]] = row_out
@@ -541,11 +549,13 @@ def calculate_wellplate_positions(positions):
             row_out[j] = {
                 0: {
                     "X": float(positions["tool0"]["X"]) + j * 9,
-                    "Y": float(positions["tool0"]["Y"]) + i * 9
+                    "Y": float(positions["tool0"]["Y"]) + i * 9,
+                    "Z": float(positions["tool0"]["Z"])
                 },
                 1: {
                     "X": float(positions["tool1"]["X"]) + j * 9,
-                    "Y": float(positions["tool1"]["Y"]) + i * 9
+                    "Y": float(positions["tool1"]["Y"]) + i * 9,
+                    "Z": float(positions["tool1"]["Z"])
                 }
             }
         out_96[row_96[i]] = row_out
@@ -581,8 +591,8 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
     wellPlatePositions = calculate_wellplate_positions(positions)
     rows = sorted(wellPlatePositions[wellPlate].keys())
 
-    e0_pos = positions["tool0"]["E"]
-    e1_pos = positions["tool1"]["E"]
+    e0_pos = 46
+    e1_pos = 0
     filename = str(payload["file"])
 
     fName = '.'.join(str.split(filename, '.')[0:-1])
@@ -603,7 +613,7 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
         active_e = 0
         last_e = 0
         extruding = False
-        layer_z = 0
+        layer_z = [positions["tool0"]["Z"],positions["tool1"]["Z"]]
         for r in rows:
             columns = sorted(wellPlatePositions[wellPlate][r].keys())
             for c in columns:
@@ -611,9 +621,11 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
 
                 e0_Xctr = wellPlatePositions[wellPlate][r][c][0]["X"]
                 e0_Yctr = wellPlatePositions[wellPlate][r][c][0]["Y"]
+                e0_Z = wellPlatePositions[wellPlate][r][c][0]["Z"]
 
                 e1_Xctr = wellPlatePositions[wellPlate][r][c][1]["X"]
                 e1_Yctr = wellPlatePositions[wellPlate][r][c][1]["Y"]
+                e1_Z = wellPlatePositions[wellPlate][r][c][1]["Z"]
                 x_pos, x_pos_old = [e0_Xctr, e1_Xctr], [e0_Xctr, e1_Xctr]
                 y_pos, y_pos_old = [e0_Yctr, e1_Yctr], [e0_Yctr, e1_Yctr]
                 with open(filename, 'r') as f:
@@ -635,7 +647,9 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
                                         target_x = e1_Xctr
                                         target_y = e1_Yctr
                                     o.write(crosslink(e1_Xctr, e1_Yctr, target_x, target_y, layer_z, wellPlate, cl_params["cl_duration"], cl_params["cl_intensity"]) + '\n')
-                            layer_z = z_value(line)
+                            
+                            layer_z[0] = z_value(line) + e0_Z
+                            layer_z[1] = z_value(line) + e1_Z
                             layer += 1
                             next
                         if m_value(line) == 190.0 or m_value(line) == 104.0 or m_value(line) == 109.0:
@@ -745,7 +759,8 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
                 "pressure": tempData['bed']['actual'],
                 "X": positions["tool0"]["X"],
                 "Y": positions["tool0"]["Y"],
-                "E": positions["tool0"]["E"]
+                "Z": positions["tool0"]["Z"],
+                "E": e0_pos
             }
             tool1 = {
                 "temperature": {
@@ -755,7 +770,8 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
                 "pressure": tempData['tool2']['actual'],
                 "X": positions["tool1"]["X"],
                 "Y": positions["tool1"]["Y"],
-                "E": positions["tool1"]["E"]
+                "Z": positions["tool1"]["Z"],
+                "E": e1_pos
             }
 
             print_info = {
@@ -784,20 +800,20 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
 
 test_payload = {
     'origin': 'local', 
-    'file': '/Users/karanhiremath/Downloads/dual_ring_0.2mm.gcode',
-    'filename': u'/Users/karanhiremath/Downloads/dual_ring_0.2mm.gcode'
+    'file': 'test_files/test_lattice.gcode',
+    'filename': u'test_files/test_lattice.gcode'
 }
 
 test_positions = {
     "tool0": {
         "X": 11.20,
         "Y": 63,
-        "E": 24
+        "Z": 16
     },
     "tool1": {
         "X": 59.53,
         "Y": 63,
-        "E": 24
+        "Z": 13
     },
 }
 
@@ -811,6 +827,6 @@ cl_params = {
     "cl_end_intensity": 100
 }
 
-# post_process(test_payload, test_positions, 1, cl_params)
+# post_process(test_payload, test_positions, 1, cl_params, None)
 # print calculate_wellplate_positions(test_positions, 24)
 

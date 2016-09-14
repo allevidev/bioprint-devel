@@ -158,6 +158,8 @@ $(function() {
 
         self.terminalFilters = ko.observableArray([]);
 
+        self.positions = ko.observable(undefined);
+
         self.server_commands_systemShutdownCommand = ko.observable(undefined);
         self.server_commands_systemRestartCommand = ko.observable(undefined);
         self.server_commands_serverRestartCommand = ko.observable(undefined);
@@ -467,6 +469,8 @@ $(function() {
 
             self.terminalFilters(response.terminalFilters);
 
+            self.positions(response.positions);
+
             self.server_commands_systemShutdownCommand(response.server.commands.systemShutdownCommand);
             self.server_commands_systemRestartCommand(response.server.commands.systemRestartCommand);
             self.server_commands_serverRestartCommand(response.server.commands.serverRestartCommand);
@@ -557,6 +561,7 @@ $(function() {
                             "afterPrinterConnected": self.scripts_gcode_afterPrinterConnected()
                         }
                     },
+                    "positions": self.positions(),
                     "server": {
                         "commands": {
                             "systemShutdownCommand": self.server_commands_systemShutdownCommand(),
