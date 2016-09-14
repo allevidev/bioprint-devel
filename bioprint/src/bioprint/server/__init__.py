@@ -172,7 +172,7 @@ class Server():
 			self._logger.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_tb))
 		sys.excepthook = exception_logger
 		self._logger.info("Starting bioprint %s" % DISPLAY_VERSION)
-		self._logger.info("Bioprint Version %s" % 1.3)
+		self._logger.info("Bioprint Version %s" % 1.4)
 
 		# then initialize the plugin manager
 		pluginManager = bioprint.plugin.plugin_manager(init=True)
