@@ -288,4 +288,5 @@ src/bioprint/util/avr_isp/ispBase.py
 src/bioprint/util/avr_isp/stk500v2.py
 src/bioprint/util/biobot1/__init__.py
 src/bioprint/util/biobot1/post_process.py
+src/bioprint/util/biobot1/post_process_v2.py
 src/bioprint_setuptools/__init__.py
