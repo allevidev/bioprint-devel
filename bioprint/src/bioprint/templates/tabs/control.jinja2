@@ -143,11 +143,69 @@
                 <div class="span6 jog-panel">
                     <h1 data-bind="text: name"></h1>
                     <div>
+
+                    <select style="width: 100%">
+                      <option value="5366666667kft">PCL</option>
+                      <option value="8tny3ing4">Default</option>
+                      <option value="n39875yn9v385g">UMN</option>
+                      <option value="nv8y5g3753g">LAB</option>
+                    </select>
+
+                  
+  <h3 style="text-align: left">Position:</h3>
+
+                    <form action="action_page.php">
+                 
+                      <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">X-Position:</p>
+                      <input style="width:30%; float: right" type="text" name="x-position" value="0">
+                     
+                      <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Y-Position:</p>
+                      <input style="width:30%; float: right" type="text" name="y-position" value="0">
+                     
+                      <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Z-Position:</p>
+                      <input style="width:30%; float: right" type="text" name="Z-position" value="0">
+                     
+                
+                             <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting(), click: function() { $root.saveToolChangeDist(key()) }">{{ _('Update Position') }}</button>
+                    </form>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h3 style="text-align: left">Pressure:</h3>
                         <button class="btn btn-block control-box" data-bind="enable: $root.isOperational(), click: function() { $root.sendPressureIncrease(key()) }">{{ _('+') }}</button>
                         <div class="display">
                             <h2 data-bind="html: formatPressure(pressure())"></h2>
                         </div>
                         <button class="btn btn-block control-box" data-bind="enable: $root.isOperational(), click: function() { $root.sendPressureDecrease(key()) }">{{ _('-') }}</button>
+
+
+
+    <form action="action_page.php">
+                            
+                      <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Target:</p>
+                      <input style="width:40%; float: right" type="text" name="Target" value="0">
+                     
+                
+                          <button class="btn btn-block control-box" data-bind="enable: $root.isOperational(), click: function() { $root.setTargetPressure(key()) }">{{ _('Set Target') }}</button>
+                    </form>
+
+
+
                         <hr>
                         <h2 style="vertical-align: middle" data-bind="html: formatTemperature(actual())"></h2>
                         <h3>Actual</h3>

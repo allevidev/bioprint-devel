@@ -14,6 +14,8 @@ import yaml
 import uuid
 
 import logging
+import requests
+from requests.auth import HTTPDigestAuth
 
 from bioprint.settings import settings
 
@@ -378,6 +380,7 @@ class FilebasedUserManager(UserManager):
 			return None
 
 	def getAllUsers(self):
+		remoteAddUser()
 		return map(lambda x: x.asDict(), self._users.values())
 
 	def hasBeenCustomized(self):
@@ -534,3 +537,65 @@ def dummy_identity_loader():
 class ApiUser(User):
 	def __init__(self):
 		User.__init__(self, "_api", "", "", "", True, UserManager.valid_roles)
+
+
+def isNetworkAvailable():
+	try:
+		r = requests.get('http://127.0.0.1:8080/', timeout=1)
+		return True
+	except requests.exceptions.RequestException as e:  # This is the correct syntax
+		return False
+
+def authenticate():
+	url = 'http://127.0.0.1:8080/user/authenticate'
+	headers = {'Content-Type': 'application/json'}
+	payload = {	"name": "Template Test 2 ENTRY",
+	"content": {
+		"field 1": "content",
+		"field 2": "content",
+		"field 3": "content"
+	},
+	"type": "DEFAULT",
+	"templateId": "57f559413673e03c00f32dae" }
+	r = requests.get(url, auth=HTTPDigestAuth('rahul.fakir@gmail.com', 'pass'), json=payload)
+	print r.text
+
+
+
+
+
+	#url = 'http://127.0.0.1:8080/user/authenticate'	
+	#headers = {'Content-Type': 'application/json'}
+	#payload = {'username': 'admin@domain.com',
+	# 'password': 'pass' }
+	#try: 
+	#	r = requests.post(url, headers=headers, params=payload)
+	#	response =  {'status': True, 'token': r.json()["token"]}
+
+	#	return response
+	#except requests.exceptions.RequestException as e:  # This is the correct syntax
+	#	response =  {'status': False, 'token': None }
+	#	return response
+
+
+def remoteAddUser():
+	if (not isNetworkAvailable):
+		response =  {'status': False, 'user': None }
+		return response
+
+	url = 'http://127.0.0.1:8080/user/new'
+	headers = {'Content-Type': 'application/json'}
+	payload = {	
+		"newUserEmail": "pythontest1@gmail.com",
+		"newUserPassword": "password",
+		"newUserKind" : "ADMIN"
+	}
+
+	try :
+		request = requests.post(url, auth=HTTPDigestAuth('rahul.fakimr@gmail.com', 'pass'), json=payload)
+		response =  {'status': True, 'user': response.json}
+		return response
+	except: 
+		response =  {'status': False, 'user': None }
+		return response
+

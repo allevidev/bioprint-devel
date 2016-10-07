@@ -1031,6 +1031,60 @@ $(function() {
             })
         }
 
+        self.setTargetPressure = function(extruder) {
+            
+            if (extruder == "tool0") {
+                var regulator = 'L';
+            } else if (extruder == "tool1") {
+                var regulator = 'R';
+            }
+           
+
+   $.ajax({
+                url: API_BASEURL + "printer/tool",
+                type: "GET",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                success: function(state) {
+console.log(state);
+                    self.extruder1Temp = state['tool0']['actual'];
+                    self.extruder2Temp = state['tool1']['actual'];
+                    self.extruder2Pressure = state['tool2']['actual'];
+
+     self.sendCustomCommand({
+                type: "commands",
+                commands: [
+                "G91",
+                "G1 "+ regulator + "-0.25 ",
+                "G90",
+                "M18 " + regulator,
+                'M105'
+                ]
+            })
+//                    $('#extruder1Temp').val(self.extruder1Temp);
+//                    $('#extruder2Pressure').val(self.extruder2Pressure);
+//                    $('#extruder2Temp').val(self.extruder2Temp);
+                }
+            });
+
+    $.ajax({
+                url: API_BASEURL + "printer/bed",
+                type: "GET",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                success: function(state) {
+                    
+                    self.extruder1Pressure = state['bed']['actual'];
+
+                    $('#extruder1Pressure').val(self.extruder1Pressure);
+                }
+            });
+
+
+       
+        }
+
+
         self.sendPressureDecrease = function(extruder) {
             if (extruder == "tool0") {
                 var regulator = 'L';
@@ -1530,3 +1584,4 @@ $(function() {
         "#control"
     ]);
 });
+

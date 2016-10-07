@@ -62,7 +62,7 @@ def apiKeyRequestHandler():
 		return
 
 	# invalid api key => 401
-	return _flask.make_response("Invalid API key", 401)
+	return _flask.make_response("Invalid API key" + settings().get(["api", "key"]), 401)
 
 
 def corsResponseHandler(resp):
