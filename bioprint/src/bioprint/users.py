@@ -380,7 +380,6 @@ class FilebasedUserManager(UserManager):
 			return None
 
 	def getAllUsers(self):
-		remoteAddUser()
 		return map(lambda x: x.asDict(), self._users.values())
 
 	def hasBeenCustomized(self):
@@ -583,17 +582,44 @@ def remoteAddUser():
 		response =  {'status': False, 'user': None }
 		return response
 
-	url = 'http://127.0.0.1:8080/user/new'
+	url = 'http://127.0.0.1:8080/template/new'
 	headers = {'Content-Type': 'application/json'}
 	payload = {	
 		"newUserEmail": "pythontest1@gmail.com",
 		"newUserPassword": "password",
-		"newUserKind" : "ADMIN"
+		"newUserKind" : "ADMIN",
+
+		#wellplate temlate creation
+		"name": "Well Plate Template - TEST",
+		"type": "DEFAULT",
+		"content": {
+			"extruder1Temperature": {
+				"type": "boolean",
+				"required": True,
+				"default": True			
+			}
+		},
+
+		"name2": "PCL Extruder",
+		"content2": {
+			"extruder1Temperature": "62",
+			"extruder1Pressure": "23",
+			"extruder1X": "4",
+			"extruder1Y": "18",
+			"extruder1Z": "5",
+			"extruder2Temperature": "85",
+			"extruder2Pressure": "1",
+			"extruder2X": "15",
+			"extruder2Y": "13",
+			"extruder2Z": "12"
+		},
+		"templateId2": "57fe640eed01e51500e34125"
 	}
 
 	try :
-		request = requests.post(url, auth=HTTPDigestAuth('rahul.fakimr@gmail.com', 'pass'), json=payload)
-		response =  {'status': True, 'user': response.json}
+		request = requests.post(url, auth=HTTPDigestAuth('rahul.fakir@gmail.com', 'pass'), json=payload)
+		print request.text
+		response =  {'status': True}
 		return response
 	except: 
 		response =  {'status': False, 'user': None }

@@ -198,7 +198,7 @@
     <form action="action_page.php">
                             
                       <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Target:</p>
-                      <input style="width:40%; float: right" type="text" name="Target" value="0">
+                      <input id="extruder1TargetPressure" style="width:40%; float: right" type="text" name="Target" value="0">
                      
                 
                           <button class="btn btn-block control-box" data-bind="enable: $root.isOperational(), click: function() { $root.setTargetPressure(key()) }">{{ _('Set Target') }}</button>
