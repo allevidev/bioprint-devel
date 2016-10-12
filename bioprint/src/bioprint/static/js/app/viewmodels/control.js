@@ -119,6 +119,8 @@ $(function() {
 
         self.webcamDisableTimeout = undefined;
 
+        self.templates = ['PCL', 'Pluronic'];
+
         self.keycontrolActive = ko.observable(false);
         self.keycontrolHelpActive = ko.observable(false);
         self.keycontrolPossible = ko.computed(function () {
@@ -1375,6 +1377,17 @@ $(function() {
             })
         };
 
+        self.loadTemplates = function() {
+            $.ajax({
+                url: API_BASEURL + 'users/templates',
+                type: 'GET',
+                success: function(res) {
+                    console.log(res);
+                }
+            });
+
+        }
+
         self.sendEmergencyStop = function () {
             console.log(self.selectedPort());
 
@@ -1410,6 +1423,7 @@ $(function() {
 
         self.onStartup = function () {
             self.requestData();
+            self.loadTemplates();
         };
 
         self.updateRotatorWidth = function() {

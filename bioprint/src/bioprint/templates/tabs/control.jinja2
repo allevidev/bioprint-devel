@@ -144,15 +144,10 @@
                     <h1 data-bind="text: name"></h1>
                     <div>
 
-                    <select style="width: 100%">
-                      <option value="5366666667kft">PCL</option>
-                      <option value="8tny3ing4">Default</option>
-                      <option value="n39875yn9v385g">UMN</option>
-                      <option value="nv8y5g3753g">LAB</option>
+                    <select style="width: 100%" data-bind="options: $root.templates">
                     </select>
 
-                  
-  <h3 style="text-align: left">Position:</h3>
+                    <h3 style="text-align: left">Position:</h3>
 
                     <form action="action_page.php">
                  
@@ -168,22 +163,6 @@
                 
                              <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting(), click: function() { $root.saveToolChangeDist(key()) }">{{ _('Update Position') }}</button>
                     </form>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   <h3 style="text-align: left">Pressure:</h3>
