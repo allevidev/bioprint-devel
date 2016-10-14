@@ -141,35 +141,30 @@
 
             <script type="text/html" id="extruder-template">
                 <div class="span6 jog-panel">
-                    <h1 data-bind="text: name"></h1>
+                    <h1 data-bind="text: name "></h1>
                     <div>
 
-                    <select style="width: 100%">
-                      <option value="5366666667kft">PCL</option>
-                      <option value="8tny3ing4">Default</option>
-                      <option value="n39875yn9v385g">UMN</option>
-                      <option value="nv8y5g3753g">LAB</option>
+
+
+                    <select id="eprofiles" style="width: 100%" data-bind="onchange: function() { $root.updateExtruderPosition() }, options: $root.extruderProfiles">
                     </select>
 
-                  
   <h3 style="text-align: left">Position:</h3>
 
                     <form action="action_page.php">
                  
                       <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">X-Position:</p>
-                      <input style="width:30%; float: right" type="text" name="x-position" value="0">
+                      <input style="width:30%; float: right" type="text" name="x-position" data-bind="value: {% if "name" == 'Extruder 1' %}$root.extruder1TempXPos{% else %}$root.extruder2TempXPos{% endif %}">
                      
                       <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Y-Position:</p>
-                      <input style="width:30%; float: right" type="text" name="y-position" value="0">
+                      <input style="width:30%; float: right" type="text" name="y-position" data-bind="value: {% if 'name' == 'Extruder 1' %}$root.extruder1TempYPos{% else %}$root.extruder2TempYPos{% endif %}">
                      
                       <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Z-Position:</p>
-                      <input style="width:30%; float: right" type="text" name="Z-position" value="0">
+                      <input style="width:30%; float: right" type="text" name="Z-position" data-bind="value: {% if 'name' == 'Extruder 1' %}$root.extruder1TempZPos{% else %}$root.extruder2TempZPos{% endif %}">
                      
                 
-                             <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting(), click: function() { $root.saveToolChangeDist(key()) }">{{ _('Update Position') }}</button>
+                             <button class="btn btn-block control-box" data-bind=" click: function() { $root.saveToolChangeDist(key()) }">{{ _('Update Position') }}</button>
                     </form>
-
-
 
 
 

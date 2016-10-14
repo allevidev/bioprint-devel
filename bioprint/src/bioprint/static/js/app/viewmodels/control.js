@@ -257,6 +257,10 @@ $(function() {
             self.updateFilterRegex();
         });
 
+
+        self.extruderProfiles = [];
+
+
         self.fromCurrentData = function (data) {
             self._processStateData(data.state);
             self._processPositionData(data.position);
@@ -1409,6 +1413,7 @@ $(function() {
         };
 
         self.onStartup = function () {
+            self.loadTemplates();
             self.requestData();
         };
 
@@ -1576,6 +1581,81 @@ $(function() {
                 button.click();
             }
         };
+
+        self.extruder1TempXPos = null;
+        self.extruder1TempYPos = null;
+        self.extruder1TempZPos = null;
+
+        self.extruder2TempXPos = null;
+        self.extruder2TempYPos = null;
+        self.extruder2TempZPos = null;
+        
+        API_KEY = "AE0727B0D3044149A0AEBE3FE233698F"
+
+        self.loadTemplates = function () {
+
+           $.ajax({
+                url: API_BASEURL + "user/entries/extruder",
+                type: "GET",
+                headers: {"X-Api-Key": API_KEY},
+                contentType: "application/json; charset=UTF-8",
+                success: function(response) {
+                    if (response["status"]) {
+                     
+                        for (var i=0; i < response["result"]["entries"].length; i++) {
+
+                            self.extruderProfiles.push(response["result"]["entries"][i]["entry"]["name"]);
+                          
+                            if (i == 0) {    
+                                self.extruder1TempXPos = response["result"]["entries"][i]["entry"]["content"]["extruder1X"];
+                                self.extruder1TempYPos = response["result"]["entries"][i]["entry"]["content"]["extruder1Y"];
+                                self.extruder1TempZPos = response["result"]["entries"][i]["entry"]["content"]["extruder1Z"];
+                                
+                                self.extruder2TempXPos = response["result"]["entries"][i]["entry"]["content"]["extruder2X"];
+                                self.extruder2TempYPos = response["result"]["entries"][i]["entry"]["content"]["extruder2Y"];
+                                self.extruder2TempZPos = response["result"]["entries"][i]["entry"]["content"]["extruder2Z"];
+
+                                //if these work I'll put them in a seperate function and call them on each select change
+                                //--------------------------------------------------------------------------------------
+
+
+                                // Extruder 1
+                                //----------------------------------------------------------
+                                //send custom command currentExtruder1X -----> new extruder1X
+                                //(self.extruder1TempXPos - self.extruder1XPos)
+
+                                //send custom command currentExtruder1Y-----> new extruder1Y
+                                //(self.extruder1TempYPos - self.extruder1YPos)
+                               
+                                //send custom command currentExtruder1Z-----> new extruder1Z
+                                //(self.extruder1TempZPos - self.extruder1ZPos)
+
+                                //send custom command -> setTargetTemperature
+
+                                // Extruder 2
+                                //----------------------------------------------------------
+                                //send custom command currentExtruder1X -----> new extruder1X
+                                //(self.extruder1TempXPos - self.extruder1XPos)
+
+                                //send custom command currentExtruder1Y-----> new extruder1Y
+                                //(self.extruder1TempYPos - self.extruder1YPos)
+                               
+                                //send custom command currentExtruder1Z-----> new extruder1Z
+                                //(self.extruder1TempZPos - self.extruder1ZPos)
+
+                                //send custom command -> setTargetTemperature
+
+
+
+
+
+                            }
+                        }
+                    }
+                }
+            });
+        };
+
 
     }
 

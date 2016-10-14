@@ -194,7 +194,7 @@ def getSettings():
 			}
 		}
 	}
-	print data["positions"]
+
 	gcode_scripts = s.listScripts("gcode")
 	if gcode_scripts:
 		data["scripts"] = dict(gcode=dict())

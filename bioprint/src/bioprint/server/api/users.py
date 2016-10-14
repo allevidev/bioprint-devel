@@ -15,6 +15,9 @@ from bioprint.server import SUCCESS, admin_permission, userManager
 from bioprint.server.api import api
 from bioprint.server.util.flask import restricted_access
 
+import requests
+from requests.auth import HTTPDigestAuth
+
 #~~ user settings
 
 
@@ -211,4 +214,83 @@ def generateApikeyForUser(username):
 		return jsonify({"apikey": apikey})
 	else:
 		return make_response(("Forbidden", 403, []))
+
+
+
+###############################
+# NEW METHODS
+###############################
+
+# Environment vairables to be defines
+BIOBOTS_API_URL = "http://localhost:8080/"
+
+
+@api.route("/user/entries/extruder", methods=["GET"])
+@restricted_access
+@admin_permission.require(403)
+def getExtruderEntries():
+	if userManager is None:
+		return jsonify(SUCCESS)
+
+	if not (isNetworkAvailable()):
+		return jsonify({"status": False})
+
+
+	activeUserEmail =  getActiveUser()
+	if activeUserEmail is None:
+		return
+	
+	try:
+		url = BIOBOTS_API_URL + "user/entries"
+		request = requests.get(url, auth=HTTPDigestAuth("rahul.fakir@gmail.com", 'pass'))
+
+		if (request.status_code == 200):
+			return jsonify({
+				"status": True, 
+				"result": request.json()
+				})		
+		else:
+			return jsonify({
+				"status": False, 
+				"result": None
+			})
+
+	except requests.exceptions.RequestException as e:  
+		return jsonify({
+				"status": False, 
+				"result": None
+			})
+
+def isNetworkAvailable():
+	createAPIUser("test@te13st.com", "kittens123")
+	try:
+		url = BIOBOTS_API_URL
+		r = requests.get(url, auth=HTTPDigestAuth('', ''))
+		return True
+	except requests.exceptions.RequestException as e:  
+		return False
+
+def getActiveUser():
+	if userManager is not None:
+		for users in userManager.getAllUsers():
+			if users["active"]:
+				return users["email"]
+	else:
+		return None
+
+def createAPIUser(email, password):
+	url = BIOBOTS_API_URL + "user/new"
+	payload = {
+	"email": email,
+	"password": password,
+	"kind": "STANDARD"
+	}
+
+	try:
+		r = requests.post(url, json=payload)
+		return True
+	except requests.exceptions.RequestException as e:  
+		return False
+
+
 
