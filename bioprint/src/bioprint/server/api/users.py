@@ -223,9 +223,6 @@ def generateApikeyForUser(username):
 # NEW METHODS
 ###############################
 
-# Environment vairables to be defines
-BIOBOTS_API_URL = "http://localhost:8080/"
-
 
 @api.route("/user/entries/extruder", methods=["GET"])
 @restricted_access
@@ -243,7 +240,11 @@ def getExtruderEntries():
 		return
 	
 	try:
-		url = BIOBOTS_API_URL + "user/entries"
+
+		s = settings()
+
+		url = s.get(["biobots", "apiUrl"]) + "user/entries"
+
 		request = requests.get(url, auth=HTTPDigestAuth("rahul.fakir@gmail.com", 'pass'))
 
 		if (request.status_code == 200):
@@ -265,7 +266,10 @@ def getExtruderEntries():
 
 def isNetworkAvailable():
 	try:
-		url = BIOBOTS_API_URL
+		s = settings()
+
+		url = s.get(["biobots", "apiUrl"])
+
 		r = requests.get(url, auth=HTTPDigestAuth('', ''))
 		return True
 	except requests.exceptions.RequestException as e:  
@@ -280,7 +284,10 @@ def getActiveUser():
 		return None
 
 def createAPIUser(email, password):
-	url = BIOBOTS_API_URL + "user/new"
+	s = settings()
+
+	url = s.get(["biobots", "apiUrl"]) + "user/new"
+
 	payload = {
 	"email": email,
 	"password": password,
