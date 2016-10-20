@@ -14,7 +14,15 @@ $(function() {
                 offset: ko.observable(0),
                 newTarget: ko.observable(),
                 newOffset: ko.observable(),
-                pressure: ko.observable(0)
+                pressure: ko.observable(0),
+                extruderX: ko.observable(1),
+                extruderXCurrent: ko.observable(0), 
+                extruderY: ko.observable(0),
+                extruderYCurrent: ko.observable(0),
+                extruderZ: ko.observable(0),
+                extruderZCurrent: ko.observable(0), 
+                extruderTemperature: ko.observable(0),
+                extruderPressure: ko.observable(0),
             }
         };
 
@@ -905,6 +913,7 @@ $(function() {
         };
 
         self.sendHomeCommand = function (axis) {
+             var tools = self.tools();
             if (axis == 'e') {
                 console.log(self.position['Z']);
                 if (self.homed['z'] == false) {
@@ -928,6 +937,7 @@ $(function() {
                             "G1 Z50 F1000"
                         ]
                     });
+
                 }
                 if (self.homed['e'] == false) {
                     self.sendHomeCommand('e');
@@ -1585,12 +1595,42 @@ $(function() {
         self.extruder1TempXPos = null;
         self.extruder1TempYPos = null;
         self.extruder1TempZPos = null;
+        self.extruder1TempTemperature = null;
 
         self.extruder2TempXPos = null;
         self.extruder2TempYPos = null;
         self.extruder2TempZPos = null;
+        self.extruder2TempTemperature = null;
         
         API_KEY = "AE0727B0D3044149A0AEBE3FE233698F"
+         self.testarr = ko.observableArray(["1", "2", "3"]);
+         self.teste = ko.observable(0);
+        self.testFunc = function(){
+  console.log(($('#eprofiles').val()));
+         }
+
+        self.setTemplate = function (item) {
+            
+            var tools = self.tools();
+         
+     
+            var index = parseInt((item["key"]())[4]);
+
+            console.log();
+            self.sendCustomCommand({
+                type: "commands",
+                commands: [
+                    "G90",
+                    "G1 X" + (parseFloat(tools[index]["extruderX"]())).toFixed(3) + " Y" + (parseFloat(tools[index]["extruderY"]())).toFixed(3) + " F1000",
+
+                    "G90",
+                    "M105"
+                ]
+            });
+
+
+
+        }
 
         self.loadTemplates = function () {
 
@@ -1601,28 +1641,42 @@ $(function() {
                 contentType: "application/json; charset=UTF-8",
                 success: function(response) {
                     if (response["status"]) {
-                     
+                        console.log(response);
                         for (var i=0; i < response["result"]["entries"].length; i++) {
 
                             self.extruderProfiles.push(response["result"]["entries"][i]["entry"]["name"]);
-                          
+                            
                             if (i == 0) {    
-                                self.extruder1TempXPos = response["result"]["entries"][i]["entry"]["content"]["extruder1X"];
+                                self.extruder1TempXPos = parseFloat(response["result"]["entries"][i]["entry"]["content"]["extruder1X"]).toFixed(2);
                                 self.extruder1TempYPos = response["result"]["entries"][i]["entry"]["content"]["extruder1Y"];
                                 self.extruder1TempZPos = response["result"]["entries"][i]["entry"]["content"]["extruder1Z"];
-                                
+                                self.extruder1TempTemperature = parseFloat(response["result"]["entries"][i]["entry"]["content"]["extruder1Temperature"]).toFixed(2);;
+
                                 self.extruder2TempXPos = response["result"]["entries"][i]["entry"]["content"]["extruder2X"];
                                 self.extruder2TempYPos = response["result"]["entries"][i]["entry"]["content"]["extruder2Y"];
                                 self.extruder2TempZPos = response["result"]["entries"][i]["entry"]["content"]["extruder2Z"];
+                                self.extruder2TempTemperature = parseFloat(response["result"]["entries"][i]["entry"]["content"]["extruder2Temperature"]).toFixed(2);;
 
                                 //if these work I'll put them in a seperate function and call them on each select change
                                 //--------------------------------------------------------------------------------------
-
 
                                 // Extruder 1
                                 //----------------------------------------------------------
                                 //send custom command currentExtruder1X -----> new extruder1X
                                 //(self.extruder1TempXPos - self.extruder1XPos)
+
+                 
+
+                                self.sendCustomCommand({
+                                    type: "commands",
+                                    commands: [
+                                        "G90",
+                                        "G1 X" + self.extruder1TempXPos + " Y" + self.extruder1TempYPos + " F1000",
+
+                                        "G90",
+                                        "M105"
+                                    ]
+                                });
 
                                 //send custom command currentExtruder1Y-----> new extruder1Y
                                 //(self.extruder1TempYPos - self.extruder1YPos)
@@ -1631,6 +1685,12 @@ $(function() {
                                 //(self.extruder1TempZPos - self.extruder1ZPos)
 
                                 //send custom command -> setTargetTemperature
+                                self.sendCustomCommand({
+                                    type: "commands",
+                                    commands: [
+                                        "M104 T0 S" + self.extruder1TempTemperature
+                                    ]
+                                });
 
                                 // Extruder 2
                                 //----------------------------------------------------------
@@ -1644,6 +1704,13 @@ $(function() {
                                 //(self.extruder1TempZPos - self.extruder1ZPos)
 
                                 //send custom command -> setTargetTemperature
+                                
+                                self.sendCustomCommand({
+                                    type: "commands",
+                                    commands: [
+                                        "M104 T1 S" + self.extruder2TempTemperature
+                                    ]
+                                });
 
 
 
@@ -1655,6 +1722,7 @@ $(function() {
                 }
             });
         };
+
 
 
     }

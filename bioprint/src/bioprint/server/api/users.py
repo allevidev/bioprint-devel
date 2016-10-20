@@ -262,7 +262,6 @@ def getExtruderEntries():
 			})
 
 def isNetworkAvailable():
-	createAPIUser("test@te13st.com", "kittens123")
 	try:
 		url = BIOBOTS_API_URL
 		r = requests.get(url, auth=HTTPDigestAuth('', ''))
