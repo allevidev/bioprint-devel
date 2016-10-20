@@ -147,7 +147,8 @@ def getSettings():
 					"X": s.get(["positions", "6", "tool1", "X"]),
 					"Y": s.get(["positions", "6", "tool1", "Y"]),
 					"Z": s.get(["positions", "6", "tool1", "Z"])
-				}			},
+				}
+			},
 			"12": {
 				"tool0":{
 					"X": s.get(["positions", "12", "tool0", "X"]),
@@ -181,6 +182,9 @@ def getSettings():
 					"Y": s.get(["positions", "96", "tool1", "Y"]),
 					"Z": s.get(["positions", "96", "tool1", "Z"])
 				}			},
+		},
+		"biobots": {
+			"apiUrl": s.get(["biobots", "apiUrl"])
 		},
 		"server": {
 			"commands": {
@@ -371,7 +375,11 @@ def setSettings():
 @admin_permission.require(403)
 def getExtruderProfiles():
 
-	url = 'http://127.0.0.1:8080/user/entries'
+	s = settings()
+
+	url = s.get(["biobots", "apiUrl"])
+
+	print '\n\n\n\n\n', url, '\n\n\n\n\n'
 	headers = {'Content-Type': 'application/json'}
 	try :
 		request = requests.get(url, auth=HTTPDigestAuth('rahul.fakir@gmail.com', 'pass'))

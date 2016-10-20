@@ -15,6 +15,8 @@ from bioprint.server import SUCCESS, admin_permission, userManager
 from bioprint.server.api import api
 from bioprint.server.util.flask import restricted_access
 
+from bioprint.settings import settings
+
 import requests
 from requests.auth import HTTPDigestAuth
 
