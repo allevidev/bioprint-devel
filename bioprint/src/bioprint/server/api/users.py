@@ -223,11 +223,11 @@ def generateApikeyForUser(username):
 # NEW METHODS
 ###############################
 
-
 @api.route("/user/entries/extruder", methods=["GET"])
 @restricted_access
 @admin_permission.require(403)
 def getExtruderEntries():
+	print '\n\n\n\n', 'HERE', '\n\n\n\n\n'
 	if userManager is None:
 		return jsonify(SUCCESS)
 
@@ -235,10 +235,12 @@ def getExtruderEntries():
 		return jsonify({"status": False})
 
 
-	activeUserEmail =  getActiveUser()
-	if activeUserEmail is None:
+	activeUser =  getActiveUser()
+	if activeUser is None:
 		return
 	
+	print '\n\n\n\n\n\n', activeUser, '\n\n\n\n\n\n'
+
 	try:
 
 		s = settings()
@@ -264,6 +266,39 @@ def getExtruderEntries():
 				"result": None
 			})
 
+@api.route("/user/entries/extruder", methods=["POST"])
+@restricted_access
+@admin_permission.require(403)
+def createExtruderEntries():
+	if userManager is None:
+		return jsonify(SUCCESS)
+
+	if not (isNetworkAvailable()):
+		return jsonify({"status": False})
+
+	activeUser = getActiveUser()
+	if activeUser is None:
+		return
+
+
+		s = settings()
+
+		try:
+
+			params = {
+				"filters" : {
+					"access": "DEFAULT",
+					"type": "WELLPLATE"
+				}
+			}
+			templateUrl = s.get(["biobots", "apiUrl"]) + "template/all"
+
+			templateRequest = requests.post(templateUrl, data=params)
+
+			template = templateRequest["templates"][0]
+		except requests.exceptions.RequestException as e:
+			return False
+
 def isNetworkAvailable():
 	try:
 		s = settings()
@@ -279,7 +314,8 @@ def getActiveUser():
 	if userManager is not None:
 		for users in userManager.getAllUsers():
 			if users["active"]:
-				return users["email"]
+				print users
+				return userManager.findUser(users['name'])
 	else:
 		return None
 
@@ -289,9 +325,9 @@ def createAPIUser(email, password):
 	url = s.get(["biobots", "apiUrl"]) + "user/new"
 
 	payload = {
-	"email": email,
-	"password": password,
-	"kind": "STANDARD"
+		"email": email,
+		"password": password,
+		"kind": "STANDARD"
 	}
 
 	try:

@@ -98,6 +98,8 @@ class UserManager(object):
 				settings().set(["accessControl", "salt"], salt)
 				settings().save()
 
+		print '\n\n\n\n\n' + salt + '\n\n\n\n\n'
+
 		return hashlib.sha512(password + salt).hexdigest()
 
 	def checkPassword(self, username, password):

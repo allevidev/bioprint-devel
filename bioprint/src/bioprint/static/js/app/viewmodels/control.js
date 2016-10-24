@@ -1634,12 +1634,15 @@ $(function() {
 
         self.loadTemplates = function () {
 
+            console.log("HERE");
+
            $.ajax({
                 url: API_BASEURL + "user/entries/extruder",
                 type: "GET",
-                headers: {"X-Api-Key": API_KEY},
                 contentType: "application/json; charset=UTF-8",
                 success: function(response) {
+
+                    console.log(response);
                     if (response["status"]) {
                         console.log(response);
                         for (var i=0; i < response["result"]["entries"].length; i++) {
