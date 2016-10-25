@@ -1632,14 +1632,16 @@ $(function() {
             if  (parseInt(tools[index].xPosition()) !== parseInt(self.extruderEntries[entryName]["content"]["xPosition"]) ||
                 (parseInt(tools[index].yPosition()) !== parseInt(self.extruderEntries[entryName]["content"]["yPosition"])) ||
                 (parseInt(tools[index].zPosition()) !== parseInt(self.extruderEntries[entryName]["content"]["zPosition"]))) {
-                $.ajax(
-                    API_BASEURL + "user/entry/update", {
+
+                positions = {
+                    "xPosition": parseInt(tools[index].xPosition()),
+                    "yPosition": parseInt(tools[index].yPosition()),
+                    "zPosition": parseInt(tools[index].zPosition())
+                }
+                $.ajax({
+                    url: API_BASEURL + "user/entry/update", 
                     type: "POST",
-                    body: {
-                        "xPosition": parseInt(tools[index].xPosition()),
-                        "yPosition": parseInt(tools[index].yPosition()),
-                        "zPosition": parseInt(tools[index].zPosition())
-                    },
+                    data: JSON.stringify(positions),
                     contentType: "application/json",
                     success: function(response) {
                         if (response["status"]) {

@@ -270,7 +270,16 @@ def getExtruderEntries():
 @api.route("/user/entry/update", methods=["POST"])
 def updateEntry():
 	print jsonify(request.get_json(force=True))
-	#data=request.get_json()
+
+	if not "application/json" in request.headers["Content-Type"]:
+		return make_response("Expected content-type JSON", 400)
+
+	try:
+		data = request.json
+	except BadRequest:
+		return make_response("Malformed JSON body in request", 400)
+
+	print '\n\n\n\n\n', data, '\n\n\n\n'
 
 	if userManager is None:
 		return jsonify(SUCCESS)
