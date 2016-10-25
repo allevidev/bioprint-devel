@@ -15,14 +15,15 @@ $(function() {
                 newTarget: ko.observable(),
                 newOffset: ko.observable(),
                 pressure: ko.observable(0),
-                extruderX: ko.observable(1),
-                extruderXCurrent: ko.observable(0), 
-                extruderY: ko.observable(0),
-                extruderYCurrent: ko.observable(0),
-                extruderZ: ko.observable(0),
-                extruderZCurrent: ko.observable(0), 
-                extruderTemperature: ko.observable(0),
-                extruderPressure: ko.observable(0),
+                xPosition: ko.observable(1),
+                xCurrentPosition: ko.observable(0), 
+                yPosition: ko.observable(0),
+                yCurrentPosition: ko.observable(0),
+                zPosition: ko.observable(0),
+                zCurrentPosition: ko.observable(0), 
+                temperature: ko.observable(0),
+                pressure: ko.observable(0),
+                entryNames: ko.observableArray([])
             }
         };
 
@@ -266,7 +267,7 @@ $(function() {
         });
 
 
-        self.extruderProfiles = [];
+        self.extruderEntries = {};
 
 
         self.fromCurrentData = function (data) {
@@ -1592,134 +1593,96 @@ $(function() {
             }
         };
 
-        self.extruder1TempXPos = null;
-        self.extruder1TempYPos = null;
-        self.extruder1TempZPos = null;
-        self.extruder1TempTemperature = null;
-
-        self.extruder2TempXPos = null;
-        self.extruder2TempYPos = null;
-        self.extruder2TempZPos = null;
-        self.extruder2TempTemperature = null;
         
-        API_KEY = "AE0727B0D3044149A0AEBE3FE233698F"
-         self.testarr = ko.observableArray(["1", "2", "3"]);
-         self.teste = ko.observable(0);
-        self.testFunc = function(){
-  console.log(($('#eprofiles').val()));
-         }
-
-        self.setTemplate = function (item) {
-            
-            var tools = self.tools();
-         
-     
+        self.setExtruderValues = function (item) {            
+            var tools = self.tools();         
             var index = parseInt((item["key"]())[4]);
 
-            console.log();
             self.sendCustomCommand({
                 type: "commands",
                 commands: [
                     "G90",
-                    "G1 X" + (parseFloat(tools[index]["extruderX"]())).toFixed(3) + " Y" + (parseFloat(tools[index]["extruderY"]())).toFixed(3) + " F1000",
+                    "G1 X" + (parseFloat(tools[index]["xPosition"]())).toFixed(3) + " Y" + (parseFloat(tools[index]["yPosition"]())).toFixed(3) + " F1000",
 
                     "G90",
                     "M105"
                 ]
             });
 
+            // TODO: Send custom Z command here
+        }
+    
+
+        self.loadExtruderValues = function(tool) {
+            const tools = self.tools();
+            const index = parseInt(tool[4]); 
+            const entryName = $('#' + tool + 'EntrySelector').val();
+       
+            //entryName ==> id
+            tools[index].xPosition(self.extruderEntries[entryName]["content"]["xPosition"]);
+            tools[index].yPosition(self.extruderEntries[entryName]["content"]["yPosition"]);
+            tools[index].zPosition(self.extruderEntries[entryName]["content"]["zPosition"]);
+        }
+
+        self.saveExtruderValues = function(tool) {
+            const tools = self.tools();
+            const index = parseInt(tool[4]); 
+            const entryName = $('#' + tool + 'EntrySelector').val();
+
+            if  (parseInt(tools[index].xPosition()) !== parseInt(self.extruderEntries[entryName]["content"]["xPosition"]) ||
+                (parseInt(tools[index].yPosition()) !== parseInt(self.extruderEntries[entryName]["content"]["yPosition"])) ||
+                (parseInt(tools[index].zPosition()) !== parseInt(self.extruderEntries[entryName]["content"]["zPosition"]))) {
+                $.ajax(
+                    API_BASEURL + "user/entry/update", {
+                    type: "POST",
+                    body: {
+                        "xPosition": parseInt(tools[index].xPosition()),
+                        "yPosition": parseInt(tools[index].yPosition()),
+                        "zPosition": parseInt(tools[index].zPosition())
+                    },
+                    contentType: "application/json",
+                    success: function(response) {
+                        if (response["status"]) {
+                           // self.extruderEntries[entryName]["content"]["xPosition"] = parseInt(tools[index].xPosition());
+                           // self.extruderEntries[entryName]["content"]["yPosition"] = parseInt(tools[index].yPosition());
+                           // self.extruderEntries[entryName]["content"]["zPosition"] = parseInt(tools[index].zPosition());
+                        }
+                    }
+                });
+            } 
 
 
         }
 
         self.loadTemplates = function () {
-
            $.ajax({
                 url: API_BASEURL + "user/entries/extruder",
-                type: "GET",
-                headers: {"X-Api-Key": API_KEY},
+                type: "POST",
                 contentType: "application/json; charset=UTF-8",
                 success: function(response) {
+
                     if (response["status"]) {
-                        console.log(response);
+                        const tools = self.tools();
                         for (var i=0; i < response["result"]["entries"].length; i++) {
 
-                            self.extruderProfiles.push(response["result"]["entries"][i]["entry"]["name"]);
+                            //name ==> id
+                            self.extruderEntries[response["result"]["entries"][i]["entry"]["name"]] = response["result"]["entries"][i]["entry"]; 
+                           
+                            const validExtruders = response["result"]["entries"][i]["entry"]["content"]["type"];
                             
-                            if (i == 0) {    
-                                self.extruder1TempXPos = parseFloat(response["result"]["entries"][i]["entry"]["content"]["extruder1X"]).toFixed(2);
-                                self.extruder1TempYPos = response["result"]["entries"][i]["entry"]["content"]["extruder1Y"];
-                                self.extruder1TempZPos = response["result"]["entries"][i]["entry"]["content"]["extruder1Z"];
-                                self.extruder1TempTemperature = parseFloat(response["result"]["entries"][i]["entry"]["content"]["extruder1Temperature"]).toFixed(2);;
-
-                                self.extruder2TempXPos = response["result"]["entries"][i]["entry"]["content"]["extruder2X"];
-                                self.extruder2TempYPos = response["result"]["entries"][i]["entry"]["content"]["extruder2Y"];
-                                self.extruder2TempZPos = response["result"]["entries"][i]["entry"]["content"]["extruder2Z"];
-                                self.extruder2TempTemperature = parseFloat(response["result"]["entries"][i]["entry"]["content"]["extruder2Temperature"]).toFixed(2);;
-
-                                //if these work I'll put them in a seperate function and call them on each select change
-                                //--------------------------------------------------------------------------------------
-
-                                // Extruder 1
-                                //----------------------------------------------------------
-                                //send custom command currentExtruder1X -----> new extruder1X
-                                //(self.extruder1TempXPos - self.extruder1XPos)
-
-                 
-
-                                self.sendCustomCommand({
-                                    type: "commands",
-                                    commands: [
-                                        "G90",
-                                        "G1 X" + self.extruder1TempXPos + " Y" + self.extruder1TempYPos + " F1000",
-
-                                        "G90",
-                                        "M105"
-                                    ]
-                                });
-
-                                //send custom command currentExtruder1Y-----> new extruder1Y
-                                //(self.extruder1TempYPos - self.extruder1YPos)
-                               
-                                //send custom command currentExtruder1Z-----> new extruder1Z
-                                //(self.extruder1TempZPos - self.extruder1ZPos)
-
-                                //send custom command -> setTargetTemperature
-                                self.sendCustomCommand({
-                                    type: "commands",
-                                    commands: [
-                                        "M104 T0 S" + self.extruder1TempTemperature
-                                    ]
-                                });
-
-                                // Extruder 2
-                                //----------------------------------------------------------
-                                //send custom command currentExtruder1X -----> new extruder1X
-                                //(self.extruder1TempXPos - self.extruder1XPos)
-
-                                //send custom command currentExtruder1Y-----> new extruder1Y
-                                //(self.extruder1TempYPos - self.extruder1YPos)
-                               
-                                //send custom command currentExtruder1Z-----> new extruder1Z
-                                //(self.extruder1TempZPos - self.extruder1ZPos)
-
-                                //send custom command -> setTargetTemperature
-                                
-                                self.sendCustomCommand({
-                                    type: "commands",
-                                    commands: [
-                                        "M104 T1 S" + self.extruder2TempTemperature
-                                    ]
-                                });
-
-
-
-
-
+                            for (var extruder of validExtruders){
+                                const index = parseInt(extruder[8]) - 1; 
+                                tools[index].entryNames.push(response["result"]["entries"][i]["entry"]["name"]);
                             }
+
                         }
                     }
-                }
+                },
+                error: function(err) {
+                    console.log(err.message);
+                } 
+
+
             });
         };
 

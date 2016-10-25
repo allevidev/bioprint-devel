@@ -24,6 +24,8 @@ from bioprint.settings import settings as s, valid_boolean_trues
 from bioprint.server.util import noCachingResponseHandler, apiKeyRequestHandler, corsResponseHandler
 from bioprint.server.util.flask import restricted_access, get_json_command_from_request, passive_login
 
+import requests
+
 
 #~~ init api blueprint, including sub modules
 
@@ -181,7 +183,7 @@ def performSystemAction():
 
 #~~ Login/user handling
 
-
+BIOBOTS_API_URL = "http://localhost:8080/"
 @api.route("/login", methods=["POST"])
 def login():
 	if bioprint.server.userManager is not None and "user" in request.values.keys() and "pass" in request.values.keys():
@@ -203,6 +205,9 @@ def login():
 					user = bioprint.server.userManager.login_user(user)
 					session["usersession.id"] = user.get_session()
 					g.user = user
+					if isNetworkAvailible():
+						if createUserIfNotExists(username, password):
+							setSessionToken(username, password)
 				login_user(user, remember=remember)
 				identity_changed.send(current_app._get_current_object(), identity=Identity(user.get_id()))
 				return jsonify(user.asDict())
@@ -211,6 +216,33 @@ def login():
 	elif "passive" in request.values:
 		return passive_login()
 	return NO_CONTENT
+
+def isNetworkAvailible():
+	r = requests.get(BIOBOTS_API_URL);
+	return r.status_code == 200
+
+def createUserIfNotExists(email, password):
+	url = BIOBOTS_API_URL + "user/exists"
+	payload = {
+		"email": email,
+		"password": password,
+	}
+
+	r = requests.post(url, json=payload)
+	return r.status_code == 200
+
+def setSessionToken(email, password):
+	url = BIOBOTS_API_URL + "user/authenticate"
+	payload = {
+		"username": email,
+		"password": password
+	}
+
+	r = requests.post(url, json=payload)
+	session["BIOBOTS_API_TOKEN"] = r.json()["token"]
+	return r.status_code == 200
+
+
 
 
 @api.route("/logout", methods=["POST"])

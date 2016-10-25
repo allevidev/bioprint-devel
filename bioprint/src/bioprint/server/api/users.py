@@ -5,7 +5,7 @@ __author__ = "Gina Häußge <osd@foosel.net>"
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
 __copyright__ = "Copyright (C) 2014 The bioprint Project - Released under terms of the AGPLv3 License"
 
-from flask import request, jsonify, abort, make_response
+from flask import request, jsonify, abort, make_response, session
 from werkzeug.exceptions import BadRequest
 from flask.ext.login import current_user
 
@@ -225,29 +225,93 @@ def generateApikeyForUser(username):
 BIOBOTS_API_URL = "http://localhost:8080/"
 
 
-@api.route("/user/entries/extruder", methods=["GET"])
-@restricted_access
-@admin_permission.require(403)
+@api.route("/user/entries/extruder", methods=["POST"])
 def getExtruderEntries():
 	if userManager is None:
 		return jsonify(SUCCESS)
 
 	if not (isNetworkAvailable()):
 		return jsonify({"status": False})
-
-
-	activeUserEmail =  getActiveUser()
-	if activeUserEmail is None:
-		return
 	
 	try:
 		url = BIOBOTS_API_URL + "user/entries"
-		request = requests.get(url, auth=HTTPDigestAuth("rahul.fakir@gmail.com", 'pass'))
+		
+		payload = {
+			"filters": {
+				
+			}
+		}
 
-		if (request.status_code == 200):
+		headers = {
+			"Content-Type": "application/json",
+			"Authorization": "Bearer " + session["BIOBOTS_API_TOKEN"] 
+		}
+
+		r = requests.post(url, headers=headers, json=payload)
+
+		if (r.status_code == 200):
 			return jsonify({
 				"status": True, 
-				"result": request.json()
+				"result": r.json()
+				})		
+		else:
+			return jsonify({
+				"status": False, 
+				"result": None
+			})
+
+	except requests.exceptions.RequestException as e:  
+		return jsonify({
+				"status": False, 
+				"result": None
+			})
+
+
+@api.route("/user/entry/update", methods=["POST"])
+def updateEntry():
+	print jsonify(request.get_json(force=True))
+	#data=request.get_json()
+
+	if userManager is None:
+		return jsonify(SUCCESS)
+
+	if not (isNetworkAvailable()):
+		return jsonify({"status": False})
+
+	
+	try:
+		url = BIOBOTS_API_URL + "entry/update"
+		
+		payload = {
+			# This needs to be request.json.id (NOT WORKING)
+			"id": "580ef4b4eb77ec88005a774e",
+
+			# This needs to be request.json.content (NOT WORKING)
+			"content": {
+		      "xPosition": 5,
+		      "yPosition": 11,
+		      "zPosition": 15,
+		      "temperature": 71,
+		      "pressure": 27,
+		      "revision": 1,
+		      "type": [
+		        'extruder1',
+		        'extruder2',
+		      ],
+		    }
+		}
+
+		headers = {
+			"Content-Type": "application/json",
+			"Authorization": "Bearer " + session["BIOBOTS_API_TOKEN"] 
+		}
+
+		r = requests.post(url, headers=headers, json=payload)
+
+		if (r.status_code == 200):
+			return jsonify({
+				"status": True, 
+				"result": r.json()
 				})		
 		else:
 			return jsonify({
@@ -264,7 +328,7 @@ def getExtruderEntries():
 def isNetworkAvailable():
 	try:
 		url = BIOBOTS_API_URL
-		r = requests.get(url, auth=HTTPDigestAuth('', ''))
+		r = requests.get(url)
 		return True
 	except requests.exceptions.RequestException as e:  
 		return False
