@@ -1594,22 +1594,29 @@ $(function() {
         };
 
         
-        self.setExtruderValues = function (item) {            
-            var tools = self.tools();         
-            var index = parseInt((item["key"]())[4]);
+        self.setExtruderValues = function (item) {          
+            var z = self.sendHomeCommand('z');
+            var e = self.sendHomeCommand('e');
+            var xy = self.sendHomeCommand('x,y'); 
+           
 
-            self.sendCustomCommand({
-                type: "commands",
-                commands: [
-                    "G90",
-                    "G1 X" + (parseFloat(tools[index]["xPosition"]())).toFixed(3) + " Y" + (parseFloat(tools[index]["yPosition"]())).toFixed(3) + " F1000",
 
-                    "G90",
-                    "M105"
-                ]
+            Promise.all([z, e, xy]).then(function() {
+                var tools = self.tools();         
+                var index = parseInt((item["key"]())[4]);
+                console.log(self.homed);
+                self.sendCustomCommand({
+                    type: "commands",
+                    commands: [
+                        "G90",
+                        "G1 X" + (parseFloat(tools[index]["xPosition"]())).toFixed(3) + " Y" + (parseFloat(tools[index]["yPosition"]())).toFixed(3) + " F1000",
+
+                        "G90",
+                        "M105"
+                    ]
+                });
+
             });
-
-            // TODO: Send custom Z command here
         }
     
 
