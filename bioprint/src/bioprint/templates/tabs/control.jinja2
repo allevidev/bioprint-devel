@@ -146,11 +146,13 @@
 
 
 
-                    <select id="eprofiles" style="width: 100%" data-bind="click: function() { $root.testFunc(this) }, options: $root.extruderProfiles, value: $root.teste()">
+                    <select style="width: 100%" data-bind="options: entryNames, attr: { id: key() + 'EntrySelector' }">
                     </select>
                 
-                        <button  style="margin-top:0.5em" class="btn btn-block control-box" data-bind=" click: function() { $root.saveToolChangeDist(key()) }">{{ _('Load') }}</button>
-                        <button   class="btn btn-block control-box" data-bind=" click: function() { $root.saveToolChangeDist(key()) }">{{ _('Save') }}</button>
+                        <button  style="margin-top:0.5em" class="btn btn-block control-box" data-bind=" click: function() { $root.loadExtruderValues(key()) }">{{ _('Load') }}</button>
+
+                         <button  style="margin-top:0.5em" class="btn btn-block control-box" data-bind=" click: function() { $root.saveExtruderValues(key()) }">{{ _('Save') }}</button>
+                       
 
 
   <h3 style="text-align: left">Position:</h3>
@@ -158,25 +160,25 @@
                     <form action="action_page.php" data-bind="id: name">
                     
                       <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">X-Position Target:</p>
-                      <input style="width:30%; float: right" type="text" name="x-position" data-bind="value: extruderX">
+                      <input style="width:30%; float: right" type="text" name="x-position" data-bind="value: xPosition">
 
                       <p style="text-align: left; width: 50%; float: left;">X-Position Current:</p>
-                       <p style="text-align: right; width: 50%; float: right;" data-bind="text: extruderXCurrent"></p>
+                       <p style="text-align: right; width: 50%; float: right;" data-bind="text: xCurrentPosition"></p>
 
                       <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Y-Position Target:</p>
-                      <input style="width:30%; float: right" type="text" name="y-position" data-bind="value: extruderY">
+                      <input style="width:30%; float: right" type="text" name="y-position" data-bind="value: yPosition">
 
                         <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Y-Position Current:</p>
-                       <p style="text-align: right; width: 50%; float: right; margin-bottom: 1.2em" data-bind="text: extruderYCurrent"></p>
+                       <p style="text-align: right; width: 50%; float: right;" data-bind="text: yCurrentPosition"></p>
                      
                       <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Z-Position Target:</p>
-                      <input style="width:30%; float: right" type="text" name="Z-position" data-bind="value: extruderZ">
+                      <input style="width:30%; float: right" type="text" name="Z-position" data-bind="value: zPosition">
 
                         <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Z-Position Current:</p>
-                       <p style="text-align: right; width: 50%; float: right; margin-bottom: 1.2em" data-bind="text: extruderZCurrent"></p>
+                       <p style="text-align: right; width: 50%; float: right;" data-bind="text: zCurrentPosition"></p>
                      
                 
-                             <button class="btn btn-block control-box" data-bind=" click: $parent.setTemplate ">{{ _('Set') }}</button>
+                             <button class="btn btn-block control-box" data-bind=" click: $parent.setExtruderValues ">{{ _('Go') }}</button>
                     </form>
 
 
@@ -196,12 +198,10 @@
 
 
   <h3 style="text-align: left">Pressure:</h3>
-                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational(), click: function() { $root.sendPressureIncrease(key()) }">{{ _('+') }}</button>
                         <div class="display">
                             <h2 data-bind="html: formatPressure(pressure())"></h2>
                         </div>
-                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational(), click: function() { $root.sendPressureDecrease(key()) }">{{ _('-') }}</button>
-
+                    
 
 
     <form action="action_page.php">
@@ -240,8 +240,6 @@
                             </ul>
                         </div>
                         <hr>
-                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting(), click: function() { $root.saveToolChangeDist(key()) }">{{ _('Calibrate Tool') }}</button>
-                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting() && !$root.extruderSelected(key()), click: function() { $root.switchTool(key()) }">{{ _('Select Tool') }}</button>
                         <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting() && !$root.checkExtruding(key()), click: function() { $root.startExtrude(key()) }">{{ _('Extrude') }}</button>
                         <button class="btn btn-block control-box" data-bind="enable: $root.isOperational() && !$root.isPrinting() && $root.checkExtruding(key()), click: function() { $root.stopExtrude(key()) }">{{ _('Stop') }}</button>
                     </div>

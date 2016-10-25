@@ -328,7 +328,7 @@ default_settings = {
         }
     },
     "biobots": {
-        "apiUrl": "http://localhost:8080"
+        "apiUrl": "http://api.biobots.io/"
     },
     "devel": {
         "stylesheet": "css",
