@@ -21,6 +21,9 @@ from bioprint.server.util.flask import restricted_access
 import bioprint.plugin
 import bioprint.util
 
+import requests
+from requests.auth import HTTPDigestAuth
+
 #~~ settings
 
 
@@ -122,30 +125,62 @@ def getSettings():
 		},
 		"positions": {
 			"1": {
-				"X": s.get(["positions", "1", "X"]),
-				"Y": s.get(["positions", "1", "Y"]),
-				"Z": s.get(["positions", "1", "Z"])
+				"tool0":{
+					"X": s.get(["positions", "1", "tool0", "X"]),
+					"Y": s.get(["positions", "1", "tool0", "Y"]),
+					"Z": s.get(["positions", "1", "tool0", "Z"])
+				},
+				"tool1":{
+					"X": s.get(["positions", "1", "tool1", "X"]),
+					"Y": s.get(["positions", "1", "tool1", "Y"]),
+					"Z": s.get(["positions", "1", "tool1", "Z"])
+				}
+				
 			},
 			"6": {
-				"X": s.get(["positions", "6", "X"]),
-				"Y": s.get(["positions", "6", "Y"]),
-				"Z": s.get(["positions", "6", "Z"])
-			},
+				"tool0":{
+					"X": s.get(["positions", "6", "tool0", "X"]),
+					"Y": s.get(["positions", "6", "tool0", "Y"]),
+					"Z": s.get(["positions", "6", "tool0", "Z"])
+				},
+				"tool1":{
+					"X": s.get(["positions", "6", "tool1", "X"]),
+					"Y": s.get(["positions", "6", "tool1", "Y"]),
+					"Z": s.get(["positions", "6", "tool1", "Z"])
+				}			},
 			"12": {
-				"X": s.get(["positions", "12", "X"]),
-				"Y": s.get(["positions", "12", "Y"]),
-				"Z": s.get(["positions", "12", "Z"])
-			},
+				"tool0":{
+					"X": s.get(["positions", "12", "tool0", "X"]),
+					"Y": s.get(["positions", "12", "tool0", "Y"]),
+					"Z": s.get(["positions", "12", "tool0", "Z"])
+				},
+				"tool1":{
+					"X": s.get(["positions", "12", "tool1", "X"]),
+					"Y": s.get(["positions", "12", "tool1", "Y"]),
+					"Z": s.get(["positions", "12", "tool1", "Z"])
+				}			},
 			"24": {
-				"X": s.get(["positions", "24", "X"]),
-				"Y": s.get(["positions", "24", "Y"]),
-				"Z": s.get(["positions", "24", "Z"])
-			},
+				"tool0":{
+					"X": s.get(["positions", "24", "tool0", "X"]),
+					"Y": s.get(["positions", "24", "tool0", "Y"]),
+					"Z": s.get(["positions", "24", "tool0", "Z"])
+				},
+				"tool1":{
+					"X": s.get(["positions", "24", "tool1", "X"]),
+					"Y": s.get(["positions", "24", "tool1", "Y"]),
+					"Z": s.get(["positions", "24", "tool1", "Z"])
+				}			},
 			"96": {
-				"X": s.get(["positions", "96", "X"]),
-				"Y": s.get(["positions", "96", "Y"]),
-				"Z": s.get(["positions", "96", "Z"])
-			},
+				"tool0":{
+					"X": s.get(["positions", "96", "tool0", "X"]),
+					"Y": s.get(["positions", "96", "tool0", "Y"]),
+					"Z": s.get(["positions", "96", "tool0", "Z"])
+				},
+				"tool1":{
+					"X": s.get(["positions", "96", "tool1", "X"]),
+					"Y": s.get(["positions", "96", "tool1", "Y"]),
+					"Z": s.get(["positions", "96", "tool1", "Z"])
+				}			},
 		},
 		"server": {
 			"commands": {
@@ -159,7 +194,7 @@ def getSettings():
 			}
 		}
 	}
-
+	print data["positions"]
 	gcode_scripts = s.listScripts("gcode")
 	if gcode_scripts:
 		data["scripts"] = dict(gcode=dict())
@@ -330,4 +365,41 @@ def setSettings():
 		eventManager().fire(Events.SETTINGS_UPDATED)
 
 	return getSettings()
+
+@api.route("/settings/defaults/extruder", methods=["GET"])
+@restricted_access
+@admin_permission.require(403)
+def getExtruderProfiles():
+
+	url = 'http://127.0.0.1:8080/user/entries'
+	headers = {'Content-Type': 'application/json'}
+	try :
+		request = requests.get(url, auth=HTTPDigestAuth('rahul.fakir@gmail.com', 'pass'))
+
+		#response =  {'status': True, request.json() }
+		return jsonify(request.json())
+	except: 
+		response =  {'status': False, 'entries': None }
+		return jsonify(response)
+
+
+
+
+
+
+def getExtruderProfilesMain():
+
+	url = 'http://127.0.0.1:8080/user/entries'
+	headers = {'Content-Type': 'application/json'}
+	try :
+		request = requests.get(url, auth=HTTPDigestAuth('rahul.fakir@gmail.com', 'pass'))
+
+		#response =  {'status': True, request.json() }
+		return jsonify(request.json())
+	except: 
+		response =  {'status': False, 'entries': None }
+		return jsonify(response)
+
+
+
 

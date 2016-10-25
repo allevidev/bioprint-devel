@@ -1,7 +1,7 @@
 $(function() {
     function ControlViewModel(parameters) {
         var self = this;
-
+        
         self.loginState = parameters[0];
         self.settings = parameters[1];
 
@@ -118,6 +118,8 @@ $(function() {
         self.additionalControls = [];
 
         self.webcamDisableTimeout = undefined;
+
+        self.templates = ['PCL', 'Pluronic'];
 
         self.keycontrolActive = ko.observable(false);
         self.keycontrolHelpActive = ko.observable(false);
@@ -1031,6 +1033,60 @@ $(function() {
             })
         }
 
+        self.setTargetPressure = function(extruder) {
+            
+            if (extruder == "tool0") {
+                var regulator = 'L';
+            } else if (extruder == "tool1") {
+                var regulator = 'R';
+            }
+           
+
+            $.ajax({
+                url: API_BASEURL + "printer/tool",
+                type: "GET",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                success: function(state) {
+                    console.log(state);
+                        self.extruder1Temp = state['tool0']['actual'];
+                        self.extruder2Temp = state['tool1']['actual'];
+                        self.extruder2Pressure = state['tool2']['actual'];
+
+                        self.sendCustomCommand({
+                            type: "commands",
+                            commands: [
+                            "G91",
+                            "G1 "+ regulator + "-0.25 ",
+                            "G90",
+                            "M18 " + regulator,
+                            'M105'
+                            ]
+                        })
+//                    $('#extruder1Temp').val(self.extruder1Temp);
+//                    $('#extruder2Pressure').val(self.extruder2Pressure);
+//                    $('#extruder2Temp').val(self.extruder2Temp);
+                }
+            });
+
+            $.ajax({
+                url: API_BASEURL + "printer/bed",
+                type: "GET",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                success: function(state) {
+                    
+                    self.extruder1Pressure = state['bed']['actual'];
+
+                    $('#extruder1Pressure').val(self.extruder1Pressure);
+                }
+            });
+
+
+       
+        }
+
+
         self.sendPressureDecrease = function(extruder) {
             if (extruder == "tool0") {
                 var regulator = 'L';
@@ -1075,10 +1131,11 @@ $(function() {
                 dataType: "json",
                 contentType: "application/json; charset=UTF-8",
                 success: function (response) {
+                    console.log(response);
 
                     positions = response["positions"][self.wellPlate()];
                  
-                    console.log(positions);
+                    console.log(self.extruder1EPos);
 
                     self.sendPrintHeadCommand({
                         "command": "wellplate",
@@ -1089,7 +1146,7 @@ $(function() {
                         commands: [
                             'G90',
                             'G1 Z50 E'+ self.midpoint +'F1000',
-                            'G1 X' + positions["X"] + ' Y' + positions["Y"] + ' F2000',
+                            'G1 X' + positions["tool0"]["X"] + ' Y' + positions["tool0"]["Y"] + ' F2000',
                             'G1 E' + self.extruder1EPos + ' F1000']
                     });
                 }
@@ -1320,6 +1377,17 @@ $(function() {
             })
         };
 
+        self.loadTemplates = function() {
+            $.ajax({
+                url: API_BASEURL + 'users/templates',
+                type: 'GET',
+                success: function(res) {
+                    console.log(res);
+                }
+            });
+
+        }
+
         self.sendEmergencyStop = function () {
             console.log(self.selectedPort());
 
@@ -1355,6 +1423,7 @@ $(function() {
 
         self.onStartup = function () {
             self.requestData();
+            self.loadTemplates();
         };
 
         self.updateRotatorWidth = function() {
@@ -1530,3 +1599,4 @@ $(function() {
         "#control"
     ]);
 });
+

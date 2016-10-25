@@ -15,7 +15,6 @@ from bioprint.server import SUCCESS, admin_permission, userManager
 from bioprint.server.api import api
 from bioprint.server.util.flask import restricted_access
 
-
 #~~ user settings
 
 
@@ -212,3 +211,4 @@ def generateApikeyForUser(username):
 		return jsonify({"apikey": apikey})
 	else:
 		return make_response(("Forbidden", 403, []))
+
