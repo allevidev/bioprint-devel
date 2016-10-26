@@ -2,6 +2,7 @@ $(function() {
     function LoginStateViewModel() {
         var self = this;
 
+        self.loginEmail = ko.observable();
         self.loginUser = ko.observable();
         self.loginPass = ko.observable();
         self.loginRemember = ko.observable(false);
@@ -47,6 +48,7 @@ $(function() {
         self.fromResponse = function(response) {
             if (response && response.name) {
                 self.loggedIn(true);
+                self.email(response.email);
                 self.username(response.name);
                 self.isUser(response.user);
                 self.isAdmin(response.admin);
@@ -75,10 +77,12 @@ $(function() {
         };
 
         self.login = function() {
+            var email = self.loginEmail();
             var username = self.loginUser();
             var password = self.loginPass();
             var remember = self.loginRemember();
 
+            self.loginEmail("")
             self.loginUser("");
             self.loginPass("");
             self.loginRemember(false);
@@ -86,9 +90,9 @@ $(function() {
             $.ajax({
                 url: API_BASEURL + "login",
                 type: "POST",
-                data: {"user": username, "pass": password, "remember": remember},
+                data: {"username": username, "email": email, "pass": password, "remember": remember},
                 success: function(response) {
-                    new PNotify({title: gettext("Login successful"), text: _.sprintf(gettext('You are now logged in as "%(username)s"'), {username: response.name}), type: "success"});
+                    new PNotify({title: gettext("Login successful"), text: _.sprintf(gettext('You are now logged in as "%(username)s"'), {username: response.username}), type: "success"});
                     self.fromResponse(response);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
