@@ -265,6 +265,7 @@ $(function() {
         };
 
         self.onUserLoggedIn = function(user) {
+            console.log("log in in user");
             if (user.admin) {
                 self.requestData();
             }

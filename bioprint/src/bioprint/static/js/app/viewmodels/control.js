@@ -1634,7 +1634,8 @@ $(function() {
             const tools = self.tools();
             const index = parseInt(tool[4]); 
             const entryName = $('#' + tool + 'EntrySelector').val();
-
+            
+        
             if  (parseInt(tools[index].xPosition()) !== parseInt(self.extruderEntries[entryName]["content"]["xPosition"]) ||
                 (parseInt(tools[index].yPosition()) !== parseInt(self.extruderEntries[entryName]["content"]["yPosition"])) ||
                 (parseInt(tools[index].zPosition()) !== parseInt(self.extruderEntries[entryName]["content"]["zPosition"]))) {
@@ -1644,16 +1645,32 @@ $(function() {
                     "yPosition": parseInt(tools[index].yPosition()),
                     "zPosition": parseInt(tools[index].zPosition())
                 }
+
+                var tempContent = self.extruderEntries[entryName]["content"];
+                tempContent["xPosition"] = parseInt(tools[index].xPosition());
+                tempContent["yPosition"] = parseInt(tools[index].yPosition());
+                tempContent["zPosition"] = parseInt(tools[index].zPosition());
+                tempContent["pressure"] = parseInt(tools[index].pressure());
+                tempContent["temperature"] = parseInt(tools[index].temperature());
+                
+
+                data = {
+                    id: self.extruderEntries[entryName]["_id"], 
+                    content: tempContent
+                };
+
                 $.ajax({
                     url: API_BASEURL + "user/entry/update", 
                     type: "POST",
-                    data: JSON.stringify(positions),
+                    data: JSON.stringify(data),
                     contentType: "application/json",
                     success: function(response) {
                         if (response["status"]) {
-                           // self.extruderEntries[entryName]["content"]["xPosition"] = parseInt(tools[index].xPosition());
-                           // self.extruderEntries[entryName]["content"]["yPosition"] = parseInt(tools[index].yPosition());
-                           // self.extruderEntries[entryName]["content"]["zPosition"] = parseInt(tools[index].zPosition());
+                            self.extruderEntries[entryName]["content"]["xPosition"] = parseInt(tools[index].xPosition());
+                            self.extruderEntries[entryName]["content"]["yPosition"] = parseInt(tools[index].yPosition());
+                            self.extruderEntries[entryName]["content"]["zPosition"] = parseInt(tools[index].zPosition());
+                            self.extruderEntries[entryName]["content"]["pressure"] = parseInt(tools[index].pressure());
+                            self.extruderEntries[entryName]["content"]["temperature"] = parseInt(tools[index].temperature());
                         }
                     }
                 });
@@ -1694,11 +1711,16 @@ $(function() {
 
             });
         };
+
+
+        self.onUserLoggedIn = function (user) {
+            self.loadTemplates();
+        }
+
+
     }
 
-    self.onUserLoggedIn = function () {
-        self.loadTemplates();
-    }
+
 
     bioprint_VIEWMODELS.push([
         ControlViewModel,

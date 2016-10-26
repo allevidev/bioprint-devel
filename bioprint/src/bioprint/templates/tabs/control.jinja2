@@ -178,7 +178,7 @@
                        <p style="text-align: right; width: 50%; float: right;" data-bind="text: zCurrentPosition"></p>
                      
                 
-                             <button class="btn btn-block control-box" data-bind=" click: $parent.setExtruderValues ">{{ _('Go') }}</button>
+                             <button class="btn btn-block control-box" data-bind=" click: $parent.setExtruderValues, enable: $root.isOperational() && $root.loginState.isUser() && $root.isHomed()">{{ _('Go') }}</button>
                     </form>
 
 
