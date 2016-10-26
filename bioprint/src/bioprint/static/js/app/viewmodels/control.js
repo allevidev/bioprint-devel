@@ -1424,7 +1424,6 @@ $(function() {
         };
 
         self.onStartup = function () {
-            self.loadTemplates();
             self.requestData();
         };
 
@@ -1695,9 +1694,10 @@ $(function() {
 
             });
         };
+    }
 
-
-
+    self.onUserLoggedIn = function () {
+        self.loadTemplates();
     }
 
     bioprint_VIEWMODELS.push([

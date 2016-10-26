@@ -236,6 +236,8 @@ def getExtruderEntries():
 
 	active_user = getActiveUser()
 
+	print active_user
+
 	if active_user is None:
 		return
 
@@ -255,6 +257,10 @@ def getExtruderEntries():
 			"Content-Type": "application/json",
 			"Authorization": "Bearer " + session["BIOBOTS_API_TOKEN"] 
 		}
+
+		print headers
+
+		print '\n\n\n\n\n', url, '\n\n\n\n\n'
 
 		r = requests.post(url, headers=headers, json=payload)
 

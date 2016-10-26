@@ -185,8 +185,9 @@ def performSystemAction():
 
 @api.route("/login", methods=["POST"])
 def login():
-	print '\n\n\n\n\n', request.values.keys(), '\n\n\n\n\n'
-	if bioprint.server.userManager is not None and "user" in request.values.keys() and "pass" in request.values.keys():
+	print request
+	if bioprint.server.userManager is not None and "user" in request.values.keys() and "pass" in request.values.keys() and "email" in request.values.keys():
+		print "Here 1"
 		username = request.values["user"]
 		password = request.values["pass"]
 		email = request.values["email"]
@@ -211,7 +212,6 @@ def login():
 							setSessionToken(email, password)
 				login_user(user, remember=remember)
 				identity_changed.send(current_app._get_current_object(), identity=Identity(user.get_id()))
-				print '\n\n\n\n\n\n', jsonify(user.asDict()), '\n\n\n\n\n\n'
 				return jsonify(user.asDict())
 		return make_response(("User unknown or password incorrect", 401, []))
 
@@ -220,19 +220,19 @@ def login():
 	return NO_CONTENT
 
 def isNetworkAvailible():
-	s = settings()
 
-	url = s.get(["biobots", "apiUrl"])
+	url = s().get(["biobots", "apiUrl"])
 
 	r = requests.get(url)
 
 	return r.status_code == 200
 
 def createUserIfNotExists(email, password):
-	s = settings()
 
-	url = s.get(["biobots", "apiUrl"]) + "user/exists"
-	s.get(["biobots", "apiUrl"])
+	print "HERE HERE HERE "
+
+	url = s().get(["biobots", "apiUrl"]) + "user/exists"
+
 	payload = {
 		"email": email,
 		"password": password,
@@ -243,9 +243,8 @@ def createUserIfNotExists(email, password):
 	return r.status_code == 200
 
 def setSessionToken(email, password):
-	s = settings()
 
-	url = s.get(["biobots", "apiUrl"]) + "user/authenticate"
+	url = s().get(["biobots", "apiUrl"]) + "user/authenticate"
 	
 	payload = {
 		"username": email,

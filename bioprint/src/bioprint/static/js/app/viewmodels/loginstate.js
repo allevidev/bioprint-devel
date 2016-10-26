@@ -48,7 +48,7 @@ $(function() {
         self.fromResponse = function(response) {
             if (response && response.name) {
                 self.loggedIn(true);
-                self.email(response.email);
+                self.loginEmail(response.email);
                 self.username(response.name);
                 self.isUser(response.user);
                 self.isAdmin(response.admin);
@@ -90,9 +90,9 @@ $(function() {
             $.ajax({
                 url: API_BASEURL + "login",
                 type: "POST",
-                data: {"username": username, "email": email, "pass": password, "remember": remember},
+                data: {"user": username, "email": email, "pass": password, "remember": remember},
                 success: function(response) {
-                    new PNotify({title: gettext("Login successful"), text: _.sprintf(gettext('You are now logged in as "%(username)s"'), {username: response.username}), type: "success"});
+                    new PNotify({title: gettext("Login successful"), text: _.sprintf(gettext('You are now logged in as "%(username)s"'), {username: response.name}), type: "success"});
                     self.fromResponse(response);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {

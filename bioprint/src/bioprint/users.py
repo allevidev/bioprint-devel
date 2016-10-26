@@ -53,6 +53,8 @@ class UserManager(object):
 
 		self._logger.debug("Logged in user: %r" % user)
 
+		print '\n\n\n\n\n\n', user, '\n\n\n\n\n'
+
 		return user
 
 	def logout_user(self, user):
