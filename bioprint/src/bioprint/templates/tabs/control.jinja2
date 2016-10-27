@@ -146,12 +146,13 @@
 
 
 
-                    <select style="width: 100%" data-bind="options: entryNames, attr: { id: key() + 'EntrySelector' }">
+  <select style="width: 100%" data-bind="enable: $root.wellplateSelected(), foreach: entryNames, attr: { id: key() + 'EntrySelector' }">
+                            <option data-bind="text: name, value: id"></option>
                     </select>
                 
-                        <button  style="margin-top:0.5em" class="btn btn-block control-box" data-bind=" click: function() { $root.loadExtruderValues(key()) }">{{ _('Load') }}</button>
+                        <button  style="margin-top:0.5em" class="btn btn-block control-box" data-bind=" click: function() { $root.loadExtruderValues(key()) }, enable: $root.wellplateSelected()">{{ _('Load') }}</button>
 
-                         <button  style="margin-top:0.5em" class="btn btn-block control-box" data-bind=" click: function() { $root.saveExtruderValues(key()) }">{{ _('Save') }}</button>
+                         <button  style="margin-top:0.5em" class="btn btn-block control-box" data-bind=" click: function() { $root.saveExtruderValues(key()) }, enable: $root.wellplateSelected()">{{ _('Save') }}</button>
                        
 
 
@@ -160,25 +161,25 @@
                     <form action="action_page.php" data-bind="id: name">
                     
                       <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">X-Position Target:</p>
-                      <input style="width:30%; float: right" type="text" name="x-position" data-bind="value: xPosition">
+                      <input style="width:30%; float: right" type="text" name="x-position" data-bind="value: xPosition, enable: $root.wellplateSelected()">
 
                       <p style="text-align: left; width: 50%; float: left;">X-Position Current:</p>
                        <p style="text-align: right; width: 50%; float: right;" data-bind="text: xCurrentPosition"></p>
 
                       <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Y-Position Target:</p>
-                      <input style="width:30%; float: right" type="text" name="y-position" data-bind="value: yPosition">
+                      <input style="width:30%; float: right" type="text" name="y-position" data-bind="value: yPosition, enable: $root.wellplateSelected()">
 
                         <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Y-Position Current:</p>
                        <p style="text-align: right; width: 50%; float: right;" data-bind="text: yCurrentPosition"></p>
                      
                       <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Z-Position Target:</p>
-                      <input style="width:30%; float: right" type="text" name="Z-position" data-bind="value: zPosition">
+                      <input style="width:30%; float: right" type="text" name="Z-position" data-bind="value: zPosition, enable: $root.wellplateSelected()">
 
                         <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Z-Position Current:</p>
                        <p style="text-align: right; width: 50%; float: right;" data-bind="text: zCurrentPosition"></p>
                      
                 
-                             <button class="btn btn-block control-box" data-bind=" click: $parent.setExtruderValues, enable: $root.isOperational() && $root.loginState.isUser() && $root.isHomed()">{{ _('Go') }}</button>
+                             <button class="btn btn-block control-box" data-bind=" click: $parent.setExtruderValues, enable: $root.isOperational() && $root.loginState.isUser() && $root.isHomed() &&$root.wellplateSelected()">{{ _('Go') }}</button>
                     </form>
 
 
@@ -207,7 +208,7 @@
     <form action="action_page.php">
                             
                       <p style="text-align: left; width: 50%; float: left; margin-bottom: 1.2em">Target:</p>
-                      <input id="extruder1TargetPressure" style="width:40%; float: right" type="text" name="Target" value="0">
+                      <input data-bind="enable: $root.wellplateSelected()" id="extruder1TargetPressure" style="width:40%; float: right" type="text" name="Target" value="0">
                      
                 
                           <button class="btn btn-block control-box" data-bind="enable: $root.isOperational(), click: function() { $root.setTargetPressure(key()) }">{{ _('Set Target') }}</button>
