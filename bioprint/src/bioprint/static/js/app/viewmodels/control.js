@@ -23,10 +23,11 @@ $(function() {
                 zCurrentPosition: ko.observable(0), 
                 temperature: ko.observable(0),
                 pressure: ko.observable(0),
-                entryNames: ko.observableArray([])
+                entryNames: ko.observableArray([]),
             }
         };
 
+        self.wellplateSelected = ko.observable(false);
         self.log = ko.observableArray([]);
         self.buffer = ko.observable(300);
 
@@ -103,7 +104,7 @@ $(function() {
 
         self.position = {}
         
-        
+    
         self.midpoint = 22;
         self.xTravel = 48.33;
 
@@ -1144,6 +1145,7 @@ $(function() {
                 dataType: "json",
                 contentType: "application/json; charset=UTF-8",
                 success: function (response) {
+
                     console.log(response);
 
                     positions = response["positions"][self.wellPlate()];
@@ -1162,6 +1164,8 @@ $(function() {
                             'G1 X' + positions["tool0"]["X"] + ' Y' + positions["tool0"]["Y"] + ' F2000',
                             'G1 E' + self.extruder1EPos + ' F1000']
                     });
+
+                    self.wellplateSelected(true);
                 }
             })            
         }
@@ -1603,7 +1607,6 @@ $(function() {
             Promise.all([z, e, xy]).then(function() {
                 var tools = self.tools();         
                 var index = parseInt((item["key"]())[4]);
-                console.log(self.homed);
                 self.sendCustomCommand({
                     type: "commands",
                     commands: [
@@ -1620,25 +1623,25 @@ $(function() {
     
 
         self.loadExtruderValues = function(tool) {
-            const tools = self.tools();
             const index = parseInt(tool[4]); 
-            const entryName = $('#' + tool + 'EntrySelector').val();
+            const entryId = $('#' + tool + 'EntrySelector').val();
        
-            //entryName ==> id
-            tools[index].xPosition(self.extruderEntries[entryName]["content"]["xPosition"]);
-            tools[index].yPosition(self.extruderEntries[entryName]["content"]["yPosition"]);
-            tools[index].zPosition(self.extruderEntries[entryName]["content"]["zPosition"]);
+            
+            tools[index].xPosition(self.extruderEntries[entryId]["content"]["xPosition"]);
+            tools[index].yPosition(self.extruderEntries[entryId]["content"]["yPosition"]);
+            tools[index].zPosition(self.extruderEntries[entryId]["content"]["zPosition"]);
         }
 
         self.saveExtruderValues = function(tool) {
+             self.wellplateSelected(true);
             const tools = self.tools();
             const index = parseInt(tool[4]); 
-            const entryName = $('#' + tool + 'EntrySelector').val();
+            const entryId = $('#' + tool + 'EntrySelector').val();
             
         
-            if  (parseInt(tools[index].xPosition()) !== parseInt(self.extruderEntries[entryName]["content"]["xPosition"]) ||
-                (parseInt(tools[index].yPosition()) !== parseInt(self.extruderEntries[entryName]["content"]["yPosition"])) ||
-                (parseInt(tools[index].zPosition()) !== parseInt(self.extruderEntries[entryName]["content"]["zPosition"]))) {
+            if  (parseInt(tools[index].xPosition()) !== parseInt(self.extruderEntries[entryId]["content"]["xPosition"]) ||
+                (parseInt(tools[index].yPosition()) !== parseInt(self.extruderEntries[entryId]["content"]["yPosition"])) ||
+                (parseInt(tools[index].zPosition()) !== parseInt(self.extruderEntries[entryId]["content"]["zPosition"]))) {
 
                 positions = {
                     "xPosition": parseInt(tools[index].xPosition()),
@@ -1646,7 +1649,7 @@ $(function() {
                     "zPosition": parseInt(tools[index].zPosition())
                 }
 
-                var tempContent = self.extruderEntries[entryName]["content"];
+                var tempContent = self.extruderEntries[entryId]["content"];
                 tempContent["xPosition"] = parseInt(tools[index].xPosition());
                 tempContent["yPosition"] = parseInt(tools[index].yPosition());
                 tempContent["zPosition"] = parseInt(tools[index].zPosition());
@@ -1655,7 +1658,7 @@ $(function() {
                 
 
                 data = {
-                    id: self.extruderEntries[entryName]["_id"], 
+                    id: entryId, 
                     content: tempContent
                 };
 
@@ -1666,11 +1669,11 @@ $(function() {
                     contentType: "application/json",
                     success: function(response) {
                         if (response["status"]) {
-                            self.extruderEntries[entryName]["content"]["xPosition"] = parseInt(tools[index].xPosition());
-                            self.extruderEntries[entryName]["content"]["yPosition"] = parseInt(tools[index].yPosition());
-                            self.extruderEntries[entryName]["content"]["zPosition"] = parseInt(tools[index].zPosition());
-                            self.extruderEntries[entryName]["content"]["pressure"] = parseInt(tools[index].pressure());
-                            self.extruderEntries[entryName]["content"]["temperature"] = parseInt(tools[index].temperature());
+                            self.extruderEntries[entryId]["content"]["xPosition"] = parseInt(tools[index].xPosition());
+                            self.extruderEntries[entryId]["content"]["yPosition"] = parseInt(tools[index].yPosition());
+                            self.extruderEntries[entryId]["content"]["zPosition"] = parseInt(tools[index].zPosition());
+                            self.extruderEntries[entryId]["content"]["pressure"] = parseInt(tools[index].pressure());
+                            self.extruderEntries[entryId]["content"]["temperature"] = parseInt(tools[index].temperature());
                         }
                     }
                 });
@@ -1693,14 +1696,18 @@ $(function() {
                         for (var i=0; i < response["result"]["entries"].length; i++) {
 
                             //name ==> id
-                            self.extruderEntries[response["result"]["entries"][i]["entry"]["name"]] = response["result"]["entries"][i]["entry"]; 
+                            self.extruderEntries[response["result"]["entries"][i]["entry"]["_id"]] = response["result"]["entries"][i]["entry"]; 
                            
                             const validExtruders = response["result"]["entries"][i]["entry"]["content"]["type"];
 
                             
                             for (var extruder of validExtruders){
                                 const index = parseInt(extruder[8]) - 1; 
-                                tools[index].entryNames.push(response["result"]["entries"][i]["entry"]["name"]);
+                                const currentEntry = {};
+                                currentEntry["name"] = response["result"]["entries"][i]["entry"]["name"];
+                                currentEntry["id"] = response["result"]["entries"][i]["entry"]["_id"];
+
+                                tools[index].entryNames.push(currentEntry);
                             }
 
                         }

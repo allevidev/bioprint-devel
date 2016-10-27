@@ -83,6 +83,7 @@
         <button class="btn btn-block" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { $root.sendEmergencyStop() }">{{ _('Emergency Stop') }}</button>
         <hr>
         <div class="row-fluid">
+
           <div class="span4">
             <select class="form-control span12"  id="wellPlate" data-bind="enable: isOperational() && loginState.isUser() && isHomed()">
               <option selected="selected">Select Plate Type</option>
@@ -145,13 +146,14 @@
           <div>
             <h3 style="text-align: left">Template:</h3>
             <div class="row" style="margin-left: 0px; ">
-              <select class="span6" style="float: left" data-bind="options: entryNames, attr: { id: key() + 'EntrySelector' }">
+              <select class="span6" data-bind="enable: $root.wellplateSelected(), foreach: entryNames, attr: { id: key() + 'EntrySelector' }">
+                <option data-bind="text: name, value: id"></option>
               </select>
               <div class="span3 btn-group action-buttons" >
-                <div class="btn" data-bind=" click: function() { $root.loadExtruderValues(key()) }">
+                <div class="btn" data-bind=" enable: $root.wellplateSelected(), click: function() { $root.loadExtruderValues(key()) }">
                   {{ _('Load') }}
                 </div>
-                <div class="btn" data-bind=" click: function() { $root.saveExtruderValues(key()) }">
+                <div class="btn" data-bind=" enable: $root.wellplateSelected(), click: function() { $root.saveExtruderValues(key()) }">
                   {{ _('Save') }}
                 </div>
               </div>
@@ -172,7 +174,7 @@
                 </div>
                 <div class="span6 target">
                   <div class="input-append">
-                    <input type="text" class="input text-right tempInput" name="x-position" data-bind="value: xPosition, enable: $root.isOperational()">
+                    <input type="text" class="input text-right tempInput" name="x-position" data-bind="value: xPosition,  enable: $root.wellplateSelected()">
                   </div>
                   <h3>Target</h3>
                 </div>
@@ -187,7 +189,7 @@
                 </div>
                 <div class="span6 target">
                   <div class="input-append">
-                    <input type="text" class="input text-right tempInput" name="y-position" data-bind="value: yPosition, enable: $root.isOperational()">
+                    <input type="text" class="input text-right tempInput" name="y-position" data-bind="value: yPosition,  enable: $root.wellplateSelected()">
                   </div>
                   <h3>Target</h3>
                 </div>
@@ -202,12 +204,12 @@
                 </div>
                 <div class="span6 target">
                   <div class="input-append">
-                    <input type="text" class="input text-right tempInput" name="z-position" data-bind="value: zPosition, enable: $root.isOperational()">
+                    <input type="text" class="input text-right tempInput" name="z-position" data-bind="value: zPosition,  enable: $root.wellplateSelected()">
                   </div>
                   <h3>Target</h3>
                 </div>
               </div>              
-              <button class="btn btn-block control-box" data-bind=" click: $parent.setExtruderValues, enable: $root.isOperational() && $root.loginState.isUser() && $root.isHomed()">{{ _('Set Position') }}</button>
+              <button class="btn btn-block control-box" data-bind=" click: $parent.setExtruderValues,  enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed()">{{ _('Set Position') }}</button>
             </form>
 
             <hr>
@@ -223,12 +225,12 @@
                 </div>
                 <div class="span6 target">
                   <div class="input-append">
-                    <input type="text" class="input text-right tempInput" id="extruder1TargetPressure" name="Target" data-bind="enable: $root.isOperational()">
+                    <input type="text" class="input text-right tempInput" id="extruder1TargetPressure" name="Target" data-bind=" enable: $root.wellplateSelected()">
                   </div>
                   <h3>Target</h3>
                 </div>
               </div>
-              <button class="btn btn-block control-box" data-bind="enable: $root.isOperational(), click: function() { $root.setTargetPressure(key()) }">{{ _('Set Target Pressure') }}</button>
+              <button class="btn btn-block control-box" data-bind=" enable: $root.wellplateSelected(), click: function() { $root.setTargetPressure(key()) }">{{ _('Set Target Pressure') }}</button>
             </form>
 
 
@@ -245,13 +247,13 @@
                 </div>
                 <div class="span6 target">
                   <div class="input-append">
-                    <input type="text" class="input text-right tempInput" data-bind="attr: {placeholder: cleanTemperature(target()) }, value: newTarget, enable: $root.isOperational(), event: { keyup: function(d, e) {$root.handleEnter(e, 'target', $data);} }">
+                    <input type="text" class="input text-right tempInput" data-bind="attr: {placeholder: cleanTemperature(target()) }, value: newTarget,  enable: $root.wellplateSelected(), event: { keyup: function(d, e) {$root.handleEnter(e, 'target', $data);} }">
                     <span class="add-on tempAddOn">&deg;C</span>
                   </div>
                   <h3>Target</h3>
                 </div>
               </div>
-              <button type="submit" data-bind="click: $parent.setTarget, enable: $root.isOperational()" class="tempSubmit btn-block control-box btn">{{ _('Set Target Temp') }}</button>
+              <button type="submit" data-bind="click: $parent.setTarget,  enable: $root.wellplateSelected()" class="tempSubmit btn-block control-box btn">{{ _('Set Target Temp') }}</button>
             </form>
 
             <hr>
