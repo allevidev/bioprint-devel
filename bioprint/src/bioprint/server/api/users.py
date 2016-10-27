@@ -236,8 +236,6 @@ def getExtruderEntries():
 
 	active_user = getActiveUser()
 
-	print active_user
-
 	if active_user is None:
 		return
 
@@ -257,10 +255,6 @@ def getExtruderEntries():
 			"Content-Type": "application/json",
 			"Authorization": "Bearer " + session["BIOBOTS_API_TOKEN"] 
 		}
-
-		print headers
-
-		print '\n\n\n\n\n', url, '\n\n\n\n\n'
 
 		r = requests.post(url, headers=headers, json=payload)
 
@@ -284,7 +278,6 @@ def getExtruderEntries():
 
 @api.route("/user/entry/update", methods=["POST"])
 def updateEntry():
-	print jsonify(request.get_json(force=True))
 
 	if not "application/json" in request.headers["Content-Type"]:
 		return make_response("Expected content-type JSON", 400)
@@ -390,7 +383,6 @@ def getActiveUser():
 	if userManager is not None:
 		for users in userManager.getAllUsers():
 			if users["active"]:
-				print users
 				return userManager.findUser(users['name'])
 	else:
 		return None

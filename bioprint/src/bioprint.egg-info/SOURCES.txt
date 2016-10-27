@@ -172,6 +172,7 @@ src/bioprint/static/js/lib/modernizr.custom.js
 src/bioprint/static/js/lib/moment-with-locales.min.js
 src/bioprint/static/js/lib/pnotify.min.js
 src/bioprint/static/js/lib/pusher.color.min.js
+src/bioprint/static/js/lib/ramda.min.js
 src/bioprint/static/js/lib/sockjs-0.3.4.min.js
 src/bioprint/static/js/lib/sprintf.min.js
 src/bioprint/static/js/lib/bootstrap/bootstrap-modal.js

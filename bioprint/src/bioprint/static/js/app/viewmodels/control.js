@@ -1689,12 +1689,14 @@ $(function() {
                     console.log(response);
                     if (response["status"]) {
                         const tools = self.tools();
+                        console.log(R.length(response["result"]["entries"]))
                         for (var i=0; i < response["result"]["entries"].length; i++) {
 
                             //name ==> id
                             self.extruderEntries[response["result"]["entries"][i]["entry"]["name"]] = response["result"]["entries"][i]["entry"]; 
                            
                             const validExtruders = response["result"]["entries"][i]["entry"]["content"]["type"];
+
                             
                             for (var extruder of validExtruders){
                                 const index = parseInt(extruder[8]) - 1; 

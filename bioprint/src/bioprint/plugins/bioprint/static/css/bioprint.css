@@ -219,6 +219,30 @@ h3 {
   border-radius: 0px;
 }
 
+.input-append {
+  margin: 7px 0;
+}
+
+.current-value {
+
+}
+
+.current-value h2 {
+  line-height: 45px;
+}
+
+.jog-panel h4 {
+  margin:0 0 5px 0;
+}
+
+.input-inline .span6 {
+  margin-left: 0px;
+}
+
+.target {
+  margin-left: 0;
+}
+
 ::-webkit-input-placeholder { /* Safari, Chrome and Opera */
   vertical-align: middle;
 }

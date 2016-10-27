@@ -185,9 +185,7 @@ def performSystemAction():
 
 @api.route("/login", methods=["POST"])
 def login():
-	print request
 	if bioprint.server.userManager is not None and "user" in request.values.keys() and "pass" in request.values.keys() and "email" in request.values.keys():
-		print "Here 1"
 		username = request.values["user"]
 		password = request.values["pass"]
 		email = request.values["email"]
@@ -228,8 +226,6 @@ def isNetworkAvailible():
 	return r.status_code == 200
 
 def createUserIfNotExists(email, password):
-
-	print "HERE HERE HERE "
 
 	url = s().get(["biobots", "apiUrl"]) + "user/exists"
 

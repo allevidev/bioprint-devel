@@ -53,8 +53,6 @@ class UserManager(object):
 
 		self._logger.debug("Logged in user: %r" % user)
 
-		print '\n\n\n\n\n\n', user, '\n\n\n\n\n'
-
 		return user
 
 	def logout_user(self, user):
@@ -99,8 +97,6 @@ class UserManager(object):
 				salt = "".join(choice(chars) for _ in xrange(32))
 				settings().set(["accessControl", "salt"], salt)
 				settings().save()
-
-		print '\n\n\n\n\n' + salt + '\n\n\n\n\n'
 
 		return hashlib.sha512(password + salt).hexdigest()
 
