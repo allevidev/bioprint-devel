@@ -225,12 +225,12 @@
                 </div>
                 <div class="span6 target">
                   <div class="input-append">
-                    <input type="text" class="input text-right tempInput" id="extruder1TargetPressure" name="Target" data-bind=" enable: $root.wellplateSelected()">
+                    <input type="text" class="input text-right tempInput" id="extruder1TargetPressure" name="Target" data-bind=" value: targetPressure, enable: $root.wellplateSelected()">
                   </div>
                   <h3>Target</h3>
                 </div>
               </div>
-              <button class="btn btn-block control-box" data-bind=" enable:  $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() { $root.setTargetPressure(key()) }">{{ _('Set Target Pressure') }}</button>
+              <button class="btn btn-block control-box" data-bind=" enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: $parent.setTargetPressure">{{ _('Set Target Pressure') }}</button>
             </form>
 
 

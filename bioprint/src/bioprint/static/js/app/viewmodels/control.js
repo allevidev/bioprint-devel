@@ -24,6 +24,7 @@ $(function() {
                 temperature: ko.observable(0),
                 pressure: ko.observable(0),
                 entryNames: ko.observableArray([]),
+                targetPressure: ko.observable()
             }
         };
 
@@ -1043,16 +1044,46 @@ $(function() {
             })
         }
 
-        self.setTargetPressure = function(extruder) {
+        self.setTargetPressure = function(item) {
+         
+            console.log(item.targetPressure());
+            console.log(item.key());
+         
+            if (!item.key() || !item.targetPressure()) return;
             
-            if (extruder == "tool0") {
+
+            if (item.key() == "tool0") {
                 var regulator = 'L';
-            } else if (extruder == "tool1") {
+            } else if (item.key() == "tool1") {
                 var regulator = 'R';
             }
+            
+
+            const tools = self.tools();  
+            const tool = parseInt((item["key"]())[4]);
+        
+
+            var offset = -1 * (item.targetPressure() - parseFloat(tools[tool]["pressure"]()));
+
+            console.log("Target: " + item.targetPressure());
+            console.log("Current: " + parseFloat(tools[tool]["pressure"]()));
+            console.log("Offset: " + offset);
+      
+        
+            self.sendCustomCommand({
+                type: "commands",
+                commands: [
+                "G91",
+                "G1 "+ regulator + "-0.25 ",
+                "G90",
+                "M18 " + regulator,
+                'M105'
+                ]
+            });
+       
            
 
-            $.ajax({
+      /*      $.ajax({
                 url: API_BASEURL + "printer/tool",
                 type: "GET",
                 dataType: "json",
@@ -1091,7 +1122,7 @@ $(function() {
                     $('#extruder1Pressure').val(self.extruder1Pressure);
                 }
             });
-
+*/
 
        
         }
