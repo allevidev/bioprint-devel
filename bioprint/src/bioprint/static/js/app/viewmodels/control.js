@@ -962,10 +962,6 @@ $(function() {
                 self.isHomed(true);
             }
 
-            if (axis == ['e']) {
-                self.extruder1EPos = -1;
-                self.extruder2EPos = -1;
-            }
 
             if (axis == ['x', 'y']) {
                 self.extruder1XPos = -1;
@@ -1625,11 +1621,11 @@ $(function() {
         self.loadExtruderValues = function(tool) {
             const index = parseInt(tool[4]); 
             const entryId = $('#' + tool + 'EntrySelector').val();
-       
+            const tools = self.tools();
             
-            tools[index].xPosition(self.extruderEntries[entryId]["content"]["positions"]);
-            tools[index].yPosition(self.extruderEntries[entryId]["content"]["yPosition"]);
-            tools[index].zPosition(self.extruderEntries[entryId]["content"]["zPosition"]);
+            tools[index].xPosition(self.extruderEntries[entryId]["content"]["positions"][self.wellPlate()][tool]['X']);
+            tools[index].yPosition(self.extruderEntries[entryId]["content"]["positions"][self.wellPlate()][tool]['Y']);
+            tools[index].zPosition(self.extruderEntries[entryId]["content"]["positions"][self.wellPlate()][tool]['Z']);
         }
 
         self.saveExtruderValues = function(tool) {
@@ -1644,17 +1640,11 @@ $(function() {
                 (parseInt(tools[index].yPosition()) !== parseInt(self.extruderEntries[entryId]["content"]["yPosition"])) ||
                 (parseInt(tools[index].zPosition()) !== parseInt(self.extruderEntries[entryId]["content"]["zPosition"]))) {
 
-                positions = {
-                    "xPosition": parseInt(tools[index].xPosition()),
-                    "yPosition": parseInt(tools[index].yPosition()),
-                    "zPosition": parseInt(tools[index].zPosition())
-                }
-
                 var tempContent = self.extruderEntries[entryId]["content"];
 
-                tempContent["positions"][(self.wellPlate()).toString()][tool]["X"] = parseInt(tools[index].xPosition());
-                tempContent["positions"][(self.wellPlate()).toString()][tool]["Y"] = parseInt(tools[index].yPosition());
-                tempContent["positions"][(self.wellPlate()).toString()][tool]["Z"] = parseInt(tools[index].zPosition());
+                tempContent["positions"][self.wellPlate()][tool]['X'] = parseInt(tools[index].xPosition());
+                tempContent["positions"][self.wellPlate()][tool]['Y'] = parseInt(tools[index].yPosition());
+                tempContent["positions"][self.wellPlate()][tool]['Z'] = parseInt(tools[index].zPosition());
                 tempContent["pressure"] = parseInt(tools[index].pressure());
                 tempContent["temperature"] = parseInt(tools[index].temperature());
                 

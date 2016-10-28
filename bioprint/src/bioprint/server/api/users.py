@@ -303,10 +303,10 @@ def updateEntry():
 		
 		payload = {
 			# This needs to be request.json.id (NOT WORKING)
-			"id": data.id,
+			"id": request.json["id"],
 
 			# This needs to be request.json.content (NOT WORKING)
-			"content": data.content
+			"content": request.json["content"]
 		}
 
 		headers = {
