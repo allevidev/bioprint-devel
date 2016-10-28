@@ -1627,7 +1627,7 @@ $(function() {
             const entryId = $('#' + tool + 'EntrySelector').val();
        
             
-            tools[index].xPosition(self.extruderEntries[entryId]["content"]["xPosition"]);
+            tools[index].xPosition(self.extruderEntries[entryId]["content"]["positions"]);
             tools[index].yPosition(self.extruderEntries[entryId]["content"]["yPosition"]);
             tools[index].zPosition(self.extruderEntries[entryId]["content"]["zPosition"]);
         }
@@ -1637,7 +1637,8 @@ $(function() {
             const tools = self.tools();
             const index = parseInt(tool[4]); 
             const entryId = $('#' + tool + 'EntrySelector').val();
-            
+
+
         
             if  (parseInt(tools[index].xPosition()) !== parseInt(self.extruderEntries[entryId]["content"]["xPosition"]) ||
                 (parseInt(tools[index].yPosition()) !== parseInt(self.extruderEntries[entryId]["content"]["yPosition"])) ||
@@ -1650,9 +1651,10 @@ $(function() {
                 }
 
                 var tempContent = self.extruderEntries[entryId]["content"];
-                tempContent["xPosition"] = parseInt(tools[index].xPosition());
-                tempContent["yPosition"] = parseInt(tools[index].yPosition());
-                tempContent["zPosition"] = parseInt(tools[index].zPosition());
+
+                tempContent["positions"][(self.wellPlate()).toString()][tool]["X"] = parseInt(tools[index].xPosition());
+                tempContent["positions"][(self.wellPlate()).toString()][tool]["Y"] = parseInt(tools[index].yPosition());
+                tempContent["positions"][(self.wellPlate()).toString()][tool]["Z"] = parseInt(tools[index].zPosition());
                 tempContent["pressure"] = parseInt(tools[index].pressure());
                 tempContent["temperature"] = parseInt(tools[index].temperature());
                 
