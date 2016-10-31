@@ -273,6 +273,8 @@ $(function() {
 
 
         self.fromCurrentData = function (data) {
+            console.log(data.serverTime);
+            console.log(data.temps);
             self._processStateData(data.state);
             self._processPositionData(data.position);
             self._processTemperatureUpdateData(data.serverTime, data.temps);
@@ -1044,87 +1046,77 @@ $(function() {
             })
         }
 
-        self.setTargetPressure = function(item) {
-         
-            console.log(item.targetPressure());
-            console.log(item.key());
-         
+
+
+
+//  Still TODO: Remove duplicate code -> Make a single function to handle both extruders instead of if statement
+
+        self.setTargetPressure = function(item) {     
+
             if (!item.key() || !item.targetPressure()) return;
-            
 
             if (item.key() == "tool0") {
                 var regulator = 'L';
+                $.ajax({
+                    url: API_BASEURL + "printer/bed",
+                    type: "GET",
+                    dataType: "json",
+                    contentType: "application/json; charset=UTF-8",
+                    success: function(state) {
+                        const current = parseFloat(state["bed"]["actual"]);
+                        const offset =  (-1 *(item.targetPressure() - current));
+          
+                        if (Math.abs(offset) > 0.2) {
+                            console.log("Should send command for extruder 1");
+                            self.sendCustomCommand({
+                                type: "commands",
+                                commands: [
+                                "G91",
+                                "G1 "+ regulator + (0.3 * offset) ,
+                                "G90",
+                                "M18 " + regulator,
+                                'M105'
+                                ]
+                            });
+                            
+                            setTimeout(function() {
+                                self.setTargetPressure(item);
+                            }, 500);
+                        }
+                     
+                    }
+                });
             } else if (item.key() == "tool1") {
                 var regulator = 'R';
-            }
-            
 
-            const tools = self.tools();  
-            const tool = parseInt((item["key"]())[4]);
-        
+                $.ajax({
+                    url: API_BASEURL + "printer/tool",
+                    type: "GET",
+                    dataType: "json",
+                    contentType: "application/json; charset=UTF-8",
+                    success: function(state) {
+                        const current = parseFloat(state["tool2"]["actual"]);
+                        const offset =   (-1 *(item.targetPressure() - current));
 
-            var offset = -1 * (item.targetPressure() - parseFloat(tools[tool]["pressure"]()));
-
-            console.log("Target: " + item.targetPressure());
-            console.log("Current: " + parseFloat(tools[tool]["pressure"]()));
-            console.log("Offset: " + offset);
-      
-        
-            self.sendCustomCommand({
-                type: "commands",
-                commands: [
-                "G91",
-                "G1 "+ regulator + "-0.25 ",
-                "G90",
-                "M18 " + regulator,
-                'M105'
-                ]
-            });
-       
-           
-
-      /*      $.ajax({
-                url: API_BASEURL + "printer/tool",
-                type: "GET",
-                dataType: "json",
-                contentType: "application/json; charset=UTF-8",
-                success: function(state) {
-                    console.log(state);
-                        self.extruder1Temp = state['tool0']['actual'];
-                        self.extruder2Temp = state['tool1']['actual'];
-                        self.extruder2Pressure = state['tool2']['actual'];
-
-                        self.sendCustomCommand({
-                            type: "commands",
-                            commands: [
-                            "G91",
-                            "G1 "+ regulator + "-0.25 ",
-                            "G90",
-                            "M18 " + regulator,
-                            'M105'
-                            ]
-                        })
-//                    $('#extruder1Temp').val(self.extruder1Temp);
-//                    $('#extruder2Pressure').val(self.extruder2Pressure);
-//                    $('#extruder2Temp').val(self.extruder2Temp);
-                }
-            });
-
-            $.ajax({
-                url: API_BASEURL + "printer/bed",
-                type: "GET",
-                dataType: "json",
-                contentType: "application/json; charset=UTF-8",
-                success: function(state) {
-                    
-                    self.extruder1Pressure = state['bed']['actual'];
-
-                    $('#extruder1Pressure').val(self.extruder1Pressure);
-                }
-            });
-*/
-
-       
+                        if (Math.abs(offset) > 0.5) {
+                             self.sendCustomCommand({
+                                    type: "commands",
+                                    commands: [
+                                    "G91",
+                                    "G1 "+ regulator + (0.3 * offset) ,
+                                    "G90",
+                                    "M18 " + regulator,
+                                    'M105'
+                                    ]
+                                });
+                            
+                            setTimeout(function() {
+                                self.setTargetPressure(item);
+                            }, 500);
+                        }
+                    }
+                });
+            }       
         }
 
 
