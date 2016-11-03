@@ -1456,6 +1456,7 @@ $(function() {
 
         self.onStartup = function () {
             self.requestData();
+            self.entryDialog = $('#entry_dialog')
         };
 
         self.updateRotatorWidth = function() {
@@ -1623,6 +1624,18 @@ $(function() {
             }
         };
 
+        self.showEntryDialog = function(key) {
+            console.log("HERE ", key);
+            self.entryDialog.modal({
+                minHeight: function() { return Math.max($.fn.modal.defaults.maxHeight() - 80, 250); }
+            }).css({
+                width: 'auto',
+                'margin-left': function() { return -($(this).width() / 2); }
+            });
+
+            return false;
+        }
+
         
         self.setExtruderValues = function (item) {          
             var z = self.sendHomeCommand('z');
@@ -1702,6 +1715,9 @@ $(function() {
                 });
             } 
 
+        }
+
+        self.newTemplate = function() {
 
         }
 
