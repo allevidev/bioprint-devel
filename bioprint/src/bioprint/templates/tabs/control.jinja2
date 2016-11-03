@@ -236,6 +236,10 @@
                 </div>
               </div>
               <button class="btn btn-block control-box" data-bind=" enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: $parent.setTargetPressure">{{ _('Set Target Pressure') }}</button>
+
+               <button class="btn btn-block control-box" data-bind="enable: $root.isOperational(), click: function() { $root.sendPressureIncrease(key()) }">{{ _('+') }}</button>
+                    
+                        <button class="btn btn-block control-box" data-bind="enable: $root.isOperational(), click: function() { $root.sendPressureDecrease(key()) }">{{ _('-') }}</button>
             </form>
 
 
