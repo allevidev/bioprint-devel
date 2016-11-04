@@ -26,7 +26,56 @@
 <div class="row-fluid">
   <div class="span6 panel-blue">
     <div id="motion" class="jog-panel">
+    <div class="row-fluid">
+ <div >
+            <h3 style="text-align: left;">Position:</h3>
+
+   
+
+              <div class="span4 jog-panel">
+                <h4>X Axis</h4>
+               
+                  <div class="current-value">
+                    <h2 data-bind="html: xActualPosition"></h2>
+                  </div>
+       
+              </div>
+               <div class="span4 jog-panel" >
+                <h4>Y Axis</h4>
+              
+                  <div class="current-value">
+                    <h2 data-bind="html: yActualPosition"></h2>
+                  </div>
+          
+              </div>
+               <div class="span4 jog-panel">
+                <h4>Z Axis</h4>
+              
+                  <div class="current-value">
+                    <h2 data-bind="html: zActualPosition"></h2>
+                  </div>
+    
+              </div>
+                 
+      
+          
+          </div>
+
+
+
+
+    </div>
+    <hr>
       <div class="row-fluid">
+
+
+
+
+
+
+
+
+
         <!-- XY jogging control panel -->
         <div id="motion-control">
           <div id="XY" class="jog-panel">
@@ -170,13 +219,10 @@
 
             <form action="action_page.php" data-bind="id: name">
               <div class="row input-inline">
-                <h4>X Axis</h4>
-                <div class="span6">
-                  <div class="current-value">
-                    <h2 data-bind="html: xCurrentPosition"></h2>
+               
+ <div class="span6 target">
+           <h4>X Axis</h4>
                   </div>
-                  <h3>Actual</h3>
-                </div>
                 <div class="span6 target">
                   <div class="input-append">
                     <input type="text" class="input text-right tempInput" name="x-position" data-bind="value: xPosition,  enable: $root.wellplateSelected()">
@@ -184,13 +230,12 @@
                   <h3>Target</h3>
                 </div>
               </div>
+
+
+
               <div class="row input-inline">
-                <h4>Y Axis</h4>
-                <div class="span6">
-                  <div class="current-value">
-                    <h2 data-bind="html: yCurrentPosition"></h2>
-                  </div>
-                  <h3>Actual</h3>
+               <div class="span6 target">
+                  <h4>Y Axis</h4>
                 </div>
                 <div class="span6 target">
                   <div class="input-append">
@@ -200,12 +245,8 @@
                 </div>
               </div>
               <div class="row input-inline">
-                <h4>Z Axis</h4>
-                <div class="span6">
-                  <div class="current-value">
-                    <h2 data-bind="html: zCurrentPosition"></h2>
-                  </div>
-                  <h3>Actual</h3>
+               <div class="span6 target">
+                  <h4>Z Axis</h4>
                 </div>
                 <div class="span6 target">
                   <div class="input-append">
@@ -353,12 +394,70 @@
   </div>
 </div>
 
-<div id="entry_dialog" class="modal hide fade large" tabindex="-1" role="dialog" aria-labelledby="entry_dialog_label" aria-hidden="true">
+<div id="entry_dialog" class="modal hide fade small" tabindex="-1" role="dialog" aria-labelledby="entry_dialog_label" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal">&times;</button>
     <h3 id="settings_dialog_label">{{ _('Entry Management') }}</h3>
   </div>
   <div class="modal-body">
+
+
+
+  <form >
+ 
+
+
+
+
+  <h2> Extruder Profiles </h2>
+    
+
+    <div style="margin-top: 2em" >
+      <h3> Profile Name </h3>
+      Name:<br>
+      <input data-bind="value: modalName" style="width:95%" type="text" name="profile-name"><br>
+    </div>
+    
+    <div style="width: 45%; float: left">
+    <h3> Position Data </h3>
+    <div >
+      X Position:<br>
+      <input data-bind="value: modalXPosition" type="text" name="x-position">
+    </div>
+      <div >
+      Y Position:<br>
+      <input data-bind="value: modalYPosition" type="text" name="y-position">
+    </div>
+      <div >
+      Z Position:<br>
+      <input data-bind="value: modalZPosition" type="text" name="z-position">
+    </div>
+    </div>
+
+    <div style="width: 45%; float: right">
+    <h3> Temperature Data </h3>
+    <div >
+      Temperature:<br>
+      <input data-bind="value: modalTemperature" type="text" name="temperature">
+    </div>
+    <br style="line-height: 2em">
+    <h3> Pressure Data </h3>
+    <div >
+      Pressure:<br>
+      <input data-bind="value: modalPressure" type="text" name="temperature">
+    </div>
+</div>
+
+
+  <div style="float: right" class="btn" data-bind="click: function() { $root.showEntryDialog(key()) }">
+    {{ _('New') }}
+  </div>
+  <div style="float: right" class="btn" data-bind="click: function() { $root.showEntryDialog(key()) }">
+    {{ _('Save') }}
+  </div>
+</form>
+
+
   </div>
 </div>
 

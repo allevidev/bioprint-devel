@@ -5,6 +5,13 @@ $(function() {
         self.loginState = parameters[0];
         self.settings = parameters[1];
 
+        self.xActualPosition = ko.observable(0.00);
+        self.yActualPosition = ko.observable(0.00);
+        self.zActualPosition = ko.observable(0.00);
+
+
+
+
         self._createToolEntry = function () {
             return {
                 name: ko.observable(),
@@ -16,11 +23,8 @@ $(function() {
                 newOffset: ko.observable(),
                 pressure: ko.observable(0),
                 xPosition: ko.observable(1),
-                xCurrentPosition: ko.observable(0), 
                 yPosition: ko.observable(0),
-                yCurrentPosition: ko.observable(0),
-                zPosition: ko.observable(0),
-                zCurrentPosition: ko.observable(0), 
+                zPosition: ko.observable(0), 
                 temperature: ko.observable(0),
                 pressure: ko.observable(0),
                 entryNames: ko.observableArray([]),
@@ -273,10 +277,9 @@ $(function() {
 
 
         self.fromCurrentData = function (data) {
-            console.log(data.serverTime);
-            console.log(data.temps);
             self._processStateData(data.state);
             self._processPositionData(data.position);
+
             self._processTemperatureUpdateData(data.serverTime, data.temps);
             self._processOffsetData(data.offsets);
             self._processCurrentLogData(data.logs);
@@ -301,6 +304,9 @@ $(function() {
 
         self._processPositionData = function(data) {
             self.position = data;
+           self.xActualPosition(data['X']);
+           self.yActualPosition(data['Y']);
+           self.zActualPosition(data['Z']);
         }
 
         self._processCurrentLogData = function(data) {
@@ -1617,7 +1623,7 @@ $(function() {
         };
 
         self.showEntryDialog = function(key) {
-            console.log("HERE ", key);
+            self.setupModal(key);
             self.entryDialog.modal({
                 minHeight: function() { return Math.max($.fn.modal.defaults.maxHeight() - 80, 250); }
             }).css({
@@ -1709,8 +1715,26 @@ $(function() {
 
         }
 
-        self.newTemplate = function() {
+        self.modalEntryId = null;
+        self.modalXPosition = ko.observable(0);
+        self.modalYPosition = ko.observable(0);
+        self.modalZPosition = ko.observable(0);
+        self.modalTemperature = ko.observable(0);
+        self.modalPressure = ko.observable(0);
+        self.modalName = ko.observable('');
 
+        self.setupModal = function(tool) {
+            const index = parseInt(tool[4]); 
+            const tools = self.tools();
+            const entryId = $('#' + tool + 'EntrySelector').val();
+
+            self.modalEntryId = entryId;
+            self.modalName(self.extruderEntries[entryId]["name"]);
+            self.modalXPosition(tools[index].xPosition());
+            self.modalYPosition(tools[index].yPosition());
+            self.modalZPosition(tools[index].zPosition());
+            self.modalTemperature(tools[index].temperature());
+            self.modalPressure(tools[index].pressure());
         }
 
         self.loadTemplates = function () {
