@@ -1670,8 +1670,33 @@ $(function() {
             tools[index].zPosition(self.extruderEntries[entryId]["content"]["positions"][self.wellPlate()][tool]['Z']);
         }
 
+        self.newExtruderEntry = function() {
+            var entry = {};
+            entry["name"] = self.modalName();
+            entry["content"] = {};
+            entry["content"]["xPosition"] = self.modalXPosition();
+            entry["content"]["yPosition"] = self.modalYPosition();
+            entry["content"]["zPosition"] = self.modalZPosition();
+            entry["content"]["temperature"] = self.modalXPosition();
+            entry["content"]["pressure"] = self.modalPressure();
+
+            //send to flask app here
+             $.ajax({
+                url: API_BASEURL + "user/entries/new",
+                type: "POST",
+                data: JSON.stringify(entry),
+                contentType: "application/json; charset=UTF-8",
+
+                //update local data
+            
+            });
+            
+
+
+        }
+
         self.saveExtruderValues = function(tool) {
-             self.wellplateSelected(true);
+            self.wellplateSelected(true);
             const tools = self.tools();
             const index = parseInt(tool[4]); 
             const entryId = $('#' + tool + 'EntrySelector').val();
