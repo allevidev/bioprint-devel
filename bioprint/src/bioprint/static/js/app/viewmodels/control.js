@@ -1191,7 +1191,7 @@ $(function() {
                         type: 'commands',
                         commands: [
                             'G90',
-                            'G1 Z50 E'+ self.midpoint +'F1000',
+                            'G1 Z50 E'+ self.midpoint +' F1000',
                             'G1 X' + positions["tool0"]["X"] + ' Y' + positions["tool0"]["Y"] + ' F2000',
                             'G1 E' + self.extruder1EPos + ' F1000']
                     });
@@ -1201,7 +1201,28 @@ $(function() {
             })            
         }
 
-        self.setExtruderValues = function (item) {           
+        self.setExtruderPosition = function (item) {
+            var eTarget = -1;
+            const tool = item.key()
+            if (tool == 'tool0') {
+                eTarget = self.extruder1EPos;
+            } else if (tool == 'tool1') {
+                eTarget = self.extruder2EPos;
+            }
+            console.log('HERE');
+            self.sendCustomCommand({
+                type: 'commands',
+                commands: [
+                    'G90',
+                    'G1 Z50 E' + self.midpoint + ' F1000',
+                    'G1 X' + item.xPosition() + ' Y' + item.yPosition() + ' F2000',
+                    'G1 E' + eTarget + ' F1000',
+                    'G1 Z' + item.zPosition() + ' F1000'
+                ]
+            });
+        }
+
+        self.saveExtruderPosition = function (item) {           
 
             console.log(item);
             const tool = item.key()
@@ -1219,7 +1240,7 @@ $(function() {
                 self.switchTool('tool1');
             } else if (tool == 'tool1') {
                 self.switchTool('tool0');
-            }iterm
+            }
             self.sendPrintHeadCommand({
                 "command": "position",
                 "wellplate": self.wellPlate(),

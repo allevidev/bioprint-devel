@@ -255,7 +255,12 @@
                   <h3>Target</h3>
                 </div>
               </div>              
-              <button class="btn btn-block control-box" data-bind=" click: $parent.setExtruderValues ,  enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed()">{{ _('Set Position') }}</button>
+              <div class="row">
+                <div class="span12 btn-group action-buttons">
+                  <button class="btn" data-bind=" click: $parent.setExtruderPosition ,  enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed()">{{ _('Go') }}</button>
+                  <button class="btn" data-bind=" click: $parent.saveExtruderPosition ,  enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed()">{{ _('Save') }}</button>
+                </div>
+              </div>
             </form>
 
             <hr>
