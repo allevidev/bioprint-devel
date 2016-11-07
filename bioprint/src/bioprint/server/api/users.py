@@ -405,4 +405,32 @@ def createAPIUser(email, password):
 		return False
 
 
+@api.route("/user/entries/new", methods=["POST"])
+@restricted_access
+@admin_permission.require(403)
+def newExtruderEntry():
+	if not "application/json" in request.headers["Content-Type"]:
+		return make_response("Expected content-type JSON", 400)
+
+	try:
+		data = request.json
+	except BadRequest:
+		return make_response("Malformed JSON body in request", 400)
+
+	payload = {
+		"name": request.json["name"],
+		"access" : "DEFAULT",
+		"templateId": "", #TODO
+		"kind" : "EXTRUDER",
+		"children": [],
+		"parents": [],
+		"content": request.json["content"]
+	}
+
+	#sned here once templateID working
+	return jsonify({
+				"status": False, 
+				"result": None
+			})
+
 
