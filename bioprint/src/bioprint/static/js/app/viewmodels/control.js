@@ -304,9 +304,15 @@ $(function() {
 
         self._processPositionData = function(data) {
             self.position = data;
-           self.xActualPosition(data['X']);
-           self.yActualPosition(data['Y']);
-           self.zActualPosition(data['Z']);
+            if (data != null) { 
+                self.xActualPosition(data['X']);
+                self.yActualPosition(data['Y']);
+                self.zActualPosition(data['Z']);
+            } else {
+                self.xActualPosition(0);
+                self.yActualPosition(0);
+                self.zActualPosition(0);
+            }
         }
 
         self._processCurrentLogData = function(data) {
@@ -1195,6 +1201,59 @@ $(function() {
             })            
         }
 
+        self.setExtruderValues = function (item) {           
+
+            console.log(item);
+            const tool = item.key()
+            if (tool == 'tool0') {
+                self.extruder1XPos = item.xPosition();
+                self.extruder1YPos = item.yPosition();
+                self.extruder1ZPos = item.zPosition();
+            } else if (tool == 'tool1') {
+                self.extruder2XPos = item.xPosition();
+                self.extruder2YPos = item.yPosition();
+                self.extruder2ZPos = item.zPosition();
+            }
+
+            if (tool == 'tool0') {
+                self.switchTool('tool1');
+            } else if (tool == 'tool1') {
+                self.switchTool('tool0');
+            }iterm
+            self.sendPrintHeadCommand({
+                "command": "position",
+                "wellplate": self.wellPlate(),
+                "positions": {
+                    "tool0" : {
+                        "X": self.extruder1XPos,
+                        "Y": self.extruder1YPos,
+                        "Z": self.extruder1ZPos
+                    },
+                    "tool1" : {
+                        "X": self.extruder2XPos,
+                        "Y": self.extruder2YPos,
+                        "Z": self.extruder2ZPos
+                    }
+                }
+            });
+
+            // Promise.all([z, e, xy]).then(function() {
+            //     var tools = self.tools();         
+            //     var index = parseInt((item["key"]())[4]);
+            //     self.sendCustomCommand({
+            //         type: "commands",
+            //         commands: [
+            //             "G90",
+            //             "G1 X" + (parseFloat(tools[index]["xPosition"]())).toFixed(3) + " Y" + (parseFloat(tools[index]["yPosition"]())).toFixed(3) + " F1000",
+
+            //             "G90",
+            //             "M105"
+            //         ]
+            //     });
+
+            // });
+        }
+
         self.saveToolChangeDist = function (tool) {
             if (tool == 'tool0') {
                 self.extruder1XPos = self.position["X"]
@@ -1635,29 +1694,7 @@ $(function() {
         }
 
         
-        self.setExtruderValues = function (item) {          
-            var z = self.sendHomeCommand('z');
-            var e = self.sendHomeCommand('e');
-            var xy = self.sendHomeCommand('x,y'); 
-           
-
-
-            Promise.all([z, e, xy]).then(function() {
-                var tools = self.tools();         
-                var index = parseInt((item["key"]())[4]);
-                self.sendCustomCommand({
-                    type: "commands",
-                    commands: [
-                        "G90",
-                        "G1 X" + (parseFloat(tools[index]["xPosition"]())).toFixed(3) + " Y" + (parseFloat(tools[index]["yPosition"]())).toFixed(3) + " F1000",
-
-                        "G90",
-                        "M105"
-                    ]
-                });
-
-            });
-        }
+        
     
 
         self.loadExtruderValues = function(tool) {
