@@ -753,10 +753,10 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
 
             tool0 = {
                 "temperature": {
-                    "actual": tempData['tool0']['actual'],
-                    "target": tempData['tool0']['target']
+                    "actual": tempData['tool0']['actual'] if tempData['tool0'] else 0,
+                    "target": tempData['tool0']['target'] if tempData['tool0'] else 0
                 },
-                "pressure": tempData['bed']['actual'],
+                "pressure": tempData['bed']['actual'] if 'bed' in tempData.keys() else 0,
                 "X": positions["tool0"]["X"],
                 "Y": positions["tool0"]["Y"],
                 "Z": positions["tool0"]["Z"],
@@ -764,10 +764,10 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
             }
             tool1 = {
                 "temperature": {
-                    "actual": tempData['tool1']['actual'],
-                    "target": tempData['tool1']['target']
+                    "actual": tempData['tool1']['actual'] if tempData['tool1'] else 0,
+                    "target": tempData['tool1']['target'] if tempData['tool1'] else 0
                 },
-                "pressure": tempData['tool2']['actual'],
+                "pressure": tempData['tool2']['actual'] if 'tool2' in tempData.keys() else 0,
                 "X": positions["tool1"]["X"],
                 "Y": positions["tool1"]["Y"],
                 "Z": positions["tool1"]["Z"],

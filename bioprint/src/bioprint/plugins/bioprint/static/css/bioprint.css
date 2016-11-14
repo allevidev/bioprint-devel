@@ -137,6 +137,10 @@ a {
   margin-left:-5px;
 }
 
+.position-display {
+  margin: 0 0 10px 0;
+}
+
 #control .box {
   height: 45px;
   width: 45px;
@@ -241,6 +245,10 @@ h3 {
 
 .target {
   margin-left: 0;
+}
+
+.target h4 {
+  padding-top: 20px;
 }
 
 ::-webkit-input-placeholder { /* Safari, Chrome and Opera */
