@@ -1377,7 +1377,7 @@ $(function() {
                 type: 'commands',
                 commands: [
                     'G90',
-                    'G1 Z25 F1000',
+                    'G1 Z50 F1000',
                     'T0',
                     'M400',
                     'G1 E' + self.midpoint + ' F1000.00',
@@ -1840,6 +1840,7 @@ $(function() {
 
         }
 
+        self.modalTool = ko.observable('')
         self.modalEntryId = null;
         self.modalXPosition = ko.observable(0);
         self.modalYPosition = ko.observable(0);
