@@ -202,7 +202,7 @@
                 <div class="btn" data-bind=" enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() { $root.loadExtruderValues(key()) }">
                   {{ _('Load') }}
                 </div>
-                <div class="btn" data-bind=" enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() {  $root.showEntryDialog(key()) }">
+                <div class="btn" data-bind=" enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() {  $root.setupModal(key()), $root.showEntryDialog(key()) }">
                   {{ _('Save') }}
                 </div>
                 <div class="btn" data-bind="click: function() { $root.showEntryDialog(key()) }">

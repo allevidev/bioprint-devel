@@ -1744,7 +1744,6 @@ $(function() {
         };
 
         self.showEntryDialog = function(key) {
-            self.setupModal(key);
             self.entryDialog.modal({
                 minHeight: function() { return Math.max($.fn.modal.defaults.maxHeight() - 80, 250); }
             }).css({
@@ -1794,8 +1793,6 @@ $(function() {
                             self.loadTemplates();
                     }
                 }
-                
-            
             });
         }
 
