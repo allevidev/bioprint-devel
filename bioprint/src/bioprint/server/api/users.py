@@ -406,7 +406,6 @@ def createAPIUser(email, password):
 
 
 @api.route("/user/entries/new", methods=["POST"])
-@restricted_access
 @admin_permission.require(403)
 def newExtruderEntry():
 	if not "application/json" in request.headers["Content-Type"]:
@@ -416,6 +415,9 @@ def newExtruderEntry():
 		data = request.json
 	except BadRequest:
 		return make_response("Malformed JSON body in request", 400)
+
+	if not (isNetworkAvailable()):
+		return jsonify({"status": False})
 
 	payload = {
 		"name": request.json["name"],
@@ -427,10 +429,40 @@ def newExtruderEntry():
 		"content": request.json["content"]
 	}
 
-	#sned here once templateID working
-	return jsonify({
+	try:
+
+		s = settings()
+
+		url = s.get(["biobots", "apiUrl"]) + "template/all"
+		
+		payload = {
+			"filters": {
+				"access": "DEFAULT",
+				"kind" : "EXTRUDER"
+			}
+		}
+
+		headers = {
+			"Content-Type": "application/json",
+			"Authorization": "Bearer " + session["BIOBOTS_API_TOKEN"] 
+		}
+
+		r = requests.post(url, headers=headers, json=payload)
+
+		if (r.status_code == 200):
+			print r.json()
+			return jsonify({
+				"status": True, 
+				"result": r.json()
+				})		
+		else:
+			return jsonify({
 				"status": False, 
 				"result": None
 			})
 
-
+	except requests.exceptions.RequestException as e:  
+		return jsonify({
+				"status": False, 
+				"result": None
+			})

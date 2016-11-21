@@ -89,7 +89,7 @@ $(function() {
             'e': false
         }
 
-        self.wellPlate = ko.observable(0);
+        self.wellPlate = ko.observable(1);
         self.wellPlatePositions = {
             '6': {
                 'X': 18.00,
@@ -1763,7 +1763,7 @@ $(function() {
             const index = parseInt(tool[4]); 
             const entryId = $('#' + tool + 'EntrySelector').val();
             const tools = self.tools();
-            
+            self.wellPlate(1);
             tools[index].xPosition(self.extruderEntries[entryId]["content"]["positions"][self.wellPlate()][tool]['X']);
             tools[index].yPosition(self.extruderEntries[entryId]["content"]["positions"][self.wellPlate()][tool]['Y']);
             tools[index].zPosition(self.extruderEntries[entryId]["content"]["positions"][self.wellPlate()][tool]['Z']);
@@ -1771,6 +1771,7 @@ $(function() {
         }
 
         self.newExtruderEntry = function() {
+
             var entry = {};
             entry["name"] = self.modalName();
             entry["content"] = {};
@@ -1779,7 +1780,9 @@ $(function() {
             entry["content"]["zPosition"] = self.modalZPosition();
             entry["content"]["temperature"] = self.modalXPosition();
             entry["content"]["pressure"] = self.modalPressure();
+            entry["content"]["type"] = self.modalType();
 
+            console.log(entry);
             //send to flask app here
              $.ajax({
                 url: API_BASEURL + "user/entries/new",
@@ -1795,12 +1798,11 @@ $(function() {
 
         }
 
-        self.saveExtruderValues = function(tool) {
-            self.wellplateSelected(true);
+        self.saveExtruderValues = function() {
+            const tool = self.modalTool();
             const tools = self.tools();
             const index = parseInt(tool[4]); 
             const entryId = $('#' + tool + 'EntrySelector').val();
-
 
         
             if  (parseInt(tools[index].xPosition()) !== parseInt(self.extruderEntries[entryId]["content"]["xPosition"]) ||
@@ -1809,12 +1811,17 @@ $(function() {
 
                 var tempContent = self.extruderEntries[entryId]["content"];
 
-                tempContent["positions"][self.wellPlate()][tool]['X'] = parseInt(tools[index].xPosition());
-                tempContent["positions"][self.wellPlate()][tool]['Y'] = parseInt(tools[index].yPosition());
-                tempContent["positions"][self.wellPlate()][tool]['Z'] = parseInt(tools[index].zPosition());
-                tempContent["pressure"] = parseInt(tools[index].pressure());
-                tempContent["temperature"] = parseInt(tools[index].temperature());
-                
+                //  Show error message
+                if ((tool == 'tool0') && (parseFloat(tools[index].pressure()) > 100)) {
+                    return;
+                }
+
+                tempContent["positions"][self.wellPlate()][tool]['X'] = parseFloat(self.modalXPosition());
+                tempContent["positions"][self.wellPlate()][tool]['Y'] = parseFloat(self.modalYPosition());
+                tempContent["positions"][self.wellPlate()][tool]['Z'] = parseFloat(self.modalZPosition());
+                tempContent["pressure"] = parseFloat(self.modalPressure());
+                tempContent["temperature"] = parseFloat(self.modalTemperature());
+                tempContent["type"] = self.modalType();
 
                 data = {
                     id: entryId, 
@@ -1827,20 +1834,14 @@ $(function() {
                     data: JSON.stringify(data),
                     contentType: "application/json",
                     success: function(response) {
-                        if (response["status"]) {
-                            self.extruderEntries[entryId]["content"]["xPosition"] = parseInt(tools[index].xPosition());
-                            self.extruderEntries[entryId]["content"]["yPosition"] = parseInt(tools[index].yPosition());
-                            self.extruderEntries[entryId]["content"]["zPosition"] = parseInt(tools[index].zPosition());
-                            self.extruderEntries[entryId]["content"]["pressure"] = parseInt(tools[index].pressure());
-                            self.extruderEntries[entryId]["content"]["temperature"] = parseInt(tools[index].temperature());
-                        }
+                         self.loadTemplates();
                     }
                 });
             } 
 
         }
 
-        self.modalTool = ko.observable('')
+        self.modalTool = ko.observable('');
         self.modalEntryId = null;
         self.modalXPosition = ko.observable(0);
         self.modalYPosition = ko.observable(0);
@@ -1848,13 +1849,14 @@ $(function() {
         self.modalTemperature = ko.observable(0);
         self.modalPressure = ko.observable(0);
         self.modalName = ko.observable('');
+        self.modalType = ko.observableArray(["extruder1", "extruder2"]);
 
         self.setupModal = function(tool) {
             const index = parseInt(tool[4]); 
             const tools = self.tools();
             const entryId = $('#' + tool + 'EntrySelector').val();
 
-            self.modalTool = tool;
+            self.modalTool(tool);
             self.modalEntryId = entryId;
             self.modalName(self.extruderEntries[entryId]["name"]);
             self.modalXPosition(tools[index].xPosition());

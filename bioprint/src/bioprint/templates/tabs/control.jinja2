@@ -202,7 +202,7 @@
                 <div class="btn" data-bind=" enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() { $root.loadExtruderValues(key()) }">
                   {{ _('Load') }}
                 </div>
-                <div class="btn" data-bind=" enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() { $root.saveExtruderValues(key()) }">
+                <div class="btn" data-bind=" enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() {  $root.showEntryDialog(key()) }">
                   {{ _('Save') }}
                 </div>
                 <div class="btn" data-bind="click: function() { $root.showEntryDialog(key()) }">
@@ -418,40 +418,42 @@
     </div>
     
     <div style="width: 45%; float: left">
-    <h3> Position Data </h3>
-    <div >
-      X Position:<br>
-      <input data-bind="value: modalXPosition" type="text" name="x-position">
-    </div>
+      <h3> Position Data </h3>
       <div >
-      Y Position:<br>
-      <input data-bind="value: modalYPosition" type="text" name="y-position">
-    </div>
-      <div >
-      Z Position:<br>
-      <input data-bind="value: modalZPosition" type="text" name="z-position">
-    </div>
-    </div>
+        X Position:<br>
+        <input data-bind="value: modalXPosition" type="text" name="x-position">
+      </div>
+        <div >
+        Y Position:<br>
+        <input data-bind="value: modalYPosition" type="text" name="y-position">
+      </div>
+        <div >
+        Z Position:<br>
+        <input data-bind="value: modalZPosition" type="text" name="z-position">
+      </div>
+      </div>
 
-    <div style="width: 45%; float: right">
-    <h3> Temperature Data </h3>
-    <div >
-      Temperature:<br>
-      <input data-bind="value: modalTemperature" type="text" name="temperature">
-    </div>
-    <br style="line-height: 2em">
-    <h3> Pressure Data </h3>
-    <div >
-      Pressure:<br>
-      <input data-bind="value: modalPressure" type="text" name="temperature">
-    </div>
+      <div style="width: 45%; float: right">
+      <h3> Temperature Data </h3>
+      <div >
+        Temperature:<br>
+        <input data-bind="value: modalTemperature" type="text" name="temperature">
+      </div>
+      <br style="line-height: 2em">
+      <h3> Pressure Data </h3>
+      <div >
+        Pressure:<br>
+        <input data-bind="value: modalPressure" type="text" name="temperature">
+      </div>
+      <div><input type="checkbox" value="extruder1" data-bind="checked: modalType" /> Extruder 1</div>
+      <div><input type="checkbox" value="extruder2" data-bind="checked: modalType" /> Extruder 2</div>
     </div>
 
 
   <div style="float: right" class="btn" data-bind="click: function() { $root.newExtruderEntry() }">
     {{ _('New') }}
   </div>
-  <div style="float: right" class="btn" data-bind="click: function() { $root.showEntryDialog(key()) }">
+  <div style="float: right" class="btn" data-bind="click: function() { $root.saveExtruderValues() }">
     {{ _('Save') }}
   </div>
 </form>
