@@ -419,15 +419,7 @@ def newExtruderEntry():
 	if not (isNetworkAvailable()):
 		return jsonify({"status": False})
 
-	payload = {
-		"name": request.json["name"],
-		"access" : "DEFAULT",
-		"templateId": "", #TODO
-		"kind" : "EXTRUDER",
-		"children": [],
-		"parents": [],
-		"content": request.json["content"]
-	}
+
 
 	try:
 
@@ -450,11 +442,60 @@ def newExtruderEntry():
 		r = requests.post(url, headers=headers, json=payload)
 
 		if (r.status_code == 200):
-			print r.json()
-			return jsonify({
-				"status": True, 
-				"result": r.json()
-				})		
+			if (r.json()[0] is None) or (r.json()[0]["_id"] is None):
+				return jsonify({
+					"status": False, 
+					"result": None
+				})
+
+			templateId = r.json()[0]["_id"]
+			positions = r.json()[0]["content"]["positions"]["default"]
+			
+
+			if ('extruder1' in request.json["content"]["type"]) and (request.json["content"]['pressure'] > 100):
+				return jsonify({
+					"status": False, 
+					"result": None
+				})
+			
+			for tool in request.json["content"]["type"]:
+				currentToolIndex = str(int(tool[8]) - 1)
+				positions[str(request.json['content']['wellplate'])]["tool" + currentToolIndex]['X'] = request.json["content"]["X"]
+				positions[str(request.json['content']['wellplate'])]["tool" + currentToolIndex]['Y'] = request.json["content"]["Y"]
+				positions[str(request.json['content']['wellplate'])]["tool" + currentToolIndex]['Z'] = request.json["content"]["Z"]
+		
+			
+
+			payload = {
+				"name": request.json["name"],
+				"access" : "DEFAULT",
+				"templateId": templateId,
+				"kind" : "EXTRUDER",
+				"children": [],
+				"parents": [],
+				"content":{
+					'positions': positions,
+					'temperature': request.json['content']['temperature'],
+					'pressure': request.json['content']['pressure'],
+					'revision': 1,
+					'type': request.json['content']['type']
+				}
+			}
+
+			url = s.get(["biobots", "apiUrl"]) + "entry/new"
+			r = requests.post(url, headers=headers, json=payload)
+
+
+			if (r.status_code == 200):
+				return jsonify({
+					"status": True, 
+					"result": r.json()
+					})		
+			else:
+				return jsonify({
+					"status": False, 
+					"result": None
+				})
 		else:
 			return jsonify({
 				"status": False, 

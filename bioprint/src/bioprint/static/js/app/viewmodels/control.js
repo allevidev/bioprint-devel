@@ -1771,32 +1771,35 @@ $(function() {
         }
 
         self.newExtruderEntry = function() {
-
             var entry = {};
             entry["name"] = self.modalName();
             entry["content"] = {};
-            entry["content"]["xPosition"] = self.modalXPosition();
-            entry["content"]["yPosition"] = self.modalYPosition();
-            entry["content"]["zPosition"] = self.modalZPosition();
+        
+            entry["content"]["X"] = self.modalXPosition();
+            entry["content"]["Y"] = self.modalYPosition();
+            entry["content"]["Z"] = self.modalZPosition();
             entry["content"]["temperature"] = self.modalXPosition();
             entry["content"]["pressure"] = self.modalPressure();
+            entry["content"]["wellplate"] = self.wellPlate();
             entry["content"]["type"] = self.modalType();
 
-            console.log(entry);
             //send to flask app here
              $.ajax({
                 url: API_BASEURL + "user/entries/new",
                 type: "POST",
                 data: JSON.stringify(entry),
                 contentType: "application/json; charset=UTF-8",
-
-                //update local data
+                success: function(response) {
+                    if (response['status']) {
+                            self.loadTemplates();
+                    }
+                }
+                
             
             });
-            
-
-
         }
+
+
 
         self.saveExtruderValues = function() {
             const tool = self.modalTool();
@@ -1834,7 +1837,9 @@ $(function() {
                     data: JSON.stringify(data),
                     contentType: "application/json",
                     success: function(response) {
-                         self.loadTemplates();
+                        if (response['status']) {
+                            self.loadTemplates();
+                        }
                     }
                 });
             } 
