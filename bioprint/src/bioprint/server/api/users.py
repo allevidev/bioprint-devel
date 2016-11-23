@@ -217,6 +217,34 @@ def generateApikeyForUser(username):
 	else:
 		return make_response(("Forbidden", 403, []))
 
+@api.route("/users/authenticate", methods=["POST"])
+@restricted_access
+@admin_permission.require(403)
+def authenticateUser():
+	if userManager is None:
+		return jsonify(SUCCESS)
+
+	if not "application/json" in request.headers["Content-Type"]:
+			return make_response("Expected content-type JSON", 400)
+	
+	try:
+		data = request.json
+	except BadRequest:
+		return make_response("Malformed JSON body in request", 400)
+	
+	if request.json["username"] is None or request.json["password"] is None:
+		return make_response("Malformed JSON body in request", 400)
+
+	if userManager.checkPassword(request.json["username"], request.json["password"]):	
+		return jsonify({
+			"authenticationStatus": True,
+			"apiKey": userManager.generateApiKey(request.json["username"])
+		})
+	else:
+		return jsonify({
+			"authenticated": False,
+			"apiKey": None
+		})
 
 
 ###############################

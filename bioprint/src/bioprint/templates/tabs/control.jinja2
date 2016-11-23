@@ -199,13 +199,16 @@
             </div>
             <div class="row">
               <div class="span12 btn-group action-buttons" >
+
+
+
                 <div class="btn" data-bind=" enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() { $root.loadExtruderValues(key()) }">
                   {{ _('Load') }}
                 </div>
-                <div class="btn" data-bind=" enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() {  $root.showEntryDialog(key()) }">
+                <div class="btn" data-bind=" enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() {  $root.setupModalForSave(key()), $root.showEntryDialog(key()) }">
                   {{ _('Save') }}
                 </div>
-                <div class="btn" data-bind="click: function() { $root.showEntryDialog(key()) }">
+                <div class="btn" data-bind="enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() { $root.showEntryDialog(key()) }">
                   {{ _('New') }}
                 </div>
               </div>
@@ -215,7 +218,7 @@
 
             <h3 style="text-align: left">Position:</h3>
 
-            <form action="action_page.php" data-bind="id: name">
+            <form data-bind="id: name">
               <div class="row input-inline">
                
           <div class="span6 target">
@@ -255,9 +258,9 @@
               </div>              
               <div class="row">
                 <div class="span12 btn-group action-buttons">
-                  <button class="btn" data-bind=" click: $parent.setExtruderPosition ,  enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed()">{{ _('Go') }}</button>
-                  <button class="btn" data-bind=" click: $parent.loadExtruderPosition ,  enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed()">{{ _('Load') }}</button>
-                  <button class="btn" data-bind=" click: $parent.saveExtruderPosition ,  enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed()">{{ _('Calibrate') }}</button>
+                  <button class="btn" data-bind=" click: $parent.setExtruderPosition , enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed()">{{ _('Go') }}</button>
+                  <button class="btn" data-bind=" click: $parent.loadExtruderPosition, enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed() ">{{ _('Update') }}</button>
+                  <button class="btn" data-bind=" click: $parent.saveExtruderPosition, enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed()">{{ _('Calibrate') }}</button>
                 </div>
               </div>
             </form>
@@ -445,10 +448,18 @@
         Pressure:<br>
         <input data-bind="value: modalPressure" type="text" name="temperature">
       </div>
-      <div><input type="checkbox" value="extruder1" data-bind="checked: modalType" /> Extruder 1</div>
-      <div><input type="checkbox" value="extruder2" data-bind="checked: modalType" /> Extruder 2</div>
+
+
+  
     </div>
 
+   <div style="margin-top: 2em; width: 100%" >
+          <h3> Profile Extruders </h3>
+          <div>Extruder 1<br>
+          <input type="checkbox" value="extruder1" data-bind="checked: modalType" /> </div>
+          <div>Extruder 2<br>
+          <input type="checkbox" value="extruder2" data-bind="checked: modalType" /> </div>
+     </div>
 
   <div style="float: right" class="btn" data-bind="click: function() { $root.newExtruderEntry() }">
     {{ _('New') }}

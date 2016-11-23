@@ -1257,13 +1257,10 @@ $(function() {
 
         self.loadExtruderPosition = function (item) {
             const tool = parseInt(item.key()[4])
-            const tools = self.tools();
 
-            console.log(tools[tool].xPosition());
-
-            tools[tool].xPosition(self.xActualPosition());
-            tools[tool].yPosition(self.yActualPosition());
-            tools[tool].zPosition(self.zActualPosition());
+            self.tools()[tool].xPosition(self.xActualPosition());
+            self.tools()[tool].yPosition(self.yActualPosition());
+            self.tools()[tool].zPosition(self.zActualPosition());
         }
 
         self.saveExtruderPosition = function (item) {           
@@ -1299,22 +1296,6 @@ $(function() {
                     }
                 }
             });
-
-            // Promise.all([z, e, xy]).then(function() {
-            //     var tools = self.tools();         
-            //     var index = parseInt((item["key"]())[4]);
-            //     self.sendCustomCommand({
-            //         type: "commands",
-            //         commands: [
-            //             "G90",
-            //             "G1 X" + (parseFloat(tools[index]["xPosition"]())).toFixed(3) + " Y" + (parseFloat(tools[index]["yPosition"]())).toFixed(3) + " F1000",
-
-            //             "G90",
-            //             "M105"
-            //         ]
-            //     });
-
-            // });
         }
 
         self.saveToolChangeDist = function (tool) {
@@ -1744,7 +1725,7 @@ $(function() {
         };
 
         self.showEntryDialog = function(key) {
-            self.setupModal(key);
+            
             self.entryDialog.modal({
                 minHeight: function() { return Math.max($.fn.modal.defaults.maxHeight() - 80, 250); }
             }).css({
@@ -1756,9 +1737,7 @@ $(function() {
         }
 
         
-        
     
-
         self.loadExtruderValues = function(tool) {
             const index = parseInt(tool[4]); 
             const entryId = $('#' + tool + 'EntrySelector').val();
@@ -1798,7 +1777,6 @@ $(function() {
             
             });
         }
-
 
 
         self.saveExtruderValues = function() {
@@ -1856,7 +1834,7 @@ $(function() {
         self.modalName = ko.observable('');
         self.modalType = ko.observableArray(["extruder1", "extruder2"]);
 
-        self.setupModal = function(tool) {
+        self.setupModalForSave = function(tool) {
             const index = parseInt(tool[4]); 
             const tools = self.tools();
             const entryId = $('#' + tool + 'EntrySelector').val();
@@ -1871,6 +1849,12 @@ $(function() {
             self.modalPressure(tools[index].pressure());
         }
 
+        self.calibrateExtruderPosition = function (item) {
+            self.saveExtruderPosition(item).then((response) => {
+                self.setExtruderPosition(item); 
+            })
+            
+        }
         self.loadTemplates = function () {
            $.ajax({
                 url: API_BASEURL + "user/entries/extruder",
