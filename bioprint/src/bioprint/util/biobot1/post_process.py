@@ -404,8 +404,6 @@ def stop_extrude(extruder):
         'M42 P' + str(offPin) + ' S0' 
         ' ; turn extruder ' + str(extruder) + ' off',
         'M400',
-        'G91',
-        'G1 E' + str(retractDir * 2),
         'G90'] #,
         # 'G1 E' + str(mid) + ' F1000 ; Move extruder to mid point']
     return '\n'.join(commands)
@@ -419,7 +417,7 @@ def switch_extruder(extruder, e0_pos, e1_pos, e0_Xctr, e0_Yctr, e1_Xctr, e1_Yctr
         target = e0_pos
         x = e0_Xctr
         y = e0_Yctr
-        z = 25
+        z = 50
     elif extruder is 1:
         onPin = 17
         offPin = 16
@@ -427,7 +425,7 @@ def switch_extruder(extruder, e0_pos, e1_pos, e0_Xctr, e0_Yctr, e1_Xctr, e1_Yctr
         target = e1_pos
         x = e1_Xctr
         y = e1_Yctr
-        z = 25
+        z = 50
 
     commands = [
         'T0 ; ensure we keep T0 active to prevent changing pressure',
@@ -629,7 +627,7 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
                 x_pos, x_pos_old = [e0_Xctr, e1_Xctr], [e0_Xctr, e1_Xctr]
                 y_pos, y_pos_old = [e0_Yctr, e1_Yctr], [e0_Yctr, e1_Yctr]
                 with open(filename, 'r') as f:
-                    o.write('G1 Z45\n')
+                    o.write('G1 Z50\n')
                     o.write('G1 E' + str(mid) + '\n')
                     o.write('G21\n')
                     o.write('G1 X' + str(e0_Xctr) + ' Y' + str(e0_Yctr) + ' F1000\n')
