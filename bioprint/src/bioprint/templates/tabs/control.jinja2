@@ -118,7 +118,6 @@
         <button class="btn btn-block" data-bind="enable: isOperational() && loginState.isUser(), click: function() { $root.sendEmergencyStop() }">{{ _('Emergency Stop') }}</button>
         <hr>
         <div class="row-fluid">
-
           <div class="span4">
             <select class="form-control span12"  id="wellPlate" data-bind="enable: isOperational() && loginState.isUser() && isHomed()">
               <option selected="selected">Select Plate Type</option>
@@ -187,17 +186,10 @@
             </div>
             <div class="row">
               <div class="span12 btn-group action-buttons" >
-
-
-
                 <div class="btn" data-bind=" enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() { $root.loadExtruderValues(key()) }">
                   {{ _('Load') }}
                 </div>
-<<<<<<< HEAD
                 <div class="btn" data-bind=" enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() {  $root.setupModalForSave(key()), $root.showEntryDialog(key()) }">
-=======
-                <div class="btn" data-bind=" enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() {  $root.setupModal(key()), $root.showEntryDialog(key()) }">
->>>>>>> b06723a06593054f6549b2147117444b76e669ba
                   {{ _('Save') }}
                 </div>
                 <div class="btn" data-bind="enable: $root.wellplateSelected() && $root.loginState.isUser() && $root.isHomed(), click: function() { $root.showEntryDialog(key()) }">
@@ -395,13 +387,7 @@
   </div>
   <div class="modal-body">
 
-
-
   <form >
- 
-
-
-
 
   <h2> Extruder Profiles </h2>
     

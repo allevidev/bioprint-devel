@@ -136,6 +136,8 @@ $(function() {
 
         self.webcamDisableTimeout = undefined;
 
+        self.templates = ['PCL', 'Pluronic'];
+
         self.keycontrolActive = ko.observable(false);
         self.keycontrolHelpActive = ko.observable(false);
         self.keycontrolPossible = ko.computed(function () {
@@ -1522,6 +1524,17 @@ $(function() {
             })
         };
 
+        self.loadTemplates = function() {
+            $.ajax({
+                url: API_BASEURL + 'users/templates',
+                type: 'GET',
+                success: function(res) {
+                    console.log(res);
+                }
+            });
+
+        }
+
         self.sendEmergencyStop = function () {
 
             self.sendCustomCommand({
@@ -1725,10 +1738,6 @@ $(function() {
         };
 
         self.showEntryDialog = function(key) {
-<<<<<<< HEAD
-            
-=======
->>>>>>> b06723a06593054f6549b2147117444b76e669ba
             self.entryDialog.modal({
                 minHeight: function() { return Math.max($.fn.modal.defaults.maxHeight() - 80, 250); }
             }).css({
