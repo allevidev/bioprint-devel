@@ -113,6 +113,14 @@ a {
     padding-left: 60px;
   }
 
+  #Z {
+    max-width: 80px;
+  }
+
+  #E {
+    max-width: 80px;
+  }
+
   #control .box {
     height: 100px;
     width: 100px;
@@ -128,8 +136,6 @@ a {
 }
 
 #motion-control {
-  width:80%;
-  margin-left: 10%;
   margin-bottom: 10px;
 }
 
