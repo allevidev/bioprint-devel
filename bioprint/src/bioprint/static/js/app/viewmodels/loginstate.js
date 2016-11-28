@@ -96,7 +96,13 @@ $(function() {
                     self.fromResponse(response);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    new PNotify({title: gettext("Login failed"), text: gettext("User unknown or wrong password"), type: "error"});
+                    if (errorThrown == "FORBIDDEN"){
+                        self.errorText = "NO API Token found, Please log in again"
+                    } else {
+                        self.errorText = "User unknown or wrong password"
+                    }
+
+                    new PNotify({title: gettext("Login failed"), text: gettext(self.errorText), type: "error"});
                 }
             })
         };
