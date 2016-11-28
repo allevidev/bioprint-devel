@@ -865,9 +865,7 @@ class Server():
 			"js/lib/pnotify.min.js",
 			"js/lib/bootstrap-slider-knockout-binding.js",
 			"js/lib/loglevel.min.js",
-			"js/lib/sockjs-0.3.4.min.js",
-			"js/lib/bluebird.js",
-			"js/lib/ramda.min.js"
+			"js/lib/sockjs-0.3.4.min.js"
 		]
 		js_app = dynamic_assets["js"] + [
 			"js/app/dataupdater.js",
