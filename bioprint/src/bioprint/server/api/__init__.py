@@ -185,8 +185,8 @@ def performSystemAction():
 
 @api.route("/login", methods=["POST"])
 def login():
-	if session["BIOBOTS_API_TOKEN"] is None:
-		return make_response(("No API Token. Please login again", 403, []))
+	# if "BIOBOTS_API_TOKEN" not in session.keys():
+	# 	return make_response(("No API Token. Please login again", 403, []))
 
 	if bioprint.server.userManager is not None and "user" in request.values.keys() and "pass" in request.values.keys() and "email" in request.values.keys():
 		username = request.values["user"]
