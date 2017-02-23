@@ -144,6 +144,8 @@ class EventManager(object):
 		payload being a payload object specific to the event.
 		"""
 
+		self._logger.debug("Queuing event: %s (Payload: %r)" % (event, payload))
+
 		self._queue.put((event, payload), 0)
 
 		if event == Events.UPDATED_FILES and "type" in payload and payload["type"] == "printables":

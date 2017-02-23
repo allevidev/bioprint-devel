@@ -191,7 +191,6 @@ def login():
 	if bioprint.server.userManager is not None and "user" in request.values.keys() and "pass" in request.values.keys() and "email" in request.values.keys():
 		username = request.values["user"]
 		password = request.values["pass"]
-		email = request.values["email"]
 		
 		if "remember" in request.values.keys() and request.values["remember"] == "true":
 			remember = True
@@ -208,9 +207,9 @@ def login():
 					user = bioprint.server.userManager.login_user(user)
 					session["usersession.id"] = user.get_session()
 					g.user = user
-					if isNetworkAvailible():
-						if createUserIfNotExists(email, password):
-							setSessionToken(email, password)
+					# if isNetworkAvailible():
+					# 	if createUserIfNotExists(email, password):
+					# 		setSessionToken(email, password)
 				login_user(user, remember=remember)
 				identity_changed.send(current_app._get_current_object(), identity=Identity(user.get_id()))
 				return jsonify(user.asDict())
@@ -246,7 +245,7 @@ def setSessionToken(email, password):
 	url = s().get(["biobots", "apiUrl"]) + "user/authenticate"
 	
 	payload = {
-		"username": email,
+		"email": email,
 		"password": password
 	}
 

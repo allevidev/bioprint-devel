@@ -3,8 +3,6 @@
     <b class="caret"></b>
 </a>
 <div id="login_dropdown_loggedout" style="padding: 15px" class="dropdown-menu" data-bind="css: {hide: loginState.loggedIn(), 'dropdown-menu': !loginState.loggedIn()}">
-    <label for="login_email">{{_('Email') }}</label>
-    <input type="text" id="login_email" data-bind="value: loginState.loginEmail, event: {'keyup': loginState.onLoginUserKeyup}" placeholder="{{ _('Email') }}" autocapitalize="none">
     <label for="login_user">{{ _('Username') }}</label>
     <input type="text" id="login_user" data-bind="value: loginState.loginUser, event: {'keyup': loginState.onLoginUserKeyup}" placeholder="{{ _('Username') }}" autocapitalize="none">
     <label for="login_pass">{{ _('Password') }}</label>

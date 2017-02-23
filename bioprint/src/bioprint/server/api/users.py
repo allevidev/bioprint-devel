@@ -285,7 +285,7 @@ def getExtruderEntries():
 
 		headers = {
 			"Content-Type": "application/json",
-			"Authorization": "Bearer " + session["BIOBOTS_API_TOKEN"] 
+			"Authorization": "Bearer " # + session["BIOBOTS_API_TOKEN"] 
 		}
 
 		r = requests.post(url, headers=headers, json=payload)
