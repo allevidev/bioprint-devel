@@ -22,3 +22,5 @@ OctoPrint.egg-info
 *.orig
 venv
 *.codekit
+bioprint/cxdist
+bioprint/biobots

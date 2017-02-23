@@ -147,7 +147,8 @@ def getSettings():
 					"X": s.get(["positions", "6", "tool1", "X"]),
 					"Y": s.get(["positions", "6", "tool1", "Y"]),
 					"Z": s.get(["positions", "6", "tool1", "Z"])
-				}			},
+				}
+			},
 			"12": {
 				"tool0":{
 					"X": s.get(["positions", "12", "tool0", "X"]),
@@ -182,6 +183,9 @@ def getSettings():
 					"Z": s.get(["positions", "96", "tool1", "Z"])
 				}			},
 		},
+		"biobots": {
+			"apiUrl": s.get(["biobots", "apiUrl"])
+		},
 		"server": {
 			"commands": {
 				"systemShutdownCommand": s.get(["server", "commands", "systemShutdownCommand"]),
@@ -194,7 +198,7 @@ def getSettings():
 			}
 		}
 	}
-	print data["positions"]
+
 	gcode_scripts = s.listScripts("gcode")
 	if gcode_scripts:
 		data["scripts"] = dict(gcode=dict())
@@ -366,39 +370,7 @@ def setSettings():
 
 	return getSettings()
 
-@api.route("/settings/defaults/extruder", methods=["GET"])
-@restricted_access
-@admin_permission.require(403)
-def getExtruderProfiles():
 
-	url = 'http://127.0.0.1:8080/user/entries'
-	headers = {'Content-Type': 'application/json'}
-	try :
-		request = requests.get(url, auth=HTTPDigestAuth('rahul.fakir@gmail.com', 'pass'))
-
-		#response =  {'status': True, request.json() }
-		return jsonify(request.json())
-	except: 
-		response =  {'status': False, 'entries': None }
-		return jsonify(response)
-
-
-
-
-
-
-def getExtruderProfilesMain():
-
-	url = 'http://127.0.0.1:8080/user/entries'
-	headers = {'Content-Type': 'application/json'}
-	try :
-		request = requests.get(url, auth=HTTPDigestAuth('rahul.fakir@gmail.com', 'pass'))
-
-		#response =  {'status': True, request.json() }
-		return jsonify(request.json())
-	except: 
-		response =  {'status': False, 'entries': None }
-		return jsonify(response)
 
 
 

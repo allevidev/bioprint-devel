@@ -113,6 +113,14 @@ a {
     padding-left: 60px;
   }
 
+  #Z {
+    max-width: 80px;
+  }
+
+  #E {
+    max-width: 80px;
+  }
+
   #control .box {
     height: 100px;
     width: 100px;
@@ -128,13 +136,15 @@ a {
 }
 
 #motion-control {
-  width:80%;
-  margin-left: 10%;
   margin-bottom: 10px;
 }
 
 .distance {
   margin-left:-5px;
+}
+
+.position-display {
+  margin: 0 0 10px 0;
 }
 
 #control .box {
@@ -217,6 +227,34 @@ h3 {
   padding: 13px 0;
   vertical-align: middle;
   border-radius: 0px;
+}
+
+.input-append {
+  margin: 7px 0;
+}
+
+.current-value {
+
+}
+
+.current-value h2 {
+  line-height: 45px;
+}
+
+.jog-panel h4 {
+  margin:0 0 5px 0;
+}
+
+.input-inline .span6 {
+  margin-left: 0px;
+}
+
+.target {
+  margin-left: 0;
+}
+
+.target h4 {
+  padding-top: 20px;
 }
 
 ::-webkit-input-placeholder { /* Safari, Chrome and Opera */

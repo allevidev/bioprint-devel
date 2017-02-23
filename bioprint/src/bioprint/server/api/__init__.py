@@ -24,6 +24,8 @@ from bioprint.settings import settings as s, valid_boolean_trues
 from bioprint.server.util import noCachingResponseHandler, apiKeyRequestHandler, corsResponseHandler
 from bioprint.server.util.flask import restricted_access, get_json_command_from_request, passive_login
 
+import requests
+
 
 #~~ init api blueprint, including sub modules
 
@@ -181,13 +183,15 @@ def performSystemAction():
 
 #~~ Login/user handling
 
-
 @api.route("/login", methods=["POST"])
 def login():
-	if bioprint.server.userManager is not None and "user" in request.values.keys() and "pass" in request.values.keys():
+	# if "BIOBOTS_API_TOKEN" not in session.keys():
+	# 	return make_response(("No API Token. Please login again", 403, []))
+
+	if bioprint.server.userManager is not None and "user" in request.values.keys() and "pass" in request.values.keys() and "email" in request.values.keys():
 		username = request.values["user"]
 		password = request.values["pass"]
-
+		
 		if "remember" in request.values.keys() and request.values["remember"] == "true":
 			remember = True
 		else:
@@ -203,6 +207,9 @@ def login():
 					user = bioprint.server.userManager.login_user(user)
 					session["usersession.id"] = user.get_session()
 					g.user = user
+					# if isNetworkAvailible():
+					# 	if createUserIfNotExists(email, password):
+					# 		setSessionToken(email, password)
 				login_user(user, remember=remember)
 				identity_changed.send(current_app._get_current_object(), identity=Identity(user.get_id()))
 				return jsonify(user.asDict())
@@ -212,6 +219,41 @@ def login():
 		return passive_login()
 	return NO_CONTENT
 
+def isNetworkAvailible():
+
+	url = s().get(["biobots", "apiUrl"])
+
+	r = requests.get(url)
+
+	return r.status_code == 200
+
+def createUserIfNotExists(email, password):
+
+	url = s().get(["biobots", "apiUrl"]) + "user/exists"
+
+	payload = {
+		"email": email,
+		"password": password,
+	}
+
+	r = requests.post(url, json=payload)
+
+	return r.status_code == 200
+
+def setSessionToken(email, password):
+
+	url = s().get(["biobots", "apiUrl"]) + "user/authenticate"
+	
+	payload = {
+		"email": email,
+		"password": password
+	}
+
+	r = requests.post(url, json=payload)
+
+	session["BIOBOTS_API_TOKEN"] = r.json()["token"]
+
+	return r.status_code == 200
 
 @api.route("/logout", methods=["POST"])
 @restricted_access

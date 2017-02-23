@@ -246,8 +246,8 @@ default_settings = {
     },
     "api": {
         "enabled": True,
-        "key": None,
-        "allowCrossOrigin": False,
+        "key": 'BIOBOTS_API_KEY',
+        "allowCrossOrigin": True,
         "apps": {}
     },
     "terminalFilters": [
@@ -326,6 +326,9 @@ default_settings = {
                 "Z": 0
             }
         }
+    },
+    "biobots": {
+        "apiUrl": "http://api.biobots.io/"
     },
     "devel": {
         "stylesheet": "css",

@@ -70,7 +70,7 @@ UI_API_KEY = ''.join('%02X' % ord(z) for z in uuid.uuid4().bytes)
 versions = bioprint._version.get_versions()
 VERSION = versions['version']
 BRANCH = versions['branch'] if 'branch' in versions else None
-DISPLAY_VERSION = "%s (%s branch)" % (VERSION, BRANCH) if BRANCH else VERSION
+DISPLAY_VERSION = 1.5
 del versions
 
 LOCALES = []
@@ -172,7 +172,7 @@ class Server():
 			self._logger.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_tb))
 		sys.excepthook = exception_logger
 		self._logger.info("Starting bioprint %s" % DISPLAY_VERSION)
-		self._logger.info("Bioprint Version %s" % 1.4)
+		self._logger.info("Bioprint Version %s" % DISPLAY_VERSION)
 
 		# then initialize the plugin manager
 		pluginManager = bioprint.plugin.plugin_manager(init=True)

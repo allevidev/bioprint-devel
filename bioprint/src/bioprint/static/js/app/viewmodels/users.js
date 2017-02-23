@@ -265,27 +265,12 @@ $(function() {
         };
 
         self.onUserLoggedIn = function(user) {
-            self.loadTemplates();
+            console.log("log in in user");
             if (user.admin) {
                 self.requestData();
             }
         }
 
-        self.loadTemplates = function() {
-            console.log("REACHED HERE");
-            $.ajax({
-                url: "http://localhost:8090/api/settings/defaults/extruder",
-                headers: {
-                    "X-Api-Key": "AE0727B0D3044149A0AEBE3FE233698F", 
-                    "Content-Type": "application/json"
-                },
-                type: 'GET',
-                success: function(res) {
-                    //bind data here
-                }
-            });
-
-        }
     }
 
     bioprint_VIEWMODELS.push([

@@ -62,7 +62,7 @@ def main():
 
 	if args.version:
 		print "bioprint version %s" % __version__
-		print "BioPrint verion %s" % 1.4 
+		print "BioPrint verion %s" % 1.5
 		sys.exit(0)
 
 	if args.daemon:

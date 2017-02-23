@@ -79,7 +79,7 @@ class PluginManagerPlugin(bioprint.plugin.SimpleApiPlugin,
 
 	def get_settings_defaults(self):
 		return dict(
-			repository="http://plugins.bioprint.org/plugins.json",
+			repository="http://plugins.octoprint.org/plugins.json",
 			repository_ttl=24*60,
 			pip=None,
 			pip_args=None,

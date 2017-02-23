@@ -657,6 +657,7 @@ class MachineCom(object):
             }
             selectedFile.close()
             processed = post_process.post_process(payload, extruder_positions, wellplate, cl_params, tempData)
+
             self._currentFile = PrintingGcodeFileInformation(processed["file"], offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
 
             eventManager().fire(Events.FILE_SELECTED, {
@@ -664,6 +665,7 @@ class MachineCom(object):
                 "filename": os.path.basename(self._currentFile.getFilename()),
                 "origin": self._currentFile.getFileLocation()
             })
+
             self._callback.on_comm_file_selected(processed["filename"], self._currentFile.getFilesize(), False)
 
     def unselectFile(self):

@@ -38,7 +38,7 @@ def apiKeyRequestHandler():
 	apikey = get_api_key(_flask.request)
 	if apikey is None:
 		# no api key => 401
-		return _flask.make_response("No API key provided", 401)
+		return _flask.make_response("Nao API key provided", 401)
 
 	if apikey == bioprint.server.UI_API_KEY:
 		# ui api key => continue regular request processing
@@ -62,7 +62,7 @@ def apiKeyRequestHandler():
 		return
 
 	# invalid api key => 401
-	return _flask.make_response("Invalid API key" + settings().get(["api", "key"]), 401)
+	return _flask.make_response("Invalid API key", 401)
 
 
 def corsResponseHandler(resp):
@@ -229,4 +229,4 @@ class ReverseProxied(object):
 
 		# call wrapped app with rewritten environment
 		return self.app(environ, start_response)
-
+		

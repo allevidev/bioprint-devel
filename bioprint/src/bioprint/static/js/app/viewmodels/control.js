@@ -5,6 +5,14 @@ $(function() {
         self.loginState = parameters[0];
         self.settings = parameters[1];
 
+        self.xActualPosition = ko.observable(0.00);
+        self.yActualPosition = ko.observable(0.00);
+        self.zActualPosition = ko.observable(0.00);
+        self.eActualPosition = ko.observable(0.00);
+
+
+
+
         self._createToolEntry = function () {
             return {
                 name: ko.observable(),
@@ -14,10 +22,19 @@ $(function() {
                 offset: ko.observable(0),
                 newTarget: ko.observable(),
                 newOffset: ko.observable(),
-                pressure: ko.observable(0)
+                pressure: ko.observable(0),
+                xPosition: ko.observable(0),
+                yPosition: ko.observable(0),
+                zPosition: ko.observable(0), 
+                ePosition: ko.observable(0),
+                temperature: ko.observable(0),
+                pressure: ko.observable(0),
+                entryNames: ko.observableArray([]),
+                targetPressure: ko.observable()
             }
         };
 
+        self.wellplateSelected = ko.observable(false);
         self.log = ko.observableArray([]);
         self.buffer = ko.observable(300);
 
@@ -72,7 +89,7 @@ $(function() {
             'e': false
         }
 
-        self.wellPlate = ko.observable(0);
+        self.wellPlate = ko.observable(1);
         self.wellPlatePositions = {
             '6': {
                 'X': 18.00,
@@ -94,7 +111,7 @@ $(function() {
 
         self.position = {}
         
-        
+    
         self.midpoint = 22;
         self.xTravel = 48.33;
 
@@ -259,9 +276,14 @@ $(function() {
             self.updateFilterRegex();
         });
 
+
+        self.extruderEntries = {};
+
+
         self.fromCurrentData = function (data) {
             self._processStateData(data.state);
             self._processPositionData(data.position);
+
             self._processTemperatureUpdateData(data.serverTime, data.temps);
             self._processOffsetData(data.offsets);
             self._processCurrentLogData(data.logs);
@@ -286,6 +308,17 @@ $(function() {
 
         self._processPositionData = function(data) {
             self.position = data;
+            if (data != null) { 
+                self.xActualPosition(data['X']);
+                self.yActualPosition(data['Y']);
+                self.zActualPosition(data['Z']);
+                self.eActualPosition(data['E']);
+            } else {
+                self.xActualPosition(0);
+                self.yActualPosition(0);
+                self.zActualPosition(0);
+                self.eActualPosition(0);
+            }
         }
 
         self._processCurrentLogData = function(data) {
@@ -316,8 +349,6 @@ $(function() {
             }
 
             if (!CONFIG_TEMPERATURE_GRAPH) return;
-
-            console.log(tools[1].actual());
 
             self.temperatures = self._processTemperatureData(serverTime, data, self.temperatures);
             self.updatePlot();
@@ -903,8 +934,8 @@ $(function() {
         };
 
         self.sendHomeCommand = function (axis) {
+             var tools = self.tools();
             if (axis == 'e') {
-                console.log(self.position['Z']);
                 if (self.homed['z'] == false) {
                     self.sendHomeCommand('z');
                 } else if (parseFloat(self.position['Z']) < 25.00) {
@@ -926,6 +957,7 @@ $(function() {
                             "G1 Z50 F1000"
                         ]
                     });
+
                 }
                 if (self.homed['e'] == false) {
                     self.sendHomeCommand('e');
@@ -933,7 +965,7 @@ $(function() {
                      self.sendCustomCommand({
                         type: "commands",
                         commands: [
-                            "G1 E"+ str(self.midpoint) + "F1000"
+                            "G1 E"+ self.midpoint + "F1000"
                         ]
                     });
                 }
@@ -948,10 +980,6 @@ $(function() {
                 self.isHomed(true);
             }
 
-            if (axis == ['e']) {
-                self.extruder1EPos = -1;
-                self.extruder2EPos = -1;
-            }
 
             if (axis == ['x', 'y']) {
                 self.extruder1XPos = -1;
@@ -1006,6 +1034,45 @@ $(function() {
             })
         };
 
+        self.toggleExtrude = function (extruder) {
+            let pin;
+            let val;
+            if (extruder == "tool0") {
+                pin = 16;
+                if (self.extruder1Extruding() === true) {
+                    self.extruder1Extruding(false);
+                    val = 0;
+                } else if (self.extruder1Extruding() === false) {
+                    self.extruder1Extruding(true);
+                    val = 255;
+                }
+            } else if (extruder == "tool1") {
+                pin = 17;
+                if (self.extruder2Extruding() === true) {
+                    self.extruder2Extruding(false);
+                    val = 0;
+                } else if (self.extruder2Extruding() === false) {
+                    self.extruder2Extruding(true);
+                    val = 255;
+                }
+            }
+            self.sendCustomCommand({
+                type: "commands",
+                commands: [
+                    'M400',
+                    'M42 P' + pin + " S" + val
+                ]
+            });
+        }
+
+        self.extrudingText = function (extruder) {
+            if (self.checkExtruding(extruder) === true) {
+                return "Stop"
+            } else if (self.checkExtruding(extruder) === false) {
+                return "Extrude"
+            }
+        }
+
         self.checkExtruding = function (extruder) {
             if (extruder == "tool0") {
                 return self.extruder1Extruding();
@@ -1033,57 +1100,76 @@ $(function() {
             })
         }
 
-        self.setTargetPressure = function(extruder) {
-            
-            if (extruder == "tool0") {
+
+
+
+//  Still TODO: Remove duplicate code -> Make a single function to handle both extruders instead of if statement
+
+        self.setTargetPressure = function(item) {     
+
+            if (!item.key() || !item.targetPressure()) return;
+
+            if (item.key() == "tool0") {
                 var regulator = 'L';
-            } else if (extruder == "tool1") {
+                $.ajax({
+                    url: API_BASEURL + "printer/bed",
+                    type: "GET",
+                    dataType: "json",
+                    contentType: "application/json; charset=UTF-8",
+                    success: function(state) {
+                        const current = parseFloat(state["bed"]["actual"]);
+                        const offset =  (-1 *(item.targetPressure() - current));
+          
+                        if (Math.abs(offset) > 0.2) {
+                            self.sendCustomCommand({
+                                type: "commands",
+                                commands: [
+                                "G91",
+                                "G1 "+ regulator + (0.3 * offset) ,
+                                "G90",
+                                "M18 " + regulator,
+                                'M105'
+                                ]
+                            });
+                            
+                            setTimeout(function() {
+                                self.setTargetPressure(item);
+                            }, 500);
+                        }
+                     
+                    }
+                });
+            } else if (item.key() == "tool1") {
                 var regulator = 'R';
-            }
-           
 
-            $.ajax({
-                url: API_BASEURL + "printer/tool",
-                type: "GET",
-                dataType: "json",
-                contentType: "application/json; charset=UTF-8",
-                success: function(state) {
-                    console.log(state);
-                        self.extruder1Temp = state['tool0']['actual'];
-                        self.extruder2Temp = state['tool1']['actual'];
-                        self.extruder2Pressure = state['tool2']['actual'];
+                $.ajax({
+                    url: API_BASEURL + "printer/tool",
+                    type: "GET",
+                    dataType: "json",
+                    contentType: "application/json; charset=UTF-8",
+                    success: function(state) {
+                        const current = parseFloat(state["tool2"]["actual"]);
+                        const offset =   (-1 *(item.targetPressure() - current));
 
-                        self.sendCustomCommand({
-                            type: "commands",
-                            commands: [
-                            "G91",
-                            "G1 "+ regulator + "-0.25 ",
-                            "G90",
-                            "M18 " + regulator,
-                            'M105'
-                            ]
-                        })
-//                    $('#extruder1Temp').val(self.extruder1Temp);
-//                    $('#extruder2Pressure').val(self.extruder2Pressure);
-//                    $('#extruder2Temp').val(self.extruder2Temp);
-                }
-            });
-
-            $.ajax({
-                url: API_BASEURL + "printer/bed",
-                type: "GET",
-                dataType: "json",
-                contentType: "application/json; charset=UTF-8",
-                success: function(state) {
-                    
-                    self.extruder1Pressure = state['bed']['actual'];
-
-                    $('#extruder1Pressure').val(self.extruder1Pressure);
-                }
-            });
-
-
-       
+                        if (Math.abs(offset) > 0.5) {
+                             self.sendCustomCommand({
+                                    type: "commands",
+                                    commands: [
+                                    "G91",
+                                    "G1 "+ regulator + (0.3 * offset) ,
+                                    "G90",
+                                    "M18 " + regulator,
+                                    'M105'
+                                    ]
+                                });
+                            
+                            setTimeout(function() {
+                                self.setTargetPressure(item);
+                            }, 500);
+                        }
+                    }
+                });
+            }       
         }
 
 
@@ -1108,7 +1194,6 @@ $(function() {
 
         self.sendTempIncrease = function (extruder) {
             var current = self.getToolState();
-            console.log(current["tool0"]);
 
             if (extruder == 1) {
                 var target = current["tool0"]["target"] + 1
@@ -1131,11 +1216,8 @@ $(function() {
                 dataType: "json",
                 contentType: "application/json; charset=UTF-8",
                 success: function (response) {
-                    console.log(response);
 
                     positions = response["positions"][self.wellPlate()];
-                 
-                    console.log(self.extruder1EPos);
 
                     self.sendPrintHeadCommand({
                         "command": "wellplate",
@@ -1145,12 +1227,77 @@ $(function() {
                         type: 'commands',
                         commands: [
                             'G90',
-                            'G1 Z50 E'+ self.midpoint +'F1000',
+                            'G1 Z50 E'+ self.midpoint +' F1000',
                             'G1 X' + positions["tool0"]["X"] + ' Y' + positions["tool0"]["Y"] + ' F2000',
                             'G1 E' + self.extruder1EPos + ' F1000']
                     });
+
+                    self.wellplateSelected(true);
                 }
             })            
+        }
+
+        self.setExtruderPosition = function (item) {
+            var eTarget = -1;
+            const tool = item.key()
+            if (tool == 'tool0') {
+                eTarget = self.extruder1EPos;
+            } else if (tool == 'tool1') {
+                eTarget = self.extruder2EPos;
+            }
+            self.sendCustomCommand({
+                type: 'commands',
+                commands: [
+                    'G90',
+                    'G1 Z50 E' + self.midpoint + ' F1000',
+                    'G1 X' + item.xPosition() + ' Y' + item.yPosition() + ' F2000',
+                    'G1 E' + eTarget + ' F1000',
+                    'G1 Z' + item.zPosition() + ' F1000'
+                ]
+            });
+        }
+
+        self.loadExtruderPosition = function (item) {
+            const tool = parseInt(item.key()[4])
+
+            self.tools()[tool].xPosition(self.xActualPosition());
+            self.tools()[tool].yPosition(self.yActualPosition());
+            self.tools()[tool].zPosition(self.zActualPosition());
+        }
+
+        self.saveExtruderPosition = function (item) {           
+            const tool = item.key()
+            if (tool == 'tool0') {
+                self.extruder1XPos = item.xPosition();
+                self.extruder1YPos = item.yPosition();
+                self.extruder1ZPos = item.zPosition();
+            } else if (tool == 'tool1') {
+                self.extruder2XPos = item.xPosition();
+                self.extruder2YPos = item.yPosition();
+                self.extruder2ZPos = item.zPosition();
+            }
+
+            if (tool == 'tool0') {
+                self.switchTool('tool1');
+            } else if (tool == 'tool1') {
+                self.switchTool('tool0');
+            }
+            self.sendPrintHeadCommand({
+                "command": "position",
+                "wellplate": self.wellPlate(),
+                "positions": {
+                    "tool0" : {
+                        "X": self.extruder1XPos,
+                        "Y": self.extruder1YPos,
+                        "Z": self.extruder1ZPos
+                    },
+                    "tool1" : {
+                        "X": self.extruder2XPos,
+                        "Y": self.extruder2YPos,
+                        "Z": self.extruder2ZPos
+                    }
+                }
+            });
         }
 
         self.saveToolChangeDist = function (tool) {
@@ -1213,7 +1360,7 @@ $(function() {
                 type: 'commands',
                 commands: [
                     'G90',
-                    'G1 Z25 F1000',
+                    'G1 Z50 F1000',
                     'T0',
                     'M400',
                     'G1 E' + self.midpoint + ' F1000.00',
@@ -1389,7 +1536,6 @@ $(function() {
         }
 
         self.sendEmergencyStop = function () {
-            console.log(self.selectedPort());
 
             self.sendCustomCommand({
                 type: 'command',
@@ -1423,7 +1569,7 @@ $(function() {
 
         self.onStartup = function () {
             self.requestData();
-            self.loadTemplates();
+            self.entryDialog = $('#entry_dialog')
         };
 
         self.updateRotatorWidth = function() {
@@ -1591,7 +1737,174 @@ $(function() {
             }
         };
 
+        self.showEntryDialog = function(key) {
+            self.entryDialog.modal({
+                minHeight: function() { return Math.max($.fn.modal.defaults.maxHeight() - 80, 250); }
+            }).css({
+                width: 'auto',
+                'margin-left': function() { return -($(this).width() / 2); }
+            });
+
+            return false;
+        }
+
+        
+    
+        self.loadExtruderValues = function(tool) {
+            const index = parseInt(tool[4]); 
+            const entryId = $('#' + tool + 'EntrySelector').val();
+            const tools = self.tools();
+            self.wellPlate(1);
+            tools[index].xPosition(self.extruderEntries[entryId]["content"]["positions"][self.wellPlate()][tool]['X']);
+            tools[index].yPosition(self.extruderEntries[entryId]["content"]["positions"][self.wellPlate()][tool]['Y']);
+            tools[index].zPosition(self.extruderEntries[entryId]["content"]["positions"][self.wellPlate()][tool]['Z']);
+            tools[index].ePosition(self.extruderEntries[entryId]["content"]["positions"][self.wellPlate()][tool]['E']);
+        }
+
+        self.newExtruderEntry = function() {
+            var entry = {};
+            entry["name"] = self.modalName();
+            entry["content"] = {};
+        
+            entry["content"]["X"] = self.modalXPosition();
+            entry["content"]["Y"] = self.modalYPosition();
+            entry["content"]["Z"] = self.modalZPosition();
+            entry["content"]["temperature"] = self.modalXPosition();
+            entry["content"]["pressure"] = self.modalPressure();
+            entry["content"]["wellplate"] = self.wellPlate();
+            entry["content"]["type"] = self.modalType();
+
+            //send to flask app here
+             $.ajax({
+                url: API_BASEURL + "user/entries/new",
+                type: "POST",
+                data: JSON.stringify(entry),
+                contentType: "application/json; charset=UTF-8",
+                success: function(response) {
+                    if (response['status']) {
+                            self.loadTemplates();
+                    }
+                }
+            });
+        }
+
+
+        self.saveExtruderValues = function() {
+            const tool = self.modalTool();
+            const tools = self.tools();
+            const index = parseInt(tool[4]); 
+            const entryId = $('#' + tool + 'EntrySelector').val();
+
+        
+            if  (parseInt(tools[index].xPosition()) !== parseInt(self.extruderEntries[entryId]["content"]["xPosition"]) ||
+                (parseInt(tools[index].yPosition()) !== parseInt(self.extruderEntries[entryId]["content"]["yPosition"])) ||
+                (parseInt(tools[index].zPosition()) !== parseInt(self.extruderEntries[entryId]["content"]["zPosition"]))) {
+
+                var tempContent = self.extruderEntries[entryId]["content"];
+
+                //  Show error message
+                if ((tool == 'tool0') && (parseFloat(tools[index].pressure()) > 100)) {
+                    return;
+                }
+
+                tempContent["positions"][self.wellPlate()][tool]['X'] = parseFloat(self.modalXPosition());
+                tempContent["positions"][self.wellPlate()][tool]['Y'] = parseFloat(self.modalYPosition());
+                tempContent["positions"][self.wellPlate()][tool]['Z'] = parseFloat(self.modalZPosition());
+                tempContent["pressure"] = parseFloat(self.modalPressure());
+                tempContent["temperature"] = parseFloat(self.modalTemperature());
+                tempContent["type"] = self.modalType();
+
+                data = {
+                    id: entryId, 
+                    content: tempContent
+                };
+
+                $.ajax({
+                    url: API_BASEURL + "user/entry/update", 
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    contentType: "application/json",
+                    success: function(response) {
+                        if (response['status']) {
+                            self.loadTemplates();
+                        }
+                    }
+                });
+            } 
+
+        }
+
+        self.modalTool = ko.observable('');
+        self.modalEntryId = null;
+        self.modalXPosition = ko.observable(0);
+        self.modalYPosition = ko.observable(0);
+        self.modalZPosition = ko.observable(0);
+        self.modalTemperature = ko.observable(0);
+        self.modalPressure = ko.observable(0);
+        self.modalName = ko.observable('');
+        self.modalType = ko.observableArray(["extruder1", "extruder2"]);
+
+        self.setupModalForSave = function(tool) {
+            const index = parseInt(tool[4]); 
+            const tools = self.tools();
+            const entryId = $('#' + tool + 'EntrySelector').val();
+
+            self.modalTool(tool);
+            self.modalEntryId = entryId;
+            self.modalName(self.extruderEntries[entryId]["name"]);
+            self.modalXPosition(tools[index].xPosition());
+            self.modalYPosition(tools[index].yPosition());
+            self.modalZPosition(tools[index].zPosition());
+            self.modalTemperature(tools[index].temperature());
+            self.modalPressure(tools[index].pressure());
+        }
+
+        self.calibrateExtruderPosition = function (item) {
+            self.saveExtruderPosition(item).then((response) => {
+                self.setExtruderPosition(item); 
+            })
+            
+        }
+        self.loadTemplates = function () {
+           $.ajax({
+                url: API_BASEURL + "user/entries/extruder",
+                type: "GET",
+                contentType: "application/json; charset=UTF-8",
+                success: function(response) {
+                    if (response["status"]) {
+                        const tools = self.tools();
+                        for (var i=0; i < response["result"]["entries"].length; i++) {
+
+                            //name ==> id
+                            self.extruderEntries[response["result"]["entries"][i]["entry"]["_id"]] = response["result"]["entries"][i]["entry"]; 
+                           
+                            const validExtruders = response["result"]["entries"][i]["entry"]["content"]["type"];
+
+                            
+                            for (var extruder of validExtruders){
+                                const index = parseInt(extruder[8]) - 1; 
+                                const currentEntry = {};
+                                currentEntry["name"] = response["result"]["entries"][i]["entry"]["name"];
+                                currentEntry["id"] = response["result"]["entries"][i]["entry"]["_id"];
+
+                                tools[index].entryNames.push(currentEntry);
+                            }
+
+                        }
+                    }
+                }
+            });
+        };
+
+
+        self.onUserLoggedIn = function (user) {
+            self.loadTemplates();
+        }
+
+
     }
+
+
 
     bioprint_VIEWMODELS.push([
         ControlViewModel,
