@@ -13,6 +13,7 @@ import threading
 import Queue as queue
 import logging
 import serial
+import can
 import bioprint.plugin
 
 from collections import deque
@@ -184,6 +185,48 @@ gcodeToEvent = {
     "M80": Events.POWER_ON,
     "M81": Events.POWER_OFF,
 }
+
+class CANCom(object):
+    STATE_NONE = 0
+    STATE_OPEN = 1
+    STATE_CONNECTING = 4
+    STATE_OPERATIONAL = 5
+    STATE_PRINTING = 6
+    STATE_PAUSED = 7
+    STATE_CLOSED = 8
+    STATE_ERROR = 9
+    STATE_CLOSED_WITH_ERROR = 10
+    STATE_TRANSFERING_FILE = 11
+    
+    def __init__(self, device = "can0", callbackObject=None, printerProfileManager=None):
+        self._logger = logging.getLogger(_name_)
+        self._canLogger = logging.getLogger("CAN")
+        if callbackObject == None:
+            callbackObject = CANComPrintCallback()
+
+        self._device = device
+        self._callback = callbackObject
+        self._printerProfileManager = printerProfileManager
+        self._state = self.STATE_NONE
+        self._can = None
+        self._temp = {}
+        self._position = {}
+        self._bedTemp = None
+        self._tempOffsets = dict()
+        self._commandQueue = queue.Queue()
+        self._currentZ = None
+        self._heatupWaitStartTime = None
+        self._heatupWaitTimeLost = 0.0
+        self._pauseWaitStartTime = None
+        self._pauseWaitTimeLost = 0.0
+        self._currentTool = 0
+
+        self._long_running_command = False
+        self._heating = False
+        self._connection_closing = False
+
+
+
 
 class MachineCom(object):
     STATE_NONE = 0

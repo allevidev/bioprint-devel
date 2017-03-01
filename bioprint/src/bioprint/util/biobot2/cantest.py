@@ -1,14 +1,22 @@
 import can
+import sys
 
-def send_one(msg):
+def send_one(num_messages):
+    
     bus = can.interface.Bus(channel="can0", bustype="socketcan")
-    msg = can.Message(arbitration_id=0x00000,
-            data=msg)
+    msg = can.Message(data=[0,0,0,0,0,0,0,0], arbitration_id=001)
     try:
-        bus.send(msg)
-        print "Message sent on", bus.channel_info
+        for i in xrange(int(num_messages)):
+            bus.send(msg)
+            print msg, "sent on", bus.channel_info
+        bus.flush_tx_buffer()
+        bus.shutdown()
     except can.CanError:
         print "Message NOT sent"
 
 if __name__ == "__main__":
-    send_one([0, 1, 2, 3, 4, 5, 6, 7])
+    print sys.argv[1]
+    if len(sys.argv) > 1:
+        send_one(sys.argv[1])
+    else:
+        send_one(1)
