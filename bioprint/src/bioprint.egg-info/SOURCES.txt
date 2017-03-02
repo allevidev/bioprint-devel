@@ -25,10 +25,7 @@ src/bioprint/filemanager/util.py
 src/bioprint/plugin/__init__.py
 src/bioprint/plugin/core.py
 src/bioprint/plugin/types.py
-src/bioprint/plugins/.DS_Store
-src/bioprint/plugins/bioprint/.DS_Store
 src/bioprint/plugins/bioprint/__init__.py
-src/bioprint/plugins/bioprint/static/.DS_Store
 src/bioprint/plugins/bioprint/static/css/bioprint.css
 src/bioprint/plugins/bioprint/static/font/COUTURE-Bold.eot
 src/bioprint/plugins/bioprint/static/font/COUTURE-Bold.svg
@@ -94,6 +91,7 @@ src/bioprint/server/util/tornado.py
 src/bioprint/server/util/watchdog.py
 src/bioprint/slicing/__init__.py
 src/bioprint/slicing/exceptions.py
+src/bioprint/static/.DS_Store
 src/bioprint/static/empty
 src/bioprint/static/robots.txt
 src/bioprint/static/css/bioprint.css
@@ -162,7 +160,6 @@ src/bioprint/static/js/app/viewmodels/users.js
 src/bioprint/static/js/app/viewmodels/usersettings.js
 src/bioprint/static/js/lib/avltree.js
 src/bioprint/static/js/lib/babel.js
-src/bioprint/static/js/lib/bluebird.js
 src/bioprint/static/js/lib/bootstrap-slider-knockout-binding.js
 src/bioprint/static/js/lib/detectmobilebrowser.js
 src/bioprint/static/js/lib/knockout.js
@@ -175,7 +172,6 @@ src/bioprint/static/js/lib/modernizr.custom.js
 src/bioprint/static/js/lib/moment-with-locales.min.js
 src/bioprint/static/js/lib/pnotify.min.js
 src/bioprint/static/js/lib/pusher.color.min.js
-src/bioprint/static/js/lib/ramda.min.js
 src/bioprint/static/js/lib/sockjs-0.3.4.min.js
 src/bioprint/static/js/lib/sprintf.min.js
 src/bioprint/static/js/lib/bootstrap/bootstrap-modal.js
