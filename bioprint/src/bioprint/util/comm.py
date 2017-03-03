@@ -188,7 +188,7 @@ gcodeToEvent = {
 
 class CANCom(object):
     STATE_NONE = 0
-    STATE_OPEN = 1
+    STATE_OPEN_CAN = 1
     STATE_CONNECTING = 4
     STATE_OPERATIONAL = 5
     STATE_PRINTING = 6
@@ -196,7 +196,6 @@ class CANCom(object):
     STATE_CLOSED = 8
     STATE_ERROR = 9
     STATE_CLOSED_WITH_ERROR = 10
-    STATE_TRANSFERING_FILE = 11
     
     def __init__(self, device = "can0", callbackObject=None, printerProfileManager=None):
         self._logger = logging.getLogger(_name_)
@@ -225,8 +224,184 @@ class CANCom(object):
         self._heating = False
         self._connection_closing = False
 
+        self._ignore_select = False
 
+        # print job
+        self._currentFile = None
 
+        # regexes
+
+        self._long_running_commands = settings().get(["can", "longRunningCommands"])
+
+        # multithreading locks
+        self._sendNextLock = threading.Lock()
+        self._sendingLock = threading.RLock()
+
+        # monitoring thread
+        self._monitoring_active = True
+        self.monitoring_thread = threading.Thread(target=self._monitor, name="comm._monitor")
+        self.monitoring_thread.daemon = True
+        self.monitoring_thread.start()
+
+        # sending thread
+        self._send_queue_active = True
+        self.sending_thread = threading.Thread(target=self._send_loop, name="comm.sending_thread")
+        self.sending_thread.daemon = True
+        self.sending_thread.start()
+
+    def __del__(self):
+        self.close()
+
+    def _changeState(self, newState):
+        if self._state == newState:
+            return
+
+        if newState == self.STATE_CLOSED or newState == self.STATE_CLOSED_WITH_ERROR:
+            if settings().get(["feature", "sdSupport"]):
+                self._sdFileList = False
+                self._sdFiles = []
+                self._callback.on_comm_sd_files([])
+
+            if self._currentFile is not None:
+                self._currentFile.close()
+
+        oldState = self.getStateString()
+        self._state = newState
+        self._log('Changing monitoring state from \'%s\' to \'%s\'' % (oldState, self.getStateString()))
+        self._callback.on_comm_state_change(newState)
+
+    def _log(self, message):
+        self._callback.on_comm_log(message)
+        self._canLogger.debug(message)
+
+    def _addToLastLines(self, cmd):
+        self._lastLines.append(cmd)
+
+    def getState(self):
+        return self._state
+
+    def getStateString(self):
+        if self._state == self.STATE_NONE:
+            return "Offline"
+        if self._state == self.STATE_OPEN_CAN:
+            return "Opening CAN bus"
+        if self._state == self.STATE_CONNECTING:
+            return "Connecting"
+        if self._state == self.STATE_OPERATIONAL:
+            return "Operational"
+        if self._state == self.STATE_PRINTING:
+            return "Printing"
+        if self._state == self.STATE_PAUSED:
+            return "Paused"
+        if self._state == self.STATE_CLOSED:
+            return "Closed"
+        if self._state == self.STATE_ERROR:
+            return "Error: %s" % (self.getErrorString())
+        if self._state == self.STATE_CLOSED_WITH_ERROR:
+            return "Error: %s" % (self.getErrorString())
+        return "?%d?" % (self._state)
+
+    def getErrorString(self):
+        return self._errorValue
+
+    def isClosedOrError(self):
+        return self._state == self.STATE_ERROR or self._state == self.STATE_CLOSED_WITH_ERROR or self._state == self.STATE_CLOSED
+
+    def isError(self):
+        return self._state == self.STATE_ERROR or self._state == self.STATE_CLOSED_WITH_ERROR
+
+    def isOperational(self):
+        return self._state == self.STATE_OPERATIONAL or self._state == self.STATE_PRINTING or self._state == self.STATE_PAUSED or self._state == self.STATE_TRANSFERING_FILE
+
+    def isPrinting(self):
+        return self._state == self.STATE_PRINTING
+
+    def isStreaming(self):
+        return self._currentFile is not None and isinstance(self._currentFile, StreamingGcodeFileInformation)
+
+    def isPaused(self):
+        return self._state == self.STATE_PAUSED
+
+    def isBusy(self):
+        return self.isPrinting() or self.isPaused()
+
+    def getPrintProgress(self):
+        if self._currentFile is None:
+            return None
+        return self._currentFile.getProgress()
+
+    def getPrintFilepos(self):
+        if self._currentFile is None:
+            return None
+        return self._currentFile.getFilepos()
+
+    def getPrintTime(self):
+        if self._currentFile is None or self._currentFile.getStartTime() is None:
+            return None
+        else:
+            return time.time() - self._currentFile.getStartTime() - self._pauseWaitTimeLost
+
+    def getCleanedPrintTime(self):
+        printTime = self.getPrintTime()
+        if printTime is None:
+            return None
+
+        cleanedPrintTime = printTime - self._heatupWaitTimeLost
+        if cleanedPrintTime < 0:
+            cleanedPrintTime = 0.0
+        return cleanedPrintTime
+
+    def getTemp(self):
+        return self._temp
+
+    def getPosition(self):
+        return self._position
+
+    def getBedTemp(self):
+        return self._bedTemp
+
+    def getOffsets(self):
+        return dict(self._tempOffsets)
+
+    def getCurrentTool(self):
+        return self._currentTool
+
+    def getConnection(self):
+        return self._port, self._baudrate
+
+    def getTransport(self):
+        return self._serial
+
+    def close()
+        if self._connection_closing:
+            return
+        self._connection_closing = True
+
+        if self._temperature_timer is not None:
+            try:
+                self._temperature_timer.cancel()
+            except:
+                pass
+        
+        self._monitoring_active = False
+        self._send_queue_active = False
+
+        printing = self.isPrinting() or self.isPaused()
+
+        if self._can is not None:
+            try:
+                # TODO: Should we close the CAN connection here? What's the proper state to leave the can bus in>
+                self._can.shutdown()
+            except:
+                self._logger.exception("Error while trying to close th CAN bus")
+                isError = True
+            if isError:
+                self._changeState(self.STATE_CLOSED_WITH_ERROR)
+            else:
+                self._changeState(self.STATE_CLOSED)
+        self._can = None
+
+        if 
 
 class MachineCom(object):
     STATE_NONE = 0
@@ -281,46 +456,7 @@ class MachineCom(object):
         self._heating = False
         self._connection_closing = False
 
-        self._timeout = None
-
-        self._alwaysSendChecksum = settings().getBoolean(["feature", "alwaysSendChecksum"])
-        self._sendChecksumWithUnknownCommands = settings().getBoolean(["feature", "sendChecksumWithUnknownCommands"])
-        self._unknownCommandsNeedAck = settings().getBoolean(["feature", "unknownCommandsNeedAck"])
-        self._currentLine = 1
-        self._line_mutex = threading.RLock()
-        self._resendDelta = None
-        self._lastLines = deque([], 50)
-        self._lastCommError = None
-        self._lastResendNumber = None
-        self._currentResendCount = 0
-        self._resendSwallowNextOk = False
-        self._resendSwallowRepetitions = settings().getBoolean(["feature", "ignoreIdenticalResends"])
-        self._resendSwallowRepetitionsCounter = 0
-
-        self._clear_to_send = CountedEvent(max=10, name="comm.clear_to_send")
-        self._send_queue = TypedQueue()
-        self._temperature_timer = None
-        self._sd_status_timer = None
-
-        # hooks
-        self._pluginManager = bioprint.plugin.plugin_manager()
-
-        self._gcode_hooks = dict(
-            queuing=self._pluginManager.get_hooks("bioprint.comm.protocol.gcode.queuing"),
-            queued=self._pluginManager.get_hooks("bioprint.comm.protocol.gcode.queued"),
-            sending=self._pluginManager.get_hooks("bioprint.comm.protocol.gcode.sending"),
-            sent=self._pluginManager.get_hooks("bioprint.comm.protocol.gcode.sent")
-        )
-
-        self._printer_action_hooks = self._pluginManager.get_hooks("bioprint.comm.protocol.action")
-        self._gcodescript_hooks = self._pluginManager.get_hooks("bioprint.comm.protocol.scripts")
-        self._serial_factory_hooks = self._pluginManager.get_hooks("bioprint.comm.transport.serial.factory")
-
-        # SD status data
-        self._sdAvailable = False
-        self._sdFileList = False
-        self._sdFiles = []
-        self._sdFileToSelect = None
+        
         self._ignore_select = False
 
         # print job
