@@ -433,7 +433,7 @@ def switch_extruder(extruder, e0_pos, e1_pos, e0_Xctr, e0_Yctr, e1_Xctr, e1_Yctr
         y = e1_Yctr
         z = 50
 
-    commands = [t m
+    commands = [
         'T0 ; ensure we keep T0 active to prevent changing pressure',
         'M400 ; wait for commands to complete',
         'G1 E' + str(mid) + ' F' + str(e_rate) +

@@ -372,7 +372,7 @@ class CANCom(object):
     def getTransport(self):
         return self._serial
 
-    def close()
+    def close():
         if self._connection_closing:
             return
         self._connection_closing = True
@@ -400,8 +400,6 @@ class CANCom(object):
             else:
                 self._changeState(self.STATE_CLOSED)
         self._can = None
-
-        if 
 
 class MachineCom(object):
     STATE_NONE = 0
