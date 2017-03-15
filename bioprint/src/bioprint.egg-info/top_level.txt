@@ -1,2 +1,2 @@
-bioprint
 bioprint_setuptools
+bioprint
