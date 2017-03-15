@@ -3,8 +3,8 @@ import sys
 
 def send_one(num_messages):
     
-    bus = can.interface.Bus(channel="can0", bustype="socketcan")
-    msg = can.Message(data=[0,0,0,0,0,0,0,0], arbitration_id=001)
+    bus = can.interface.Bus()
+    msg = can.Message(data=[11,11,11,11,11,11,11,11], arbitration_id=000)
     try:
         for i in xrange(int(num_messages)):
             bus.send(msg)
