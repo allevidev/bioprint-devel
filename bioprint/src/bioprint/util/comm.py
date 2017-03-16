@@ -401,6 +401,87 @@ class CANCom(object):
                 self._changeState(self.STATE_CLOSED)
         self._can = None
 
+        if printing:
+            payload = None
+            if self._currentFile is not None:
+                payload = {
+                    "file": self._currentFile.getFilename(),
+                    "filename": os.path.basename(self._currentFile.getFilename()),
+                    "origin": self._currentFile.getFileLocation()
+                }
+            eventManager().fire(Events.PRINT_FAILED, payload)
+        eventManager().fire(Events.DISCONNECTED)
+
+    def setTemperatureOffset(self, offsets):
+        self._tempOffsets.update(offsets)
+
+    def fakeOk(self):
+        self._clear_to_send.set()
+    
+    def sendCommand(self, cmd, cmd_type=None, processed=False):
+        cmd = to_unicode(cmd, errors="replace")
+        if not processed:
+            cmd = process_gcode_line(cmd)
+            if not cmd:
+                return
+
+        if self.isPrinting() and not self.isSdFileSelected():
+            self._commandQueue.put((cmd, cmd_type))
+        elif self.isOperational():
+            self._sendCommand(cmd, cmd_type=cmd_type)
+
+    def sendGcodeScript(self, scriptName, replacements=None):
+        context = dict()
+        if replacements is not None and isinstance(replacements, dict):
+            context.update(replacements)
+        context.update(dict(
+            printer_profile=self._printerProfileManager.get_current_or_default()
+        ))
+
+        template = settings().loadScript("gcode", scriptName, context=context)
+        if template is None:
+            scriptLines = []
+        else:
+            scriptLines = filter(
+                lambda x: x is not None and x.strip() != "",
+                map(
+                    lambda x: process_gcode_line(x, offsets=self._tempOffsets, current_tool=self._currentTool),
+                    template.split("\n")
+                )
+            )
+
+        for hook in self._gcodescript_hooks:
+            try:
+                retval = self._gcodescript_hooks[hook](self, "gcode", scriptName)
+            except:
+                self._logger.exception("Error while processing gcodescript hook %s" % hook)
+            else:
+                if retval is None:
+                    continue
+                if not isinstance(retval, (list, tuple)) or not len(retval) == 2:
+                    continue
+
+                def to_list(data):
+                    if isinstance(data, str):
+                        data = map(str.strip, data.split("\n"))
+                    elif isinstance(data, unicode):
+                        data = map(unicode.strip, data.split("\n"))
+
+                    if isinstance(data, (list, tuple)):
+                        return list(data)
+                    else:
+                        return None
+
+                prefix, suffix = map(to_list, retval)
+                if prefix:
+                    scriptLines = list(prefix) + scriptLines
+                if suffix:
+                    scriptLines += list(suffix)
+
+        for line in scriptLines:
+            self.sendCommand(line)
+        return "\n".join(scriptLines)
+
 class MachineCom(object):
     STATE_NONE = 0
     STATE_OPEN_SERIAL = 1
