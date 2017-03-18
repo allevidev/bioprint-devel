@@ -482,6 +482,73 @@ class CANCom(object):
             self.sendCommand(line)
         return "\n".join(scriptLines)
 
+    def _sendCommand(self, priority, cmd, cmd_type=None):
+        with self._sendingLock:
+            if self._serial is None:
+                return
+
+            gcode = None
+            priority, cmd, cmd_type, gcode = self._process_command_phase("queuing", priority, cmd, cmd_type, gcode=gcode)
+
+            if cmd is None:
+                return
+
+            if gcode and gcode in gcodeToEvent:
+                eventManager().fire(gcodeToEvent[gcode])
+
+            self._enqueue_for_sending(priority, cmd, command_type=cmd_type)
+
+    def _enqueue_for_sending(self, priority, command, linenumber=None, command_type=None):
+        try:
+            self._send_queue.put((priority, command, linenumber, command_type))
+        except TypeAlreadyInQueue as e:
+            self._logger.debug("Type already in queue: " + e.type)
+
+    def _send_loop(self):
+        self._clear_to_send.wait()
+
+        while self._send_queue_active:
+            try:
+                entry = self._send_queue.get()
+
+                if not self._send_queue_active:
+                    break
+
+                priority, command, linenumber, command_type = entry
+
+                can = can_command_for_cmd(command)
+
+                if linenumber is not None:
+                    self._doSendWithChecksum(command, linenumber)
+
+                else:
+                    command, _, gcode = self._process_command_phase("sending", command, command_type, gcode=gcode)
+
+                    if command is None:
+                        continue
+
+                    command_to_send = command.encode("ascii", errors="replace")
+
+                    if (gcode is not None or self._sendChecksumWithUnknownCommands) and (self.isPrinting() or self._alwaysSendChecksum):
+                        self._doIncrementAndSendWithChecksum(command_to_send)
+                    else:
+                        self._doSendWithoutChecksum(command_to_send)
+
+                self._process_command_phase("sent", command, command_type, gcode=gcode)
+
+                use_up_clear = self._unknownCommandsNeedAck
+                if gcode is not None:
+                    use_up_clear = True
+
+                if use_up_clear:
+                    self._clear_to_send.clear()
+
+                self._clear_to_send.wait()
+        except:
+            self._logger.exception("Caught an exception in the send loop")
+    self._log("Closing down send loop")
+
+
 class MachineCom(object):
     STATE_NONE = 0
     STATE_OPEN_SERIAL = 1
