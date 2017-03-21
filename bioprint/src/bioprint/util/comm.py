@@ -184,6 +184,379 @@ gcodeToEvent = {
     "M80": Events.POWER_ON,
     "M81": Events.POWER_OFF,
 }
+class CANCom(object):
+    STATE_NONE = 0
+    STATE_OPEN_CAN = 1
+    STATE_CONNECTING = 4
+    STATE_OPERATIONAL = 5
+    STATE_PRINTING = 6
+    STATE_PAUSED = 7
+    STATE_CLOSED = 8
+    STATE_ERROR = 9
+    STATE_CLOSED_WITH_ERROR = 10
+    
+    def __init__(self, device = "can0", callbackObject=None, printerProfileManager=None):
+        self._logger = logging.getLogger(_name_)
+        self._canLogger = logging.getLogger("CAN")
+        if callbackObject == None:
+            callbackObject = CANComPrintCallback()
+
+        self._device = device
+        self._callback = callbackObject
+        self._printerProfileManager = printerProfileManager
+        self._state = self.STATE_NONE
+        self._can = None
+        self._temp = {}
+        self._position = {}
+        self._bedTemp = None
+        self._tempOffsets = dict()
+        self._commandQueue = queue.Queue()
+        self._currentZ = None
+        self._heatupWaitStartTime = None
+        self._heatupWaitTimeLost = 0.0
+        self._pauseWaitStartTime = None
+        self._pauseWaitTimeLost = 0.0
+        self._currentTool = 0
+
+        self._long_running_command = False
+        self._heating = False
+        self._connection_closing = False
+
+        self._ignore_select = False
+
+        # print job
+        self._currentFile = None
+
+        # regexes
+
+        self._long_running_commands = settings().get(["can", "longRunningCommands"])
+
+        # multithreading locks
+        self._sendNextLock = threading.Lock()
+        self._sendingLock = threading.RLock()
+
+        # monitoring thread
+        self._monitoring_active = True
+        self.monitoring_thread = threading.Thread(target=self._monitor, name="comm._monitor")
+        self.monitoring_thread.daemon = True
+        self.monitoring_thread.start()
+
+        # sending thread
+        self._send_queue_active = True
+        self.sending_thread = threading.Thread(target=self._send_loop, name="comm.sending_thread")
+        self.sending_thread.daemon = True
+        self.sending_thread.start()
+
+    def __del__(self):
+        self.close()
+
+    def _changeState(self, newState):
+        if self._state == newState:
+            return
+
+        if newState == self.STATE_CLOSED or newState == self.STATE_CLOSED_WITH_ERROR:
+            if settings().get(["feature", "sdSupport"]):
+                self._sdFileList = False
+                self._sdFiles = []
+                self._callback.on_comm_sd_files([])
+
+            if self._currentFile is not None:
+                self._currentFile.close()
+
+        oldState = self.getStateString()
+        self._state = newState
+        self._log('Changing monitoring state from \'%s\' to \'%s\'' % (oldState, self.getStateString()))
+        self._callback.on_comm_state_change(newState)
+
+    def _log(self, message):
+        self._callback.on_comm_log(message)
+        self._canLogger.debug(message)
+
+    def _addToLastLines(self, cmd):
+        self._lastLines.append(cmd)
+
+    def getState(self):
+        return self._state
+
+    def getStateString(self):
+        if self._state == self.STATE_NONE:
+            return "Offline"
+        if self._state == self.STATE_OPEN_CAN:
+            return "Opening CAN bus"
+        if self._state == self.STATE_CONNECTING:
+            return "Connecting"
+        if self._state == self.STATE_OPERATIONAL:
+            return "Operational"
+        if self._state == self.STATE_PRINTING:
+            return "Printing"
+        if self._state == self.STATE_PAUSED:
+            return "Paused"
+        if self._state == self.STATE_CLOSED:
+            return "Closed"
+        if self._state == self.STATE_ERROR:
+            return "Error: %s" % (self.getErrorString())
+        if self._state == self.STATE_CLOSED_WITH_ERROR:
+            return "Error: %s" % (self.getErrorString())
+        return "?%d?" % (self._state)
+
+    def getErrorString(self):
+        return self._errorValue
+
+    def isClosedOrError(self):
+        return self._state == self.STATE_ERROR or self._state == self.STATE_CLOSED_WITH_ERROR or self._state == self.STATE_CLOSED
+
+    def isError(self):
+        return self._state == self.STATE_ERROR or self._state == self.STATE_CLOSED_WITH_ERROR
+
+    def isOperational(self):
+        return self._state == self.STATE_OPERATIONAL or self._state == self.STATE_PRINTING or self._state == self.STATE_PAUSED or self._state == self.STATE_TRANSFERING_FILE
+
+    def isPrinting(self):
+        return self._state == self.STATE_PRINTING
+
+    def isStreaming(self):
+        return self._currentFile is not None and isinstance(self._currentFile, StreamingGcodeFileInformation)
+
+    def isPaused(self):
+        return self._state == self.STATE_PAUSED
+
+    def isBusy(self):
+        return self.isPrinting() or self.isPaused()
+
+    def getPrintProgress(self):
+        if self._currentFile is None:
+            return None
+        return self._currentFile.getProgress()
+
+    def getPrintFilepos(self):
+        if self._currentFile is None:
+            return None
+        return self._currentFile.getFilepos()
+
+    def getPrintTime(self):
+        if self._currentFile is None or self._currentFile.getStartTime() is None:
+            return None
+        else:
+            return time.time() - self._currentFile.getStartTime() - self._pauseWaitTimeLost
+
+    def getCleanedPrintTime(self):
+        printTime = self.getPrintTime()
+        if printTime is None:
+            return None
+
+        cleanedPrintTime = printTime - self._heatupWaitTimeLost
+        if cleanedPrintTime < 0:
+            cleanedPrintTime = 0.0
+        return cleanedPrintTime
+
+    def getTemp(self):
+        return self._temp
+
+    def getPosition(self):
+        return self._position
+
+    def getBedTemp(self):
+        return self._bedTemp
+
+    def getOffsets(self):
+        return dict(self._tempOffsets)
+
+    def getCurrentTool(self):
+        return self._currentTool
+
+    def getConnection(self):
+        return self._port, self._baudrate
+
+    def getTransport(self):
+        return self._serial
+
+    def close():
+        if self._connection_closing:
+            return
+        self._connection_closing = True
+
+        if self._temperature_timer is not None:
+            try:
+                self._temperature_timer.cancel()
+            except:
+                pass
+        
+        self._monitoring_active = False
+        self._send_queue_active = False
+
+        printing = self.isPrinting() or self.isPaused()
+
+        if self._can is not None:
+            try:
+                # TODO: Should we close the CAN connection here? What's the proper state to leave the can bus in>
+                self._can.shutdown()
+            except:
+                self._logger.exception("Error while trying to close th CAN bus")
+                isError = True
+            if isError:
+                self._changeState(self.STATE_CLOSED_WITH_ERROR)
+            else:
+                self._changeState(self.STATE_CLOSED)
+        self._can = None
+
+        if printing:
+            payload = None
+            if self._currentFile is not None:
+                payload = {
+                    "file": self._currentFile.getFilename(),
+                    "filename": os.path.basename(self._currentFile.getFilename()),
+                    "origin": self._currentFile.getFileLocation()
+                }
+            eventManager().fire(Events.PRINT_FAILED, payload)
+        eventManager().fire(Events.DISCONNECTED)
+
+    def setTemperatureOffset(self, offsets):
+        self._tempOffsets.update(offsets)
+
+    def fakeOk(self):
+        self._clear_to_send.set()
+    
+    def sendCommand(self, cmd, cmd_type=None, processed=False):
+        cmd = to_unicode(cmd, errors="replace")
+        if not processed:
+            cmd = process_gcode_line(cmd)
+            if not cmd:
+                return
+
+        if self.isPrinting() and not self.isSdFileSelected():
+            self._commandQueue.put((cmd, cmd_type))
+        elif self.isOperational():
+            self._sendCommand(cmd, cmd_type=cmd_type)
+
+    def sendGcodeScript(self, scriptName, replacements=None):
+        context = dict()
+        if replacements is not None and isinstance(replacements, dict):
+            context.update(replacements)
+        context.update(dict(
+            printer_profile=self._printerProfileManager.get_current_or_default()
+        ))
+
+        template = settings().loadScript("gcode", scriptName, context=context)
+        if template is None:
+            scriptLines = []
+        else:
+            scriptLines = filter(
+                lambda x: x is not None and x.strip() != "",
+                map(
+                    lambda x: process_gcode_line(x, offsets=self._tempOffsets, current_tool=self._currentTool),
+                    template.split("\n")
+                )
+            )
+
+        for hook in self._gcodescript_hooks:
+            try:
+                retval = self._gcodescript_hooks[hook](self, "gcode", scriptName)
+            except:
+                self._logger.exception("Error while processing gcodescript hook %s" % hook)
+            else:
+                if retval is None:
+                    continue
+                if not isinstance(retval, (list, tuple)) or not len(retval) == 2:
+                    continue
+
+                def to_list(data):
+                    if isinstance(data, str):
+                        data = map(str.strip, data.split("\n"))
+                    elif isinstance(data, unicode):
+                        data = map(unicode.strip, data.split("\n"))
+
+                    if isinstance(data, (list, tuple)):
+                        return list(data)
+                    else:
+                        return None
+
+                prefix, suffix = map(to_list, retval)
+                if prefix:
+                    scriptLines = list(prefix) + scriptLines
+                if suffix:
+                    scriptLines += list(suffix)
+
+        for line in scriptLines:
+            self.sendCommand(line)
+        return "\n".join(scriptLines)
+
+    def _sendCommand(self, priority, cmd, cmd_type=None):
+        with self._sendingLock:
+            if self._serial is None:
+                return
+
+            gcode = None
+            priority, cmd, cmd_type, gcode = self._process_command_phase("queuing", priority, cmd, cmd_type, gcode=gcode)
+
+            if cmd is None:
+                return
+
+            if gcode and gcode in gcodeToEvent:
+                eventManager().fire(gcodeToEvent[gcode])
+
+            self._enqueue_for_sending(priority, cmd, command_type=cmd_type)
+
+    def _enqueue_for_sending(self, priority, command, linenumber=None, command_type=None):
+        try:
+            self._send_queue.put((priority, command, linenumber, command_type))
+        except TypeAlreadyInQueue as e:
+            self._logger.debug("Type already in queue: " + e.type)
+
+    def _send_loop(self):
+        self._clear_to_send.wait()
+
+        while self._send_queue_active:
+            try:
+                entry = self._send_queue.get()
+
+                if not self._send_queue_active:
+                    break
+
+                priority, command, linenumber, command_type = entry
+
+                gcode = gcode_command_for_cmd(command)
+
+                if linenumber is not None:
+                    self._doSendWithChecksum(command, linenumber)
+
+                else:
+                    command, _, gcode = self._process_command_phase("sending", command, command_type, gcode=gcode)
+
+                    if command is None:
+                        continue
+
+                    command_to_send = command.encode("ascii", errors="replace")
+
+                    
+
+                    if (gcode is not None or self._sendChecksumWithUnknownCommands) and (self.isPrinting() or self._alwaysSendChecksum):
+                        self._doIncrementAndSendWithChecksum(command_to_send)
+                    else:
+                        self._doSendWithoutChecksum(command_to_send)
+
+                self._process_command_phase("sent", command, command_type, can=can)
+
+                use_up_clear = self._unknownCommandsNeedAck
+                if can is not None:
+                    use_up_clear = True
+
+                if use_up_clear:
+                    self._clear_to_send.clear()
+
+                self._clear_to_send.wait()
+            except:
+                self._logger.exception("Caught an exception in the send loop")
+        self._log("Closing down send loop")
+
+    def _process_command_phase(self, phase, command, command_type=None, can=None):
+        if phase not in ("queueing", "queued", "sending", "sent"):
+            return command, command_type, gcode
+
+        if can is None:
+            can = can_command_for_cmd(command)
+
+        # for name, hook in self._can_hooks[phase].items():
+        #     try:
 
 class MachineCom(object):
     STATE_NONE = 0
