@@ -92,6 +92,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 
 		# comm
 		self._comm = None
+		self._type = os.getenv('BIOBOTS_COMM_TYPE', 'serial')
 
 		# callbacks
 		self._callbacks = []
@@ -206,7 +207,11 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		if self._comm is not None:
 			self._comm.close()
 		self._printerProfileManager.select(profile)
-		self._comm = comm.MachineCom(port, baudrate, callbackObject=self, printerProfileManager=self._printerProfileManager)
+
+		if self._type == 'can':
+			self._comm = comm.CANCom(callbackObject=self, printerProfileManager=self._printerProfileManager)
+		else:
+			self._comm = comm.MachineCom(port, baudrate, callbackObject=self, printerProfileManager=self._printerProfileManager)
 
 	def disconnect(self):
 		"""

@@ -87,6 +87,19 @@ default_settings = {
         "additionalPorts": [],
         "longRunningCommands": ["G4", "G28", "G29", "G30", "G32"]
     },
+    "can": {
+        "interface": "socketcan",
+        "bus": "can0",
+        "autoconnect": True,
+        "log": False,
+        "timeout": {
+            "detection": 0.5,
+            "connection": 10,
+            "communication": 30,
+            "temperature": 5
+        },
+        "longRunningCommands": ["G4", "G28", "G29", "G30", "G32"]
+    },
     "server": {
         "host": "0.0.0.0",
         "port": 80,

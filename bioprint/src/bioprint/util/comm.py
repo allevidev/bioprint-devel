@@ -13,7 +13,9 @@ import threading
 import Queue as queue
 import logging
 import serial
+import can
 import bioprint.plugin
+import bioprint.util.can
 
 from collections import deque
 from flask.ext.login import current_user
@@ -184,6 +186,11 @@ gcodeToEvent = {
     "M80": Events.POWER_ON,
     "M81": Events.POWER_OFF,
 }
+
+gcodeToPriority = {
+    
+}
+
 class CANCom(object):
     STATE_NONE = 0
     STATE_OPEN_CAN = 1
@@ -210,7 +217,7 @@ class CANCom(object):
         self._position = {}
         self._bedTemp = None
         self._tempOffsets = dict()
-        self._commandQueue = queue.Queue()
+        self._commandQueue = queue.PriorityQueue()
         self._currentZ = None
         self._heatupWaitStartTime = None
         self._heatupWaitTimeLost = 0.0
@@ -221,6 +228,41 @@ class CANCom(object):
         self._long_running_command = False
         self._heating = False
         self._connection_closing = False
+
+        self._timeout = None
+
+        self._alwaysSendChecksum = settings().getBoolean(["feature", "alwaysSendChecksum"])
+        self._sendChecksumWithUnknownCommands = settings().getBoolean(["feature", "sendChecksumWithUnknownCommands"])
+        self._unknownCommandsNeedAck = settings().getBoolean(["feature", "unknownCommandsNeedAck"])
+        self._currentLine = 1
+        self._line_mutex = threading.RLock()
+        self._resendDelta = None
+        self._lastLines = deque([], 50)
+        self._lastCommError = None
+        self._lastResendNumber = None
+        self._currentResendCount = 0
+        self._resendSwallowNextOk = False
+        self._resendSwallowRepetitions = settings().getBoolean(["feature", "ignoreIdenticalResends"])
+        self._resendSwallowRepetitionsCounter = 0
+
+        self._clear_to_send = CountedEvent(max=10, name="comm.clear_to_send")
+        self._send_queue = TypedQueue()
+        self._temperature_timer = None
+        self._sd_status_timer = None
+
+        # hooks
+        self._pluginManager = bioprint.plugin.plugin_manager()
+
+        self._gcode_hooks = dict(
+            queuing=self._pluginManager.get_hooks("bioprint.comm.protocol.gcode.queuing"),
+            queued=self._pluginManager.get_hooks("bioprint.comm.protocol.gcode.queued"),
+            sending=self._pluginManager.get_hooks("bioprint.comm.protocol.gcode.sending"),
+            sent=self._pluginManager.get_hooks("bioprint.comm.protocol.gcode.sent")
+        )
+
+        self._printer_action_hooks = self._pluginManager.get_hooks("bioprint.comm.protocol.action")
+        self._gcodescript_hooks = self._pluginManager.get_hooks("bioprint.comm.protocol.scripts")
+        self._serial_factory_hooks = self._pluginManager.get_hooks("bioprint.comm.transport.serial.factory")
 
         self._ignore_select = False
 
@@ -423,8 +465,10 @@ class CANCom(object):
             if not cmd:
                 return
 
+        priority = gcodeToPriority[cmd]
+
         if self.isPrinting() and not self.isSdFileSelected():
-            self._commandQueue.put((cmd, cmd_type))
+            self._commandQueue.put((priority, cmd, cmd_type))
         elif self.isOperational():
             self._sendCommand(cmd, cmd_type=cmd_type)
 
@@ -480,13 +524,52 @@ class CANCom(object):
             self.sendCommand(line)
         return "\n".join(scriptLines)
 
-    def _sendCommand(self, priority, cmd, cmd_type=None):
+    def startPrint(self):
+        if not self.isOperational() or self.isPrinting():
+            return
+
+        if self._currentFile is None:
+            raise ValueError("No file selected for printing")
+
+        self._heatupWaitStartTime = None
+        self._heatupWaitTimeLost = 0.0
+        self._pauseWaitStartTime = 0
+        self._pauseWaitTimeLost = 0.0
+
+        try:
+            self._currentFile.start()
+
+            self._changeState(self.STATE_PRINTING)
+
+            self.sendCommand("M110 N0")
+
+            payload = {
+                "file": self._currentFile.getFilename(),
+                "filename": os.path.basename(self._currentFile.getFilename()),
+                "origin": self._currentFile.getFileLocation()
+            }
+
+            eventManager().fre(Events.PRINT_STARTED, payload)
+            self.sendGcodeScript("beforePrintStarted", replacements=dict(event=payload))
+
+            line = self._getNext()
+            if line is not None:
+                self.sendCommand(line)
+
+            self._sendFromQueue()
+        except:
+            self._logger.exception("Error while trying to start printing")
+            self._errorValue = get_exception_string()
+            self._changeState(self.STATE_ERROR)
+            eventManager().fire(Events.ERROR, {"error": self.getErrorString()})
+
+    def _sendCommand(self, cmd, cmd_type=None):
         with self._sendingLock:
             if self._serial is None:
                 return
 
             gcode = None
-            priority, cmd, cmd_type, gcode = self._process_command_phase("queuing", priority, cmd, cmd_type, gcode=gcode)
+            cmd, cmd_type, gcode = self._process_command_phase("queuing", cmd, cmd_type, gcode=gcode)
 
             if cmd is None:
                 return
@@ -494,10 +577,14 @@ class CANCom(object):
             if gcode and gcode in gcodeToEvent:
                 eventManager().fire(gcodeToEvent[gcode])
 
-            self._enqueue_for_sending(priority, cmd, command_type=cmd_type)
+            self._enqueue_for_sending(cmd, command_type=cmd_type)
 
-    def _enqueue_for_sending(self, priority, command, linenumber=None, command_type=None):
+    def _enqueue_for_sending(self, command, linenumber=None, command_type=None):
         try:
+            if cmd in cmdToPriority:
+                priority = cmdToPriority[cmd]
+            else:
+                priority = 1
             self._send_queue.put((priority, command, linenumber, command_type))
         except TypeAlreadyInQueue as e:
             self._logger.debug("Type already in queue: " + e.type)
@@ -548,15 +635,170 @@ class CANCom(object):
                 self._logger.exception("Caught an exception in the send loop")
         self._log("Closing down send loop")
 
-    def _process_command_phase(self, phase, command, command_type=None, can=None):
+    def _process_command_phase(self, phase, command, command_type=None, gcode=None):
         if phase not in ("queueing", "queued", "sending", "sent"):
             return command, command_type, gcode
 
-        if can is None:
-            can = can_command_for_cmd(command)
+        if gcode is None:
+            gcode = gcode_command_for_cmd(command)
 
-        # for name, hook in self._can_hooks[phase].items():
-        #     try:
+        for name, hook in self._gcode_hooks[phase].items():
+            try:
+                hook_result = hook(self, phase, command, command_type, gcode)
+            except:
+                self._logger.exception("Error while processing hook {name} for phase {phase} and command {command}:".formate(**locals()))
+            else:
+                command, command_type, gcode = self._handle_command_handler_result(command, command_type, gcode, hook_result)
+                if command is None:
+                    return None, None, None
+
+        if gcode is not None:
+            gcodeHandler = "_gcode_" + gcode + "_" + phase
+            if hasattr(self, gcodeHandler):
+                handler_result = getattr(self, gcodeHandler)(command, cmd_type=command_type)
+                command, command_type, gcode = self._handle_command_handler_result(command, command_type, gcode, handler_result)
+
+        commandPhaseHandler = "_command_phase_" + phase
+        if hasattr(self, commandPhaseHandler):
+            handler_result = getattr(self, commandPhaseHandler)(command, cmd_type=command_type, gcode=gcode)
+            command, command_type, gcode = self._handle_command_handler_result(command, command_type, gcode, handler_result)
+
+        return command, command_type, gcode
+
+    def _handle_command_handler_result(self, command, command_type, gcode, handler_result):
+        original_tuple = (command, command_type, gcode)
+
+        if handler_result is None:
+            # handler didn't return anything, we'll just continue
+            return original_tuple
+
+        if isinstance(handler_result, basestring):
+            # handler did return just a string, we'll turn that into a 1-tuple now
+            handler_result = (handler_result,)
+        elif not isinstance(handler_result, (tuple, list)):
+            # handler didn't return an expected result format, we'll just ignore it and continue
+            return original_tuple
+
+        hook_result_length = len(handler_result)
+        if hook_result_length == 1:
+            # handler returned just the command
+            command, = handler_result
+        elif hook_result_length == 2:
+            # handler returned command and command_type
+            command, command_type = handler_result
+        else:
+            # handler returned a tuple of an unexpected length
+            return original_tuple
+
+        gcode = gcode_command_for_cmd(command)
+        return command, command_type, gcode
+
+    ##~~ actual sending via serial
+
+    def _doIncrementAndSendWithChecksum(self, cmd):
+        with self._line_mutex:
+            linenumber = self._currentLine
+            self._addToLastLines(cmd)
+            self._currentLine += 1
+            self._doSendWithChecksum(cmd, linenumber)
+
+    def _doSendWithChecksum(self, cmd, lineNumber):
+        commandToSend = "N%d %s" % (lineNumber, cmd)
+        checksum = reduce(lambda x,y:x^y, map(ord, commandToSend))
+        commandToSend = "%s*%d" % (commandToSend, checksum)
+        # For now we don't want to do anything fancy w/ checksums or lines
+        self._doSendWithoutChecksum(cmd)
+
+    def _doSendWithoutChecksum(self, cmd):
+        if self._can is None:
+            return
+
+        self._log("Send: %s" % cmd)
+        
+        ##### START HERE
+
+
+        try:
+            self._serial.write(cmd + '\n')
+        except serial.SerialTimeoutException:
+            self._log("Serial timeout while writing to serial port, trying again.")
+            try:
+                self._serial.write(cmd + '\n')
+            except:
+                if not self._connection_closing:
+                    self._logger.exception("Unexpected error while writing to serial port")
+                    self._log("Unexpected error while writing to serial port: %s" % (get_exception_string()))
+                    self._errorValue = get_exception_string()
+                    self.close(True)
+        except:
+            if not self._connection_closing:
+                self._logger.exception("Unexpected error while writing to serial port")
+                self._log("Unexpected error while writing to serial port: %s" % (get_exception_string()))
+                self._errorValue = get_exception_string()
+                self.close(True)
+
+    def _onConnected(self):
+        self._timeout = settings().getFloat(["can", "timeout", "communication"])
+        self._temperature_timer = RepeatedTimer(lambda: get_can_interval("temperature", default_value=4.0), self._poll_temperature, run_first=True)
+        self._temperature_timer.start()
+
+        self._changeState(self.STATE_OPERATIONAL)
+
+        eventManager().fire(Events.CONNECTED)
+
+    def _sendFromQueue(self):
+        if not self._commandQueue.empty() and not self.isStreaming():
+            entry = self._commandQueue.get()
+            if isinstance(entry, tuple):
+                if len(entry) == 3:
+                    priority, cmd, cmd_type = entry
+                elif len(entry) == 2:
+                    priority, cmd = entry
+                    cmd_type = None
+                else:
+                    return False
+                self._sendCommand(priority, cmd, cmd_type=cmd_type)
+                return True
+            else:
+                return False
+
+    def _openCAN(self):
+        self._log("Connecting to CAN")
+        
+        self._changeState(self.STATE_OPEN_CAN)
+
+        can.rc['interface'] = settings().get(["can", "interface"])
+        can.rc['channel'] = settings().get(["can", "channel"])
+
+        self._can = can.interface.Bus()
+
+        self._onConnected()
+
+    def _monitor(self):
+        feedback_controls, feedback_matcher = convert_feedback_controls(settings().get(["controls"]))
+        feedback_errors = []
+        pause_triggers = convert_pause_triggers(settings().get(["printerParameters", "pauseTriggers"]))
+
+        disable_external_heatup_detection = not settings().getBoolean(["feature", "externalHeatupDetection"])
+
+        if not self._openCAN():
+            return
+
+        try_hello = not settings().getBoolean(["feature", "waitForStartOnConnect"])
+
+        self._log("Connected to: %x, starting monitor" % self._can.channel_info)
+
+        self._changeState(self.STATE_CONNECTING)
+
+        self._timeout = get_new_can_timeout("communication")
+
+        startSeen = False
+        supportRepetierTargetTemp = settings().getBoolean(["feature", "repetierTargetTemp"])
+        supportWait = settings().getBoolean(["feature", "supportWait"])
+
+        connection_timeout = settings().getFloat(["can", "timeout", "connection"])
+        detection_timeout = settings().getFloat(["can", "timeout", "detection"])
+
 
 class MachineCom(object):
     STATE_NONE = 0
@@ -1251,6 +1493,8 @@ class MachineCom(object):
 
         connection_timeout = settings().getFloat(["serial", "timeout", "connection"])
         detection_timeout = settings().getFloat(["serial", "timeout", "detection"])
+
+        print '\n\n\n\n\n\n\n', try_hello, '\n\n\n\n\n\n\n'
 
         # enqueue an M105 first thing
         if try_hello:
@@ -1979,6 +2223,7 @@ class MachineCom(object):
 
                     # now comes the part where we increase line numbers and send stuff - no turning back now
                     command_to_send = command.encode("ascii", errors="replace")
+
                     if (gcode is not None or self._sendChecksumWithUnknownCommands) and (self.isPrinting() or self._alwaysSendChecksum):
                         self._doIncrementAndSendWithChecksum(command_to_send)
                     else:
@@ -2079,6 +2324,7 @@ class MachineCom(object):
         commandToSend = "N%d %s" % (lineNumber, cmd)
         checksum = reduce(lambda x,y:x^y, map(ord, commandToSend))
         commandToSend = "%s*%d" % (commandToSend, checksum)
+        print '\n checksum command: ', commandToSend
         self._doSendWithoutChecksum(commandToSend)
 
     def _doSendWithoutChecksum(self, cmd):
@@ -2086,6 +2332,7 @@ class MachineCom(object):
             return
 
         self._log("Send: %s" % cmd)
+        print '\n command: ', cmd 
         try:
             self._serial.write(cmd + '\n')
         except serial.SerialTimeoutException:
@@ -2482,6 +2729,9 @@ def get_new_timeout(type):
     now = time.time()
     return now + get_interval(type)
 
+def get_new_can_timeout(type):
+    now = time.time()
+    return now + get_can_interval(type)
 
 def get_interval(type, default_value=0.0):
     if type not in default_settings["serial"]["timeout"]:
@@ -2492,6 +2742,16 @@ def get_interval(type, default_value=0.0):
             return default_value
         else:
             return value
+
+def get_can_interval(type, default_value=0.0):
+    if type not in default_settings["can"]["timeout"]:
+        return default_value
+    else:
+        value = settings().getFloat(["can", "timeout", type])
+        if not value:
+            return default_value
+        else:
+            return value    
 
 _temp_command_regex = re.compile("^M(?P<command>104|109|140|190)(\s+T(?P<tool>\d+)|\s+S(?P<temperature>[-+]?\d*\.?\d*))+")
 
