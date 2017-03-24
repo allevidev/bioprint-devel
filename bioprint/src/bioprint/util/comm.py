@@ -571,7 +571,6 @@ class CANCom(object):
 
     def _sendCommand(self, cmd, cmd_type=None):
         with self._sendingLock:
-            print "entering here..."
             if self._can is None:
                 return
 
@@ -593,8 +592,6 @@ class CANCom(object):
                 priority = gcodeToPriority[command]
             else:
                 priority = 1
-
-            print "Enqueing", command
             self._send_queue.put((command, linenumber, command_type))
         except TypeAlreadyInQueue as e:
             self._logger.debug("Type already in queue: " + e.type)
@@ -602,7 +599,6 @@ class CANCom(object):
     def _send_loop(self):
         self._log("Opening send loop")
         self._clear_to_send.wait()
-        print self._send_queue_active
         while self._send_queue_active:
 
             try:
@@ -628,13 +624,9 @@ class CANCom(object):
 
                     command_to_send = command.encode("ascii", errors="replace")
 
-                    print '\n\n\n\n', command_to_send, "aaa", '\n\n\n\n'
-
                     if (gcode is not None or self._sendChecksumWithUnknownCommands) and (self.isPrinting() or self._alwaysSendChecksum):
-                        print "Sending from here?"
                         self._doIncrementAndSendWithChecksum(command_to_send)
                     else:
-                        print "SENDING FROM HERE RIGHT?"
                         self._doSendWithoutChecksum(command_to_send)
 
                 self._process_command_phase("sent", command, command_type, can=can)
@@ -728,6 +720,7 @@ class CANCom(object):
     def sendCanMessage(self, msg):
         try:
             self._can.send(msg)
+            self._log("Send: %s" % msg.data)
             print "Mesage sent on", bus.channel_info
         except can.CanError:
             print "Message NOT sent"
@@ -737,9 +730,6 @@ class CANCom(object):
         if self._can is None:
             return
 
-        self._log("Send: %s" % cmd)
-        
-        ##### START HERE
         msgs = can_command_for_cmd(cmd)
 
         map(sendCanMessage, msgs)        
@@ -757,7 +747,6 @@ class CANCom(object):
     def _sendFromQueue(self):
         if not self._commandQueue.empty() and not self.isStreaming():
             entry = self._commandQueue.get()
-            print entry
             if isinstance(entry, tuple):
                 if len(entry) == 3:
                     priority, cmd, cmd_type = entry
@@ -815,7 +804,6 @@ class CANCom(object):
         #self._onConnected()
 
         while self._monitoring_active:
-            print "Monitoring"
             self._clear_to_send.set()
             if self._state == self.STATE_CONNECTING:
                 self._clear_to_send.set()
