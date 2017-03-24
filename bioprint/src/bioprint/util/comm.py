@@ -351,7 +351,7 @@ class CANCom(object):
         return self._state == self.STATE_ERROR or self._state == self.STATE_CLOSED_WITH_ERROR
 
     def isOperational(self):
-        return self._state == self.STATE_OPERATIONAL or self._state == self.STATE_PRINTING or self._state == self.STATE_PAUSED or self._state == self.STATE_TRANSFERING_FILE
+        return self._state == self.STATE_OPERATIONAL or self._state == self.STATE_PRINTING or self._state == self.STATE_PAUSED
 
     def isPrinting(self):
         return self._state == self.STATE_PRINTING
@@ -459,6 +459,7 @@ class CANCom(object):
         self._clear_to_send.set()
     
     def sendCommand(self, cmd, cmd_type=None, processed=False):
+        
         cmd = to_unicode(cmd, errors="replace")
 
         print '\n\n\n\n\n\n', cmd, '\n\n\n\n\n'
@@ -570,18 +571,20 @@ class CANCom(object):
 
     def _sendCommand(self, cmd, cmd_type=None):
         with self._sendingLock:
+            print "entering here..."
             if self._can is None:
                 return
 
             gcode = None
             cmd, cmd_type, gcode = self._process_command_phase("queuing", cmd, cmd_type, gcode=gcode)
 
+            print cmd, cmd_type, gcode
+
             if cmd is None:
                 return
 
             if gcode and gcode in gcodeToEvent:
                 eventManager().fire(gcodeToEvent[gcode])
-
             self._enqueue_for_sending(cmd, command_type=cmd_type)
 
     def _enqueue_for_sending(self, command, linenumber=None, command_type=None):
@@ -590,21 +593,27 @@ class CANCom(object):
                 priority = gcodeToPriority[command]
             else:
                 priority = 1
-            self._send_queue.put((priority, command, linenumber, command_type))
+
+            print "Enqueing", command
+            self._send_queue.put((command, linenumber, command_type))
         except TypeAlreadyInQueue as e:
             self._logger.debug("Type already in queue: " + e.type)
 
     def _send_loop(self):
+        self._log("Opening send loop")
         self._clear_to_send.wait()
-
+        print self._send_queue_active
         while self._send_queue_active:
+
             try:
                 entry = self._send_queue.get()
+
+                print entry
 
                 if not self._send_queue_active:
                     break
 
-                priority, command, linenumber, command_type = entry
+                command, linenumber, command_type = entry
 
                 gcode = gcode_command_for_cmd(command)
 
@@ -619,11 +628,13 @@ class CANCom(object):
 
                     command_to_send = command.encode("ascii", errors="replace")
 
-                    print '\n\n\n\n', command_to_send, '\n\n\n\n'
+                    print '\n\n\n\n', command_to_send, "aaa", '\n\n\n\n'
 
                     if (gcode is not None or self._sendChecksumWithUnknownCommands) and (self.isPrinting() or self._alwaysSendChecksum):
+                        print "Sending from here?"
                         self._doIncrementAndSendWithChecksum(command_to_send)
                     else:
+                        print "SENDING FROM HERE RIGHT?"
                         self._doSendWithoutChecksum(command_to_send)
 
                 self._process_command_phase("sent", command, command_type, can=can)
@@ -746,6 +757,7 @@ class CANCom(object):
     def _sendFromQueue(self):
         if not self._commandQueue.empty() and not self.isStreaming():
             entry = self._commandQueue.get()
+            print entry
             if isinstance(entry, tuple):
                 if len(entry) == 3:
                     priority, cmd, cmd_type = entry
@@ -768,8 +780,9 @@ class CANCom(object):
         can.rc['channel'] = settings().get(["can", "channel"])
 
         self._can = can.interface.Bus()
-
+        self._clear_to_send.clear()
         self._onConnected()
+        return True
 
     def _monitor(self):
         feedback_controls, feedback_matcher = convert_feedback_controls(settings().get(["controls"]))
@@ -779,11 +792,14 @@ class CANCom(object):
         disable_external_heatup_detection = not settings().getBoolean(["feature", "externalHeatupDetection"])
 
         if not self._openCAN():
+            print 'here'
             return
 
         try_hello = not settings().getBoolean(["feature", "waitForStartOnConnect"])
 
-        self._log("Connected to: %x, starting monitor" % self._can.channel_info)
+        self._clear_to_send.set()
+
+        self._log("Connected to: %s, starting monitor" % self._can.channel_info)
 
         self._changeState(self.STATE_CONNECTING)
 
@@ -796,6 +812,20 @@ class CANCom(object):
         connection_timeout = settings().getFloat(["can", "timeout", "connection"])
         detection_timeout = settings().getFloat(["can", "timeout", "detection"])
 
+        #self._onConnected()
+
+        while self._monitoring_active:
+            print "Monitoring"
+            self._clear_to_send.set()
+            if self._state == self.STATE_CONNECTING:
+                self._clear_to_send.set()
+                self._onConnected()
+            elif self._state == self.STATE_OPERATIONAL or self._state == self.STATE_PAUSED:    
+                self._clear_to_send.set()
+                if self._resendSwallowNextOk:
+                    self._resendSwallowNextOk = False
+                elif self._sendFromQueue():
+                    pass
 
 class MachineCom(object):
     STATE_NONE = 0
