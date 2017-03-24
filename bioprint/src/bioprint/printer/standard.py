@@ -209,6 +209,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		self._printerProfileManager.select(profile)
 
 		if self._type == 'can':
+			print 'Using CAN Communication'
 			self._comm = comm.CANCom(callbackObject=self, printerProfileManager=self._printerProfileManager)
 		else:
 			self._comm = comm.MachineCom(port, baudrate, callbackObject=self, printerProfileManager=self._printerProfileManager)

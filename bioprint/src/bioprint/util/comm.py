@@ -28,7 +28,7 @@ from bioprint.settings import settings, default_settings
 from bioprint.events import eventManager, Events
 from bioprint.filemanager import valid_file_type
 from bioprint.filemanager.destinations import FileDestinations
-from bioprint.util import get_exception_string, sanitize_ascii, filter_non_ascii, CountedEvent, RepeatedTimer, to_unicode, bom_aware_open
+from bioprint.util import get_exception_string, sanitize_ascii, filter_non_ascii, CountedEvent, RepeatedTimer, to_unicode, bom_aware_open, gcodeInterpreter
 
 try:
     import _winreg
@@ -614,8 +614,6 @@ class CANCom(object):
 
                     command_to_send = command.encode("ascii", errors="replace")
 
-                    
-
                     if (gcode is not None or self._sendChecksumWithUnknownCommands) and (self.isPrinting() or self._alwaysSendChecksum):
                         self._doIncrementAndSendWithChecksum(command_to_send)
                     else:
@@ -716,7 +714,7 @@ class CANCom(object):
         self._log("Send: %s" % cmd)
         
         ##### START HERE
-
+        can = can_command_for_cmd(cmd)
 
         try:
             self._serial.write(cmd + '\n')

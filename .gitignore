@@ -24,3 +24,4 @@ venv
 *.codekit
 bioprint/cxdist
 bioprint/biobots
+bioprint/env
