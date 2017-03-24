@@ -203,7 +203,7 @@ class CANCom(object):
     STATE_CLOSED_WITH_ERROR = 10
     
     def __init__(self, device = "can0", callbackObject=None, printerProfileManager=None):
-        self._logger = logging.getLogger(_name_)
+        self._logger = logging.getLogger(__name__)
         self._canLogger = logging.getLogger("CAN")
         if callbackObject == None:
             callbackObject = CANComPrintCallback()
@@ -707,6 +707,14 @@ class CANCom(object):
         # For now we don't want to do anything fancy w/ checksums or lines
         self._doSendWithoutChecksum(cmd)
 
+    def sendCanMessage(self, msg):
+        try:
+            self._can.send(msg)
+            print "Mesage sent on", bus.channel_info
+        except can.CanError:
+            print "Message NOT sent"
+
+
     def _doSendWithoutChecksum(self, cmd):
         if self._can is None:
             return
@@ -714,7 +722,9 @@ class CANCom(object):
         self._log("Send: %s" % cmd)
         
         ##### START HERE
-        can = can_command_for_cmd(cmd)
+        msgs = can_command_for_cmd(cmd)
+
+        
 
         try:
             self._serial.write(cmd + '\n')
@@ -737,8 +747,8 @@ class CANCom(object):
 
     def _onConnected(self):
         self._timeout = settings().getFloat(["can", "timeout", "communication"])
-        self._temperature_timer = RepeatedTimer(lambda: get_can_interval("temperature", default_value=4.0), self._poll_temperature, run_first=True)
-        self._temperature_timer.start()
+       # self._temperature_timer = RepeatedTimer(lambda: get_can_interval("temperature", default_value=4.0), self._poll_temperature, run_first=True)
+        #self._temperature_timer.start()
 
         self._changeState(self.STATE_OPERATIONAL)
 
@@ -2965,16 +2975,6 @@ def canonicalize_temperatures(parsed, current):
         #     T1:<T1>
 
         result[current_tool_key] = result["T"]
-        del result["T"]
-
-    return result
-
-def parse_temperature_line(line, current):
-    """
-    Parses the provided temperature line.
-
-    The result will be a dictionary mapping from the extruder or bed key to
-    a tuple with current and target temperature. The result will be canonicalized
     with :func:`canonicalize_temperatures` before returning.
 
     Arguments:
@@ -3057,3 +3057,46 @@ def gcode_command_for_cmd(cmd):
         # this should never happen
         return None
 
+def can_command_for_cmd(cmd):
+    if not cmd:
+        return None
+    
+    G = gcodeInterpreter.getCodeInt(cmd, 'G')
+    M = gcodeInterpreter.getCodeInt(cmd, 'M')
+    T = gcodeInterpreter.getCodeInt(cmd, 'T')
+
+    msgs = []
+
+    if G is not None:
+        if G == 0 or G == 1:
+            x = getCodeFloat(cmd, 'X')
+            y = getCodeFloat(cmd, 'Y')
+            z = getCodeFloat(cmd, 'Z')
+            e = getCodeFloat(cmd, 'E')
+            f = getCodeFloat(cmd, 'F')
+
+    if M is not None:
+        if M == 42:
+            node_id = 0x000
+
+            p = getCodeInt(cmd, 'P')
+            s = getCodeInt(cmd, 'S')
+            
+            data = [0x00,0x00,0x00]
+
+            if p == 16:
+                data[1] = 0x00
+            elif p == 17:
+                data[1] = 0x01
+            elif p == 18:
+                data[1] = 0x02
+
+            if s == 0:
+                data[2] = 0x01
+            elif s > 0:
+                data[2] = 0x00
+
+            msg = can.Message(arbitration_id=node_id, data=data)
+            msgs.append(msg)
+
+    return msgs
