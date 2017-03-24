@@ -407,10 +407,10 @@ class CANCom(object):
         return self._currentTool
 
     def getConnection(self):
-        return self._port, self._baudrate
+        return self._can
 
     def getTransport(self):
-        return self._serial
+        return self._can
 
     def close():
         if self._connection_closing:
@@ -465,7 +465,10 @@ class CANCom(object):
             if not cmd:
                 return
 
-        priority = gcodeToPriority[cmd]
+        if cmd in gcodeToPriority:
+            priority = gcodeToPriority[cmd]
+        else:
+            priority = 1
 
         if self.isPrinting() and not self.isSdFileSelected():
             self._commandQueue.put((priority, cmd, cmd_type))
@@ -565,7 +568,7 @@ class CANCom(object):
 
     def _sendCommand(self, cmd, cmd_type=None):
         with self._sendingLock:
-            if self._serial is None:
+            if self._can is None:
                 return
 
             gcode = None
@@ -581,8 +584,8 @@ class CANCom(object):
 
     def _enqueue_for_sending(self, command, linenumber=None, command_type=None):
         try:
-            if cmd in cmdToPriority:
-                priority = cmdToPriority[cmd]
+            if command in gcodeToPriority:
+                priority = gcodeToPriority[command]
             else:
                 priority = 1
             self._send_queue.put((priority, command, linenumber, command_type))
@@ -613,6 +616,8 @@ class CANCom(object):
                         continue
 
                     command_to_send = command.encode("ascii", errors="replace")
+
+                    print '\n\n\n\n', command_to_send, '\n\n\n\n'
 
                     if (gcode is not None or self._sendChecksumWithUnknownCommands) and (self.isPrinting() or self._alwaysSendChecksum):
                         self._doIncrementAndSendWithChecksum(command_to_send)
@@ -724,26 +729,8 @@ class CANCom(object):
         ##### START HERE
         msgs = can_command_for_cmd(cmd)
 
-        
+        map(sendCanMessage, msgs)        
 
-        try:
-            self._serial.write(cmd + '\n')
-        except serial.SerialTimeoutException:
-            self._log("Serial timeout while writing to serial port, trying again.")
-            try:
-                self._serial.write(cmd + '\n')
-            except:
-                if not self._connection_closing:
-                    self._logger.exception("Unexpected error while writing to serial port")
-                    self._log("Unexpected error while writing to serial port: %s" % (get_exception_string()))
-                    self._errorValue = get_exception_string()
-                    self.close(True)
-        except:
-            if not self._connection_closing:
-                self._logger.exception("Unexpected error while writing to serial port")
-                self._log("Unexpected error while writing to serial port: %s" % (get_exception_string()))
-                self._errorValue = get_exception_string()
-                self.close(True)
 
     def _onConnected(self):
         self._timeout = settings().getFloat(["can", "timeout", "communication"])
@@ -2975,6 +2962,16 @@ def canonicalize_temperatures(parsed, current):
         #     T1:<T1>
 
         result[current_tool_key] = result["T"]
+        del result["T"]
+
+    return result
+
+def parse_temperature_line(line, current):
+    """
+    Parses the provided temperature line.
+
+    The result will be a dictionary mapping from the extruder or bed key to
+    a tuple with current and target temperature. The result will be canonicalized
     with :func:`canonicalize_temperatures` before returning.
 
     Arguments:
