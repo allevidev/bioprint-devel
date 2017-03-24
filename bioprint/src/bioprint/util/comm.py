@@ -461,8 +461,6 @@ class CANCom(object):
     def sendCommand(self, cmd, cmd_type=None, processed=False):
         
         cmd = to_unicode(cmd, errors="replace")
-
-        print '\n\n\n\n\n\n', cmd, '\n\n\n\n\n'
         if not processed:
             cmd = process_gcode_line(cmd)
             if not cmd:
@@ -577,8 +575,6 @@ class CANCom(object):
             gcode = None
             cmd, cmd_type, gcode = self._process_command_phase("queuing", cmd, cmd_type, gcode=gcode)
 
-            print cmd, cmd_type, gcode
-
             if cmd is None:
                 return
 
@@ -603,8 +599,6 @@ class CANCom(object):
 
             try:
                 entry = self._send_queue.get()
-
-                print entry
 
                 if not self._send_queue_active:
                     break
@@ -781,7 +775,6 @@ class CANCom(object):
         disable_external_heatup_detection = not settings().getBoolean(["feature", "externalHeatupDetection"])
 
         if not self._openCAN():
-            print 'here'
             return
 
         try_hello = not settings().getBoolean(["feature", "waitForStartOnConnect"])
@@ -1508,8 +1501,6 @@ class MachineCom(object):
 
         connection_timeout = settings().getFloat(["serial", "timeout", "connection"])
         detection_timeout = settings().getFloat(["serial", "timeout", "detection"])
-
-        print '\n\n\n\n\n\n\n', try_hello, '\n\n\n\n\n\n\n'
 
         # enqueue an M105 first thing
         if try_hello:
@@ -2339,7 +2330,6 @@ class MachineCom(object):
         commandToSend = "N%d %s" % (lineNumber, cmd)
         checksum = reduce(lambda x,y:x^y, map(ord, commandToSend))
         commandToSend = "%s*%d" % (commandToSend, checksum)
-        print '\n checksum command: ', commandToSend
         self._doSendWithoutChecksum(commandToSend)
 
     def _doSendWithoutChecksum(self, cmd):
@@ -2347,7 +2337,7 @@ class MachineCom(object):
             return
 
         self._log("Send: %s" % cmd)
-        print '\n command: ', cmd 
+
         try:
             self._serial.write(cmd + '\n')
         except serial.SerialTimeoutException:
