@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import sys
 from bioprint.daemon import Daemon
 from bioprint.server import Server
@@ -59,6 +60,8 @@ def main():
 						help="Allow bioprint to run as user root")
 
 	args = parser.parse_args()
+
+	print os.getenv('BIOBOTS_COMM_TYPE')
 
 	if args.version:
 		print "bioprint version %s" % __version__
