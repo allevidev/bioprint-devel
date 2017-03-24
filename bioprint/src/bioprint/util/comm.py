@@ -460,6 +460,8 @@ class CANCom(object):
     
     def sendCommand(self, cmd, cmd_type=None, processed=False):
         cmd = to_unicode(cmd, errors="replace")
+
+        print '\n\n\n\n\n\n', cmd, '\n\n\n\n\n'
         if not processed:
             cmd = process_gcode_line(cmd)
             if not cmd:
