@@ -416,7 +416,7 @@ class CANCom(object):
     def getTransport(self):
         return self._can
 
-    def close():
+    def close(self, isError = False):
         if self._connection_closing:
             return
         self._connection_closing = True
@@ -729,8 +729,8 @@ class CANCom(object):
             return
 
         msgs = can_command_for_cmd(cmd)
-
-        map(sendCanMessage, msgs)        
+        print '\n\n\n\n', msgs
+        map(self.sendCanMessage, msgs)        
 
 
     def _onConnected(self):
@@ -3074,7 +3074,7 @@ def gcode_command_for_cmd(cmd):
 def can_command_for_cmd(cmd):
     if not cmd:
         return None
-    
+
     G = gcodeInterpreter.getCodeInt(cmd, 'G')
     M = gcodeInterpreter.getCodeInt(cmd, 'M')
     T = gcodeInterpreter.getCodeInt(cmd, 'T')
@@ -3083,19 +3083,20 @@ def can_command_for_cmd(cmd):
 
     if G is not None:
         if G == 0 or G == 1:
-            x = getCodeFloat(cmd, 'X')
-            y = getCodeFloat(cmd, 'Y')
-            z = getCodeFloat(cmd, 'Z')
-            e = getCodeFloat(cmd, 'E')
-            f = getCodeFloat(cmd, 'F')
+            x = gcodeInterpreter.getCodeFloat(cmd, 'X')
+            y = gcodeInterpreter.getCodeFloat(cmd, 'Y')
+            z = gcodeInterpreter.getCodeFloat(cmd, 'Z')
+            e = gcodeInterpreter.getCodeFloat(cmd, 'E')
+            f = gcodeInterpreter.getCodeFloat(cmd, 'F')
 
     if M is not None:
         if M == 42:
             node_id = 0x000
 
-            p = getCodeInt(cmd, 'P')
-            s = getCodeInt(cmd, 'S')
+            p = gcodeInterpreter.getCodeInt(cmd, 'P')
+            s = gcodeInterpreter.getCodeInt(cmd, 'S')
             
+
             data = [0x00,0x00,0x00]
 
             if p == 16:
@@ -3110,7 +3111,8 @@ def can_command_for_cmd(cmd):
             elif s > 0:
                 data[2] = 0x00
 
-            msg = can.Message(arbitration_id=node_id, data=data)
+            msg = can.Message(arbitration_id=node_id, data=data, extended_id=False)
+            
             msgs.append(msg)
-
     return msgs
+

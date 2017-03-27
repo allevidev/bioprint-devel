@@ -515,9 +515,9 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 			printer_profile = self._printerProfileManager.get_current_or_default()
 			return self._comm.getStateString(), port, baudrate, printer_profile
 		else:
-			channel, baudrate = self._comm.getConnection()
+			interface, channel = self._comm.getConnection()
 			printer_profile = self._printerProfileManager.get_current_or_default()
-			return self._comm.getStateString(), port, baudrate, printer_profile
+			return self._comm.getStateString(), interface, channel, printer_profile
 
 	def is_closed_or_error(self):
 		return self._comm is None or self._comm.isClosedOrError()
