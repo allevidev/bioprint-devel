@@ -510,9 +510,14 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		if self._comm is None:
 			return "Closed", None, None, None
 
-		port, baudrate = self._comm.getConnection()
-		printer_profile = self._printerProfileManager.get_current_or_default()
-		return self._comm.getStateString(), port, baudrate, printer_profile
+		if self._type is 'serial':
+			port, baudrate = self._comm.getConnection()
+			printer_profile = self._printerProfileManager.get_current_or_default()
+			return self._comm.getStateString(), port, baudrate, printer_profile
+		else:
+			channel, baudrate = self._comm.getConnection()
+			printer_profile = self._printerProfileManager.get_current_or_default()
+			return self._comm.getStateString(), port, baudrate, printer_profile
 
 	def is_closed_or_error(self):
 		return self._comm is None or self._comm.isClosedOrError()

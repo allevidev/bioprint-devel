@@ -359,6 +359,9 @@ class CANCom(object):
     def isStreaming(self):
         return self._currentFile is not None and isinstance(self._currentFile, StreamingGcodeFileInformation)
 
+    def isSdReady(self):
+        return self._sdAvailable
+
     def isPaused(self):
         return self._state == self.STATE_PAUSED
 
@@ -407,7 +410,7 @@ class CANCom(object):
         return self._currentTool
 
     def getConnection(self):
-        return self._can
+        return can.rc['interface'], can.rc['channel']
 
     def getTransport(self):
         return self._can
@@ -433,7 +436,7 @@ class CANCom(object):
                 # TODO: Should we close the CAN connection here? What's the proper state to leave the can bus in>
                 self._can.shutdown()
             except:
-                self._logger.exception("Error while trying to close th CAN bus")
+                self._logger.exception("Error while trying to close the CAN bus")
                 isError = True
             if isError:
                 self._changeState(self.STATE_CLOSED_WITH_ERROR)
