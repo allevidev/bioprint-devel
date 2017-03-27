@@ -89,7 +89,7 @@ default_settings = {
     },
     "can": {
         "interface": "socketcan",
-        "bus": "can0",
+        "channel": "can0",
         "autoconnect": True,
         "log": False,
         "timeout": {

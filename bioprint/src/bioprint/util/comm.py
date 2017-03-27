@@ -249,6 +249,7 @@ class CANCom(object):
         self._send_queue = TypedQueue()
         self._temperature_timer = None
         self._sd_status_timer = None
+        self._sdAvailable = False
 
         # hooks
         self._pluginManager = bioprint.plugin.plugin_manager()
@@ -761,6 +762,9 @@ class CANCom(object):
         self._log("Connecting to CAN")
         
         self._changeState(self.STATE_OPEN_CAN)
+
+        print '\n\n\n\n\n\n\n\n\n\n', settings().get(['can', 'channel'])
+
 
         can.rc['interface'] = settings().get(["can", "interface"])
         can.rc['channel'] = settings().get(["can", "channel"])
