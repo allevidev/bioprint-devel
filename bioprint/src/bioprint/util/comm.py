@@ -3071,6 +3071,9 @@ def gcode_command_for_cmd(cmd):
         # this should never happen
         return None
 
+def convert_feedrate(feedrate):
+    return int((feedrate / 120.00) * 1000)
+
 def can_command_for_cmd(cmd):
     if not cmd:
         return None
@@ -3088,6 +3091,13 @@ def can_command_for_cmd(cmd):
             z = gcodeInterpreter.getCodeFloat(cmd, 'Z')
             e = gcodeInterpreter.getCodeFloat(cmd, 'E')
             f = gcodeInterpreter.getCodeFloat(cmd, 'F')
+
+            if x is not None:
+                node_id = 0x001
+
+                if f is not None:
+                    speed = (f / 120.00) * 1000
+                    data = [0x02]
 
     if M is not None:
         if M == 42:
