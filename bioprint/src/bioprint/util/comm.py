@@ -725,7 +725,7 @@ class CANCom(object):
         try:
             self._can.send(msg)
             self._log("Send: ID: %s Data: %s" % ( msg.arbitration_id, binascii.hexlify(msg.data) ))
-            print "Mesage sent on", bus.channel_info
+            print "Mesage sent on", self._can.channel_info
         except can.CanError:
             print "Message NOT sent"
 
@@ -735,7 +735,7 @@ class CANCom(object):
             return
 
         msgs, relativePos, currentTool = can_command_for_cmd(cmd, relative_pos=self._relativePos, current_tool=self._currentTool)
-        
+       
         map(self.sendCanMessage, msgs)
 
         self._relativePos = relativePos
@@ -3078,11 +3078,11 @@ def gcode_command_for_cmd(cmd):
         return None
 
 def feedrate_to_data(feedrate):
-    hexitr = iter('{0:08x}'.format(int((feedrate / 120.00) * 1000 & 0xffffffff)))
+    hexitr = iter('{0:08x}'.format(int((feedrate / 120.00) * 1000) & 0xffffffff))
     return [int(i + next(hexitr), 16) for i in hexitr]
 
 def pos_to_data(pos):
-    hexitr = iter('{0:08x}'.format(int(pos * 1000 & 0xffffffff)))
+    hexitr = iter('{0:08x}'.format(int(pos * 1000) & 0xffffffff))
     return [int(i + next(hexitr), 16) for i in hexitr]
 
 def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
@@ -3096,14 +3096,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
     turret_node_id = 0x04
 
     # Extruder Node IDs
-    extruder_node_ids = {
-        "A": 0x05,
-        "B": 0x06,
-        "C": 0x07,
-        "D": 0x08,
-        "E": 0x09,
-        "F": 0x0A
-    }
+    extruder_node_ids = [ 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A ]
 
     G = gcodeInterpreter.getCodeInt(cmd, 'G')
     M = gcodeInterpreter.getCodeInt(cmd, 'M')
@@ -3130,7 +3123,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
 
             if f is not None:
                 feedrate_data = [0x02]
-                feedrate_data.append(feedrate_to_data(f))
+                feedrate_data.extend(feedrate_to_data(f))
                 if x is not None:
                     x_feedrate_msg = can.Message(arbitration_id=x_axis_node_id, data=feedrate_data, extended_id=False)
                     msgs.append(x_feedrate_msg)
@@ -3146,7 +3139,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
                     x_pos_data = [ 0x01 ]
                 else:
                     x_pos_data = [ 0x03 ]
-                x_pos_data.append(pos_to_data(x))
+                x_pos_data.extend(pos_to_data(x))
                 x_pos_msg = can.Message(arbitration_id=x_axis_node_id, data=x_pos_data, extended_id=False)
                 msgs.append(x_pos_msg)
 
@@ -3155,7 +3148,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
                     y_pos_data = [ 0x01 ]
                 else:
                     y_pos_data = [ 0x03 ]
-                y_pos_data.append(pos_to_data(y))
+                y_pos_data.extend(pos_to_data(y))
                 y_pos_msg = can.Message(arbitration_id=y_axis_node_id, data=y_pos_data, extended_id=False)
                 msgs.append(y_pos_msg)
 
@@ -3164,7 +3157,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
                     z_pos_data = [ 0x01 ]
                 else:
                     z_pos_data = [ 0x03 ]
-                z_pos_data.append(pos_to_data(z))
+                z_pos_data.extend(pos_to_data(z))
                 z_pos_msg = can.Message(arbitration_id=z_axis_node_id, data=z_pos_data, extended_id=False)
                 msgs.append(z_pos_msg)
 
