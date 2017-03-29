@@ -3223,21 +3223,21 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
             s = gcodeInterpreter.getCodeInt(cmd, 'S')
             
 
-            data = [0x00,0x00,0x00]
+            extrude_data = [0x00,0x00,0x00]
 
             if p == 16:
-                data[1] = 0x00
+                extrude_data[1] = 0x00
             elif p == 17:
-                data[1] = 0x01
+                extrude_data[1] = 0x01
             elif p == 18:
-                data[1] = 0x02
+                extrude_data[1] = 0x02
 
             if s == 0:
-                data[2] = 0x01
+                extrude_data[2] = 0x01
             elif s > 0:
-                data[2] = 0x00
+                extrude_data[2] = 0x00
 
-            extrude_msg = can.Message(arbitration_id=node_id, data=data, extended_id=False)
+            extrude_msg = can.Message(arbitration_id=node_id, data=extrude_data, extended_id=False)
             
             msgs.append(extrude_msg)
 
