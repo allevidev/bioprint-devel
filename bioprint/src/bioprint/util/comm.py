@@ -225,6 +225,7 @@ class CANCom(object):
         self._pauseWaitStartTime = None
         self._pauseWaitTimeLost = 0.0
         self._currentTool = 0
+        self._relativePos = False
 
         self._long_running_command = False
         self._heating = False
@@ -410,6 +411,9 @@ class CANCom(object):
 
     def getCurrentTool(self):
         return self._currentTool
+
+    def getRelativePos(self):
+        return self._relativePos
 
     def getConnection(self):
         return can.rc['interface'], can.rc['channel']
@@ -719,7 +723,7 @@ class CANCom(object):
     def sendCanMessage(self, msg):
         try:
             self._can.send(msg)
-            self._log("Send: %s" % msg.data)
+            self._log("Send: %s" % str(msg.data))
             print "Mesage sent on", bus.channel_info
         except can.CanError:
             print "Message NOT sent"
@@ -729,9 +733,12 @@ class CANCom(object):
         if self._can is None:
             return
 
-        msgs = can_command_for_cmd(cmd)
-        print '\n\n\n\n', msgs
-        map(self.sendCanMessage, msgs)        
+        msgs, relativePos, currentTool = can_command_for_cmd(cmd, relative_pos=self._relativePos, current_tool=self._currentTool)
+        
+        map(self.sendCanMessage, msgs)
+
+        self._relativePos = relativePos
+        self._currentTool = currentTool
 
 
     def _onConnected(self):
@@ -763,9 +770,6 @@ class CANCom(object):
         self._log("Connecting to CAN")
         
         self._changeState(self.STATE_OPEN_CAN)
-
-        print '\n\n\n\n\n\n\n\n\n\n', settings().get(['can', 'channel'])
-
 
         can.rc['interface'] = settings().get(["can", "interface"])
         can.rc['channel'] = settings().get(["can", "channel"])
@@ -3072,14 +3076,12 @@ def gcode_command_for_cmd(cmd):
         # this should never happen
         return None
 
-def feedrate_to_bytearray(feedrate):
-    return bytearray(struct.pack(">H", int(feedrate / 120.00) * 1000))
+def feedrate_to_data(feedrate):
+    hexitr = iter('{0:08x}'.format(int((feedrate / 120.00) * 1000 & 0xffffffff)))
+    return [int(i + next(hexitr), 16) for i in hexitr]
 
-def abs_pos_to_bytearray(pos):
-    return bytearray(struct.pack(">I", int(pos * 1000)))
-
-def rel_pos_to_data(pos):
-    hexitr = iter(("%#4x" % (int(pos * 1000) & 0xffffffff))[-8:])
+def pos_to_data(pos):
+    hexitr = iter('{0:08x}'.format(int(pos * 1000 & 0xffffffff)))
     return [int(i + next(hexitr), 16) for i in hexitr]
 
 def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
@@ -3151,8 +3153,43 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
 
             if x is not None:
                 x_pos_data = bytearray(5)
-                if relative_pos == True:
+                if relative_pos == False:
+                    x_pos_data[0] = 0x01
+                else:
+                    x_pos_data[0] = 0x03
+                x_pos_data[1:5] = pos_to_data(x)
+                x_pos_msg = can.Message(arbitration_id=x_axis_node_id, data=x_pos_data, extended_id=False)
+                msgs.append(x_pos_msg)
 
+            if y is not None:
+                y_pos_data = bytearray(5)
+                if relative_pos == False:
+                    y_pos_data[0] = 0x01
+                else:
+                    y_pos_data[0] = 0x03
+                y_pos_data[1:5] = pos_to_data(y)
+                y_pos_msg = can.Message(arbitration_id=y_axis_node_id, data=y_pos_data, extended_id=False)
+                msgs.append(y_pos_msg)
+
+            if z is not None:
+                z_pos_data = bytearray(5)
+                if relative_pos == False:
+                    z_pos_data[0] = 0x01
+                else:
+                    z_pos_data[0] = 0x03
+                z_pos_data[1:5] = pos_to_data(z)
+                z_pos_msg = can.Message(arbitration_id=z_axis_node_id, data=z_pos_data, extended_id=False)
+                msgs.append(z_pos_msg)
+
+            if e is not None:
+                e_pos_data = bytearray(5)
+                if relative_pos == False:
+                    e_pos_data[0] = 0x01
+                else:
+                    e_pos_data[0] = 0x03
+                e_pos_data[1:5] = pos_to_data(e)
+                e_pos_msg = can.Message(arbitration_id=e_axis_node_id, data=e_pos_data, extended_id=False)
+                msgs.append(e_pos_msg)   
 
         if G == 90:
             relative_pos = False
