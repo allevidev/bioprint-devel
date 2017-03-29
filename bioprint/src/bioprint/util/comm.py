@@ -3111,9 +3111,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
     msgs = []
 
     if T is not None:
-        tool_change_data = bytearray(2)
-        tool_change_data[0] = 0x00
-        tool_change_data[1] = T
+        tool_change_data = [ 0x07, T ]
 
         tool_change_msg = can.Message(arbitration_id=turret_node_id, data=tool_change_data, extended_id=False)
 
@@ -3152,34 +3150,32 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
                 msgs.append(x_pos_msg)
 
             if y is not None:
-                y_pos_data = bytearray(5)
                 if relative_pos == False:
-                    y_pos_data[0] = 0x01
+                    y_pos_data = [ 0x01 ]
                 else:
-                    y_pos_data[0] = 0x03
-                y_pos_data[1:5] = pos_to_data(y)
+                    y_pos_data = [ 0x03 ]
+                y_pos_data.append(pos_to_data(y))
                 y_pos_msg = can.Message(arbitration_id=y_axis_node_id, data=y_pos_data, extended_id=False)
                 msgs.append(y_pos_msg)
 
             if z is not None:
-                z_pos_data = bytearray(5)
                 if relative_pos == False:
-                    z_pos_data[0] = 0x01
+                    z_pos_data = [ 0x01 ]
                 else:
-                    z_pos_data[0] = 0x03
-                z_pos_data[1:5] = pos_to_data(z)
+                    z_pos_data = [ 0x03 ]
+                z_pos_data.append(pos_to_data(z))
                 z_pos_msg = can.Message(arbitration_id=z_axis_node_id, data=z_pos_data, extended_id=False)
                 msgs.append(z_pos_msg)
 
             if e is not None:
-                e_pos_data = bytearray(5)
-                if relative_pos == False:
-                    e_pos_data[0] = 0x01
-                else:
-                    e_pos_data[0] = 0x03
-                e_pos_data[1:5] = pos_to_data(e)
-                e_pos_msg = can.Message(arbitration_id=e_axis_node_id, data=e_pos_data, extended_id=False)
-                msgs.append(e_pos_msg)   
+                pass
+                # if relative_pos == False:
+                #     e_pos_data = [ 0x01 ]
+                # else:
+                #     e_pos_data = [ 0x03 ]
+                # e_pos_data.append(pos_to_data(e))
+                # e_pos_msg = can.Message(arbitration_id=e_axis_node_id, data=e_pos_data, extended_id=False)
+                # msgs.append(e_pos_msg)
 
         if G == 28:
             x = gcodeInterpreter.getCodeFloat(cmd, 'X')
@@ -3187,8 +3183,30 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
             z = gcodeInterpreter.getCodeFloat(cmd, 'Z')
             e = gcodeInterpreter.getCodeFloat(cmd, 'E')
 
+            home_data = [ 0x01 ]
+
             if x is None and y is None and z is None and e is None:
+                x_home_msg = can.Message(arbitration_id=x_axis_node_id, data=home_data, extended_id=False)
+                y_home_msg = can.Message(arbitration_id=y_axis_node_id, data=home_data, extended_id=False)
+                z_home_msg = can.Message(arbitration_id=z_axis_node_id, data=home_data, extended_id=False)
+                # e_home_msg = can.Message(arbitration_id=e_axis_node_id, data=all_home_data, extended_id=False)
                 
+                msgs.append(x_home_msg)
+                msgs.append(y_home_msg)
+                msgs.append(z_home_msg)
+
+            else:
+                if x is not None:
+                    x_home_msg = can.Message(arbitration_id=x_axis_node_id, data=home_data, extended_id=False)
+                    msgs.append(x_home_msg)
+
+                if y is not None:
+                    y_home_msg = can.Message(arbitration_id=y_axis_node_id, data=home_data, extended_id=False)
+                    msgs.append(y_home_msg)
+
+                if z is not None:
+                    z_home_msg = can.Message(arbitration_id=z_axis_node_id, data=home_data, extended_id=False)
+                    msgs.append(z_home_msg)
         
         if G == 90:
             relative_pos = False
