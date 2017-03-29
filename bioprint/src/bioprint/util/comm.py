@@ -15,6 +15,7 @@ import logging
 import serial
 import can
 import struct
+import binascii
 import bioprint.plugin
 import bioprint.util.can
 
@@ -723,7 +724,7 @@ class CANCom(object):
     def sendCanMessage(self, msg):
         try:
             self._can.send(msg)
-            self._log("Send: %s" % str(msg.data))
+            self._log("Send: ID: %s Data: %s" % ( msg.arbitration_id, binascii.hexlify(msg.data) ))
             print "Mesage sent on", bus.channel_info
         except can.CanError:
             print "Message NOT sent"
