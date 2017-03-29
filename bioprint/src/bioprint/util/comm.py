@@ -3111,17 +3111,9 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
     msgs = []
 
     if T is not None:
-        toolPos = [
-            0,
-            60,
-            120,
-            180,
-            240,
-            300
-        ]
-        tool_change_data = bytearray(5)
+        tool_change_data = bytearray(2)
         tool_change_data[0] = 0x00
-        tool_change_data[1:] = abs_pos_to_bytearray(toolPos[T])
+        tool_change_data[1] = T
 
         tool_change_msg = can.Message(arbitration_id=turret_node_id, data=tool_change_data, extended_id=False)
 
@@ -3138,9 +3130,8 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
             f = gcodeInterpreter.getCodeFloat(cmd, 'F')
 
             if f is not None:
-                feedrate_data = bytearray(3)
-                feedrate_data[0] = 0x02
-                feedrate_data[1:2] = feedrate_to_bytearray(f)
+                feedrate_data = [0x02]
+                feedrate_data.append(feedrate_to_data(f))
                 if x is not None:
                     x_feedrate_msg = can.Message(arbitration_id=x_axis_node_id, data=feedrate_data, extended_id=False)
                     msgs.append(x_feedrate_msg)
@@ -3152,12 +3143,11 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
                     msgs.append(z_feedrate_msg)
 
             if x is not None:
-                x_pos_data = bytearray(5)
                 if relative_pos == False:
-                    x_pos_data[0] = 0x01
+                    x_pos_data = [ 0x01 ]
                 else:
-                    x_pos_data[0] = 0x03
-                x_pos_data[1:5] = pos_to_data(x)
+                    x_pos_data = [ 0x03 ]
+                x_pos_data.append(pos_to_data(x))
                 x_pos_msg = can.Message(arbitration_id=x_axis_node_id, data=x_pos_data, extended_id=False)
                 msgs.append(x_pos_msg)
 
@@ -3191,15 +3181,20 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
                 e_pos_msg = can.Message(arbitration_id=e_axis_node_id, data=e_pos_data, extended_id=False)
                 msgs.append(e_pos_msg)   
 
+        if G == 28:
+            x = gcodeInterpreter.getCodeFloat(cmd, 'X')
+            y = gcodeInterpreter.getCodeFloat(cmd, 'Y')
+            z = gcodeInterpreter.getCodeFloat(cmd, 'Z')
+            e = gcodeInterpreter.getCodeFloat(cmd, 'E')
+
+            if x is None and y is None and z is None and e is None:
+                
+        
         if G == 90:
             relative_pos = False
 
         if G == 91:
             relative_pos = True
-
-        if G == 92:
-
-
 
     if M is not None:
         if M == 42:
