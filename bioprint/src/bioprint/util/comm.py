@@ -14,6 +14,7 @@ import Queue as queue
 import logging
 import serial
 import can
+import struct
 import bioprint.plugin
 import bioprint.util.can
 
@@ -3071,18 +3072,60 @@ def gcode_command_for_cmd(cmd):
         # this should never happen
         return None
 
-def convert_feedrate(feedrate):
-    return int((feedrate / 120.00) * 1000)
+def feedrate_to_bytearray(feedrate):
+    return bytearray(struct.pack(">H", int(feedrate / 120.00) * 1000))
 
-def can_command_for_cmd(cmd):
+def abs_pos_to_bytearray(pos):
+    return bytearray(struct.pack(">I", int(pos * 1000)))
+
+def rel_pos_to_data(pos):
+    hexitr = iter(("%#4x" % (int(pos * 1000) & 0xffffffff))[-8:])
+    return [int(i + next(hexitr), 16) for i in hexitr]
+
+def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
     if not cmd:
         return None
+    
+    # Node IDs for all the movement axes
+    x_axis_node_id = 0x01
+    y_axis_node_id = 0x02
+    z_axis_node_id = 0x03
+    turret_node_id = 0x04
+
+    # Extruder Node IDs
+    extruder_node_ids = {
+        "A": 0x05,
+        "B": 0x06,
+        "C": 0x07,
+        "D": 0x08,
+        "E": 0x09,
+        "F": 0x0A
+    }
 
     G = gcodeInterpreter.getCodeInt(cmd, 'G')
     M = gcodeInterpreter.getCodeInt(cmd, 'M')
     T = gcodeInterpreter.getCodeInt(cmd, 'T')
 
     msgs = []
+
+    if T is not None:
+        toolPos = [
+            0,
+            60,
+            120,
+            180,
+            240,
+            300
+        ]
+        tool_change_data = bytearray(5)
+        tool_change_data[0] = 0x00
+        tool_change_data[1:] = abs_pos_to_bytearray(toolPos[T])
+
+        tool_change_msg = can.Message(arbitration_id=turret_node_id, data=tool_change_data, extended_id=False)
+
+        msgs.append(tool_change_msg)
+
+        current_tool = T
 
     if G is not None:
         if G == 0 or G == 1:
@@ -3092,16 +3135,38 @@ def can_command_for_cmd(cmd):
             e = gcodeInterpreter.getCodeFloat(cmd, 'E')
             f = gcodeInterpreter.getCodeFloat(cmd, 'F')
 
-            if x is not None:
-                node_id = 0x001
+            if f is not None:
+                feedrate_data = bytearray(3)
+                feedrate_data[0] = 0x02
+                feedrate_data[1:2] = feedrate_to_bytearray(f)
+                if x is not None:
+                    x_feedrate_msg = can.Message(arbitration_id=x_axis_node_id, data=feedrate_data, extended_id=False)
+                    msgs.append(x_feedrate_msg)
+                if y is not None:
+                    y_feedrate_msg = can.Message(arbitration_id=y_axis_node_id, data=feedrate_data, extended_id=False)
+                    msgs.append(y_feedrate_msg)
+                if z is not None:
+                    z_feedrate_msg = can.Message(arbitration_id=z_axis_node_id, data=feedrate_data, extended_id=False)
+                    msgs.append(z_feedrate_msg)
 
-                if f is not None:
-                    speed = (f / 120.00) * 1000
-                    data = [0x02]
+            if x is not None:
+                x_pos_data = bytearray(5)
+                if relative_pos == True:
+
+
+        if G == 90:
+            relative_pos = False
+
+        if G == 91:
+            relative_pos = True
+
+        if G == 92:
+
+
 
     if M is not None:
         if M == 42:
-            node_id = 0x000
+            node_id = 0x00
 
             p = gcodeInterpreter.getCodeInt(cmd, 'P')
             s = gcodeInterpreter.getCodeInt(cmd, 'S')
@@ -3121,8 +3186,9 @@ def can_command_for_cmd(cmd):
             elif s > 0:
                 data[2] = 0x00
 
-            msg = can.Message(arbitration_id=node_id, data=data, extended_id=False)
+            extrude_msg = can.Message(arbitration_id=node_id, data=data, extended_id=False)
             
-            msgs.append(msg)
-    return msgs
+            msgs.append(extrude_msg)
+
+    return msgs, relative_pos, current_tool
 
