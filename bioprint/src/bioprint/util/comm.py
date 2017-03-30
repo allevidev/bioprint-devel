@@ -831,7 +831,15 @@ class CANCom(object):
                         self._resendSwallowNextOk = False
                     elif self._sendFromQueue():
                         pass
+            except:
+                self._logger.exception("Something crashed inside the CAN connection loop, please report this in bioprint's bug tracker:")
 
+                errorMsg = "See bioprint.log for details"
+                self._log(errorMsg)
+                self._errorValue = errorMsg
+                self._changeState(self.STATE_ERROR)
+                eventManager().fire(Events.ERROR, {"error": self.getErrorString()})
+        self._log("Connection closed, closing down monitor")
 
     def selectFile(self, filename, sd, extruder_positions, wellplate, cl_params, tempData):
         print extruder_positions, wellplate, cl_params, tempData
