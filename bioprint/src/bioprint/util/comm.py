@@ -215,6 +215,8 @@ class CANCom(object):
         self._printerProfileManager = printerProfileManager
         self._state = self.STATE_NONE
         self._can = None
+        self._bufferedReader = None
+        self._notifier = None
         self._temp = {}
         self._position = {}
         self._bedTemp = None
@@ -776,6 +778,8 @@ class CANCom(object):
         can.rc['channel'] = settings().get(["can", "channel"])
 
         self._can = can.interface.Bus()
+        self._bufferedReader = can.BufferedReader()
+        self._notifier = can.Notifier(self._can, [ self._bufferedReader ])
         self._clear_to_send.clear()
         self._onConnected()
         return True
@@ -786,15 +790,6 @@ class CANCom(object):
         pause_triggers = convert_pause_triggers(settings().get(["printerParameters", "pauseTriggers"]))
 
         disable_external_heatup_detection = not settings().getBoolean(["feature", "externalHeatupDetection"])
-
-        if not self._openCAN():
-            return
-
-        try_hello = not settings().getBoolean(["feature", "waitForStartOnConnect"])
-
-        self._clear_to_send.set()
-
-        self._log("Connected to: %s, starting monitor" % self._can.channel_info)
 
         self._changeState(self.STATE_CONNECTING)
 
@@ -809,17 +804,143 @@ class CANCom(object):
 
         #self._onConnected()
 
+        if not self._openCAN():
+            return
+
+        try_hello = not settings().getBoolean(["feature", "waitForStartOnConnect"])
+
+        self._clear_to_send.set()
+
+        self._log("Connected to: %s, starting monitor" % self._can.channel_info)
+
         while self._monitoring_active:
             self._clear_to_send.set()
-            if self._state == self.STATE_CONNECTING:
-                self._clear_to_send.set()
-                self._onConnected()
-            elif self._state == self.STATE_OPERATIONAL or self._state == self.STATE_PAUSED:    
-                self._clear_to_send.set()
-                if self._resendSwallowNextOk:
-                    self._resendSwallowNextOk = False
-                elif self._sendFromQueue():
-                    pass
+            try:
+                msg = self._readline()
+                if msg is None:
+                    break
+
+                print msg
+
+                if self._state == self.STATE_CONNECTING:
+                    self._clear_to_send.set()
+                    self._onConnected()
+                elif self._state == self.STATE_OPERATIONAL or self._state == self.STATE_PAUSED:    
+                    self._clear_to_send.set()
+                    if self._resendSwallowNextOk:
+                        self._resendSwallowNextOk = False
+                    elif self._sendFromQueue():
+                        pass
+
+
+    def selectFile(self, filename, sd, extruder_positions, wellplate, cl_params, tempData):
+        print extruder_positions, wellplate, cl_params, tempData
+
+        if self.isBusy():
+            return
+
+        selectedFile = PrintingGcodeFileInformation(filename, offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
+
+        payload = {
+            "file": selectedFile.getFilename(),
+            "filename": os.path.basename(selectedFile.getFilename()),
+            "origin": selectedFile.getFileLocation()
+        }
+
+        selectedFile.close()
+        processed = post_process.post_process(payload, extruder_positions, wellplate, cl_params, tempData)
+
+        self._currentFile = PrintingGcodeFileInformation(processed["file"], offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
+
+        eventManager().fire(Events.FILE_SELECTED, {
+            "file": self._currentFile.getFilename(),
+            "filename": os.path.basename(self._currentFile.getFilename()),
+            "origin": self._currentFile.getFileLocation()
+        })
+
+    def unselectFile(self):
+        if self.isBusy():
+            return
+
+        self._currentFile = None
+        eventManager().fire(Events.FILE_DESELECTED)
+        self._callback.on_comm_file_selected(None, None, False)
+
+    def cancelPrint(self):
+        if not self.isOperational() or self.isStreaming():
+            return
+
+        self.sendCommand("M42 P16 S0")
+        self.sendCommand("M42 P17 S0")
+        self.sendCommand("M42 P18 S0")
+
+        self._changeState(self.STATE_OPERATIONAL)
+
+        payload = {
+            "file": self._currentFile.getFilename(),
+            "filename": os.path.basename(self._currentFile.getFilename()),
+            "origin": self._currentFile.getFileLocation()
+        }
+
+        self.sendGcodeScript("afterPrintCancelled", replacements=dict(event=payload))
+        eventManager().fire(Events.PRINT_CANCELLED, payload)
+
+    def setPause(self, pause):
+        if not self._currentFile:
+            return
+
+        payload = {
+            "file": self._currentFile.getFilename(),
+            "filename": os.path.basename(self._currentFile.getFilename()),
+            "origin": self._currentFile.getFileLocation()
+        }
+
+        if not pause and self.isPaused():
+            if self._pauseWaitStartTime:
+                self._pauseWaitTimeLost = self._pauseWaitTimeLost + (time.time() - self._pauseWaitStartTime)
+                self._pauseWaitStartTime = None
+
+            self._changeState(self.STATE_PRINTING)
+
+            self.sendGcodeScript("beforePrintResumed", replacements=dict(event=payload))
+
+            line = self._getNext()
+            if line is not None:
+                self.sendCommand(line)
+
+            # now make sure we actually do something, up until now we only filled up the queue
+            self._sendFromQueue()
+
+            eventManager().fire(Events.PRINT_RESUMED, payload)
+        elif pause and self.isPrinting():
+            if not self._pauseWaitStartTime:
+                self._pauseWaitStartTime = time.time()
+
+            self.sendCommand("M42 P16 S0")
+            self.sendCommand("M42 P17 S0")
+
+            self._changeState(self.STATE_PAUSED)
+            self.sendGcodeScript("afterPrintPaused", replacements=dict(event=payload))
+
+            eventManager().fire(Events.PRINT_PAUSED, payload)
+
+
+    def _readline(self):
+        if self._can is None:
+            return None
+
+        try:
+            msg = self._bufferedReader.get_message()
+        except:
+            if not self._connection_closing:
+                self._logger.exception("Unexpected error while reading from CAN bus")
+                self._log("Unexpected error while reading CAN bus, please consult bioprint.log for details: %s" % (get_exception_string()))
+                self._errorValue = get_exception_string()
+                self.close(True)
+            return None
+
+        self._log("Recv: ID: %s Data: %s", ( msg.arbitration_id, binascii.hexlify(msg.data) ))
+        return msg
 
 class MachineCom(object):
     STATE_NONE = 0
