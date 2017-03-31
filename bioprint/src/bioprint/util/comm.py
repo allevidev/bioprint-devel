@@ -282,6 +282,7 @@ class CANCom(object):
         # multithreading locks
         self._sendNextLock = threading.Lock()
         self._sendingLock = threading.RLock()
+        self._sendingLocks = {}
 
         # monitoring thread
         self._monitoring_active = True
@@ -483,7 +484,7 @@ class CANCom(object):
         else:
             priority = 1
 
-        if self.isPrinting() and not self.isSdFileSelected():
+        if (self.isPrinting() and not self.isSdFileSelected()) or len(self._sendingLocks) > 0:
             self._commandQueue.put((priority, cmd, cmd_type))
         elif self.isOperational():
             self._sendCommand(cmd, cmd_type=cmd_type)
@@ -728,9 +729,11 @@ class CANCom(object):
             self._can.send(msg)
             self._log("Send: ID: %s Data: %s" % ( msg.arbitration_id, binascii.hexlify(msg.data) ))
             print "Mesage sent on", self._can.channel_info
+            self._sendingLocks[str(msg.arbitration_id)] = msg.data
+            return (msg.arbitration_id, True)
         except can.CanError:
             print "Message NOT sent"
-
+            return (msg.arbitration_id, False)
 
     def _doSendWithoutChecksum(self, cmd):
         if self._can is None:
@@ -738,11 +741,10 @@ class CANCom(object):
 
         msgs, relativePos, currentTool = can_command_for_cmd(cmd, relative_pos=self._relativePos, current_tool=self._currentTool)
        
-        map(self.sendCanMessage, msgs)
+        msg_responses = map(self.sendCanMessage, msgs)
 
         self._relativePos = relativePos
         self._currentTool = currentTool
-
 
     def _onConnected(self):
         self._timeout = settings().getFloat(["can", "timeout", "communication"])
@@ -754,7 +756,7 @@ class CANCom(object):
         eventManager().fire(Events.CONNECTED)
 
     def _sendFromQueue(self):
-        if not self._commandQueue.empty() and not self.isStreaming():
+        if not self._commandQueue.empty() and not self.isStreaming() and len(self._sendingLocks()) == 0:
             entry = self._commandQueue.get()
             if isinstance(entry, tuple):
                 if len(entry) == 3:
@@ -817,19 +819,24 @@ class CANCom(object):
             self._clear_to_send.set()
             try:
                 msg = self._readline()
-                if msg is None:
-                    break
 
-                print msg
+                if str(msg.arbitration_id) in self._sendingLocks:
+                    if self._sendingLocks[str(msg.arbitration_id)][:1] == msg.data[:1]:    
+                        self._sendingLocks.pop(str(msg.arbitration_id))
+
 
                 if self._state == self.STATE_CONNECTING:
                     self._clear_to_send.set()
                     self._onConnected()
                 elif self._state == self.STATE_OPERATIONAL or self._state == self.STATE_PAUSED:    
                     self._clear_to_send.set()
-                    if self._resendSwallowNextOk:
-                        self._resendSwallowNextOk = False
-                    elif self._sendFromQueue():
+                    if len(self._sendingLocks) is 0:
+                        if self._resendSwallowNextOk:
+                            self._resendSwallowNextOk = False
+                        elif self._sendFromQueue():
+                            pass
+                    else:
+                        self._log("Awaiting responses from nodes: %s" % self._sendingLocks.keys())
                         pass
             except:
                 self._logger.exception("Something crashed inside the CAN connection loop, please report this in bioprint's bug tracker:")
@@ -947,7 +954,7 @@ class CANCom(object):
                 self.close(True)
             return None
 
-        self._log("Recv: ID: %s Data: %s", ( msg.arbitration_id, binascii.hexlify(msg.data) ))
+        self._log("Recv: ID: %s Data: %s" % ( msg.arbitration_id, binascii.hexlify(msg.data) ))
         return msg
 
 class MachineCom(object):
@@ -3217,12 +3224,14 @@ def pos_to_data(pos):
 def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
     if not cmd:
         return None
-    
+
+    pressure_node_id = 0x00
+
     # Node IDs for all the movement axes
-    x_axis_node_id = 0x01
-    y_axis_node_id = 0x02
-    z_axis_node_id = 0x03
-    turret_node_id = 0x04
+    x_axis_node_id = 0x00 #0x01
+    y_axis_node_id = 0x00 #0x02
+    z_axis_node_id = 0x00 #0x03
+    turret_node_id = 0x00 #0x04
 
     # Extruder Node IDs
     extruder_node_ids = [ 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A ]
@@ -3339,7 +3348,6 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
 
     if M is not None:
         if M == 42:
-            node_id = 0x00
 
             p = gcodeInterpreter.getCodeInt(cmd, 'P')
             s = gcodeInterpreter.getCodeInt(cmd, 'S')
@@ -3359,7 +3367,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
             elif s > 0:
                 extrude_data[2] = 0x00
 
-            extrude_msg = can.Message(arbitration_id=node_id, data=extrude_data, extended_id=False)
+            extrude_msg = can.Message(arbitration_id=pressure_node_id, data=extrude_data, extended_id=False)
             
             msgs.append(extrude_msg)
 
