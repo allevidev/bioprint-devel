@@ -985,6 +985,12 @@ class CANCom(object):
 
         try:
             msg = self._bufferedReader.get_message()
+            
+            if msg is not None:
+                self._log("Recv: ID: %s Data: %s" % ( msg.arbitration_id, binascii.hexlify(msg.data) ))
+                return msg
+            else:
+                return None
         except:
             if not self._connection_closing:
                 self._logger.exception("Unexpected error while reading from CAN bus")
@@ -992,9 +998,6 @@ class CANCom(object):
                 self._errorValue = get_exception_string()
                 self.close(True)
             return None
-
-        self._log("Recv: ID: %s Data: %s" % ( msg.arbitration_id, binascii.hexlify(msg.data) ))
-        return msg
 
 class MachineCom(object):
     STATE_NONE = 0
@@ -2687,6 +2690,9 @@ class MachineComPrintCallback(object):
         pass
 
     def on_comm_position_update(self, position):
+        pass
+
+    def on_comm_tool_update(self, toolNum):
         pass
 
     def on_comm_state_change(self, state):

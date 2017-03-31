@@ -63,6 +63,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		self._currentZ = None
 
 		self._position = None
+		self._currentTool = 0
 
 		self.extruder_positions = None
 		self.wellplate = None
@@ -302,7 +303,13 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 			raise ValueError("tool must match \"tool[0-9]+\": {tool}".format(tool=tool))
 
 		tool_num = int(tool[len("tool"):])
+		self._currentTool = tool_num
+		self._stateMonitor.set_current_tool(self._currentTool)
 		self.commands("T%d" % tool_num)
+
+	def calibrate(self):
+		if self._type == 'can':
+			self._comm.calibrate()
 
 	def set_extruder_positions(self, extruder_positions):
 		self.extruder_positions = extruder_positions
@@ -600,6 +607,10 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		self._position = position
 		self._stateMonitor.set_position(self._position)
 
+	def _setCurrentTool(self, toolNum):
+		self._currentTool = toolNum
+		self._stateMonitor.set_position(self._position)
+
 	def _setCurrentZ(self, currentZ):
 		self._currentZ = currentZ
 		self._stateMonitor.set_current_z(self._currentZ)
@@ -804,6 +815,9 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 	def on_comm_position_update(self, position):
 		self._setPosition(position)
 
+	def on_comm_tool_update(self, toolNum):
+		self._setCurrentTool(toolNum)
+
 	def on_comm_state_change(self, state):
 		"""
 		 Callback method for the comm object, called if the connection state changes.
@@ -911,6 +925,7 @@ class StateMonitor(object):
 		self._gcode_data = None
 		self._sd_upload_data = None
 		self._position = None
+		sefl._currentTool = 0
 		self._current_z = None
 		self._progress = None
 
@@ -967,6 +982,10 @@ class StateMonitor(object):
 		self._position = position
 		self._change_event.set()
 
+	def set_current_tool(self, toolNum):
+		self._currentTool = toolNum
+		self._change_event.set()
+
 	def _work(self):
 		while True:
 			self._change_event.wait()
@@ -989,6 +1008,7 @@ class StateMonitor(object):
 			"job": self._job_data,
 			"currentZ": self._current_z,
 			"position": self._position,
+			"currentTool": self._currentTool,
 			"progress": self._progress,
 			"offsets": self._offsets
 		}

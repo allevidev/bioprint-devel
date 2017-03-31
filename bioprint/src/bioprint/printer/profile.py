@@ -168,6 +168,40 @@ class PrinterProfileManager(object):
 		)
 	)
 
+	biobot1 = default
+	biobot2 = dict(
+		id = "biobot_2",
+		name = "BioBot 2",
+		model = "BioBot 2",
+		color = "default",
+		volume=dict(
+			width = 136,
+			depth = 86,
+			height = 75,
+			formFactor = BedTypes.CIRCULAR,
+			origin = BedOrigin.CENTER
+		),
+		heatedBed = False,
+		extruder=dict(
+			count = 6,
+			offsets = [
+				(0, 0),
+				(0, 0),
+				(0, 0),
+				(0, 0),
+				(0, 0),
+				(0, 0)
+			],
+			nozzleDiameter = 0.2
+		),
+		axes=dict(
+			x = dict(speed=1000, inverted=False),
+			y = dict(speed=1000, inverted=False),
+			z = dict(speed=1000, inverted=False),
+			e = dict(speed=0, inverted=False)
+		)
+	)
+
 	def __init__(self):
 		self._current = None
 		self._folder = settings().getBaseFolder("printerProfiles")
