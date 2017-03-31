@@ -925,7 +925,7 @@ class StateMonitor(object):
 		self._gcode_data = None
 		self._sd_upload_data = None
 		self._position = None
-		sefl._currentTool = 0
+		self._currentTool = 0
 		self._current_z = None
 		self._progress = None
 
