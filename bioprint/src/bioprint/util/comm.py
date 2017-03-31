@@ -848,8 +848,47 @@ class CANCom(object):
                 eventManager().fire(Events.ERROR, {"error": self.getErrorString()})
         self._log("Connection closed, closing down monitor")
 
-    def selectFile(self, filename, sd, extruder_positions, wellplate, cl_params, tempData):
+    def calibrate(self):
+        return {
+            "A": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+                },
+            "B": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+                },
+            "C": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+                },
+            "D": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+                },
+            "E": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+                },
+            "F": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+                }
+            }
+
+
+
+    def selectFile(self, filename, sd, extruders, wellplate, cl_params, tempData):
         print extruder_positions, wellplate, cl_params, tempData
+
+        if extruder_positions is None:
+            extruder_positions = self.calibrate()
 
         if self.isBusy():
             return
@@ -863,7 +902,7 @@ class CANCom(object):
         }
 
         selectedFile.close()
-        processed = post_process.post_process(payload, extruder_positions, wellplate, cl_params, tempData)
+        processed = post_process.bb2_post_process(payload, extruders, wellplate, cl_params, tempData)
 
         self._currentFile = PrintingGcodeFileInformation(processed["file"], offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
 
