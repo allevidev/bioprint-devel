@@ -109,7 +109,12 @@ $(function() {
             }
         }
 
-        self.position = {}
+        self.position = {
+          'X': -1,
+          'Y': -1,
+          'Z': -1,
+          'E': -1
+        }
         
     
         self.midpoint = 22;
@@ -307,13 +312,19 @@ $(function() {
         };
 
         self._processPositionData = function(data) {
-            self.position = data;
             if (data != null) { 
+                self.position = data;
                 self.xActualPosition(data['X']);
                 self.yActualPosition(data['Y']);
                 self.zActualPosition(data['Z']);
                 self.eActualPosition(data['E']);
             } else {
+                self.position = {
+                  'X': -1,
+                  'Y': -1,
+                  'Z': -1,
+                  'E': -1
+                }
                 self.xActualPosition(0);
                 self.yActualPosition(0);
                 self.zActualPosition(0);
@@ -922,6 +933,7 @@ $(function() {
             if (typeof distance === "undefined")
                 distance = $('#jog_distance button.active').data('distance');
             if (self.settings.printerProfiles.currentProfileData() && self.settings.printerProfiles.currentProfileData()["axes"] && self.settings.printerProfiles.currentProfileData()["axes"][axis] && self.settings.printerProfiles.currentProfileData()["axes"][axis]["inverted"]()) {
+
                 multiplier *= -1;
             }
 
@@ -934,7 +946,9 @@ $(function() {
         };
 
         self.sendHomeCommand = function (axis) {
-             var tools = self.tools();
+            
+            console.log(self.position);
+            var tools = self.tools();
             if (axis == 'e') {
                 if (self.homed['z'] == false) {
                     self.sendHomeCommand('z');
