@@ -573,6 +573,8 @@ class CANCom(object):
             if line is not None:
                 self.sendCommand(line)
 
+            print self._sendFromQueue
+
             self._sendFromQueue()
         except:
             self._logger.exception("Error while trying to start printing")
@@ -708,7 +710,7 @@ class CANCom(object):
         gcode = gcode_command_for_cmd(command)
         return command, command_type, gcode
 
-    ##~~ actual sending via can
+    ##~~ actual sending via serial
 
     def _doIncrementAndSendWithChecksum(self, cmd):
         with self._line_mutex:
@@ -752,8 +754,6 @@ class CANCom(object):
 
         msgs, relativePos, currentTool = can_command_for_cmd(cmd, relative_pos=self._relativePos, current_tool=self._currentTool)
        
-        print msgs
-
         msg_responses = map(self.sendCanMessage, msgs)
 
         self._relativePos = relativePos
@@ -769,11 +769,12 @@ class CANCom(object):
         eventManager().fire(Events.CONNECTED)
 
     def _sendFromQueue(self):
-        if not self._commandQueue.empty() and len(self._sendingLocks) == 0:
+        if not self._commandQueue.empty() and not self.isStreaming() and len(self._sendingLocks) == 0:
             entry = self._commandQueue.get()
             print isinstance(entry, tuple) 
             if isinstance(entry, tuple):
                 if len(entry) == 3:
+                    print here
                     priority, cmd, cmd_type = entry
                 elif len(entry) == 2:
                     priority, cmd = entry
@@ -859,20 +860,6 @@ class CANCom(object):
                     else:
                         self._log("Awaiting responses from nodes: %s" % self._sendingLocks.keys())
                         pass
-                elif self._state == self.STATE_PRINTING:
-                    print len(self._sendingLocks)
-                    if len(self._sendingLocks) is 0:
-                        if self._resentSwallowNextOk:
-                            self._resendSwallowNextOk = False
-                        elif self._resendDelta is not None:
-                            self._resendNextCommand()
-                        else:
-                            if self._sendFromQueue():
-                                print "HERE"
-                                pass
-                            else:
-                                print "HERE2"
-                                self._sendNext()
             except:
                 self._log("Something crashed inside the CAN connection loop, please report this in bioprint's bug tracker:")
 

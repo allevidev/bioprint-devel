@@ -839,6 +839,10 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
             "origin": payload["origin"]
         }
 
+
+def bb2_post_process(payload, positions, wellPlate, cl_params, tempData):
+    return payload
+
 test_payload = {
     'origin': 'local', 
     'file': 'test_files/test_lattice.gcode',
