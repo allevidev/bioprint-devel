@@ -3363,7 +3363,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
     msgs = []
 
     if T is not None:
-        tool_change_data = [ 0x07, T ]
+        tool_change_data = [ 0x07, T, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
 
         tool_change_msg = can.Message(arbitration_id=turret_node_id, data=tool_change_data, extended_id=False)
         tool_change_sending_lock = True
@@ -3377,7 +3377,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
             tool_cap_val = 1
         else:
             tool_cap_val = 0
-        tool_cap_data =  [ 0x03, tool_cap_val ]
+        tool_cap_data =  [ 0x03, tool_cap_val, 0x00, 0x00, 0x00, 0x00, 0x00 ]
         tool_cap_msg = can.Message(arbitration_id=pressure_node_id, data=tool_cap_data, extended_id=False)
         tool_cap_sending_lock = False
 
@@ -3392,8 +3392,9 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
             #f = gcodeInterpreter.getCodeFloat(cmd, 'F')
             f = None
             if f is not None:
-                feedrate_data = [0x02]
-                feedrate_data.extend(feedrate_to_data(f))
+                feedrate_data = [ 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
+                feedrate_data[1:5] = feedrate_to_data(f)
+
                 feedrate_sending_lock = False
                 if x is not None:
                     x_feedrate_msg = can.Message(arbitration_id=x_axis_node_id, data=feedrate_data, extended_id=False)
@@ -3409,28 +3410,28 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
 
             if x is not None:
                 if relative_pos == False:
-                    x_pos_data = [ 0x00 ]
+                    x_pos_data = [ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
                 else:
-                    x_pos_data = [ 0x03 ]
-                x_pos_data.extend(pos_to_data(x))
+                    x_pos_data = [ 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
+                x_pos_data[1:5] = pos_to_data(x)
                 x_pos_msg = can.Message(arbitration_id=x_axis_node_id, data=x_pos_data, extended_id=False)
                 msgs.append((x_pos_msg, pos_sending_lock))
 
             if y is not None:
                 if relative_pos == False:
-                    y_pos_data = [ 0x00 ]
+                    y_pos_data = [ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
                 else:
-                    y_pos_data = [ 0x03 ]
-                y_pos_data.extend(pos_to_data(y))
+                    y_pos_data = [ 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
+                y_pos_data[1:5] = pos_to_data(y)
                 y_pos_msg = can.Message(arbitration_id=y_axis_node_id, data=y_pos_data, extended_id=False)
                 msgs.append((y_pos_msg, pos_sending_lock))
 
             if z is not None:
                 if relative_pos == False:
-                    z_pos_data = [ 0x00 ]
+                    z_pos_data = [ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
                 else:
-                    z_pos_data = [ 0x03 ]
-                z_pos_data.extend(pos_to_data(z))
+                    z_pos_data = [ 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
+                z_pos_data[1:5] = pos_to_data(z)
                 z_pos_msg = can.Message(arbitration_id=z_axis_node_id, data=z_pos_data, extended_id=False)
                 msgs.append((z_pos_msg, pos_sending_lock))
 
@@ -3450,7 +3451,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
             z = gcodeInterpreter.getCodeFloat(cmd, 'Z')
             e = gcodeInterpreter.getCodeFloat(cmd, 'E')
 
-            home_data = [ 0x01 ]
+            home_data = [ 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
             home_sending_lock = True
 
             if x is None and y is None and z is None and e is None:
@@ -3489,7 +3490,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
             s = gcodeInterpreter.getCodeInt(cmd, 'S')
             
 
-            extrude_data = [0x00,0x00,0x00]
+            extrude_data = [ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
             extrude_sending_lock = False
             if p == 16:
                 extrude_data[1] = 0x00
