@@ -727,7 +727,7 @@ class CANCom(object):
     def sendCanMessage(self, msg):
         try:
             if len(msg) == 3:
-                can_msg = msg[0],
+                can_msg = msg[0]
                 delay = msg[2]
             elif len(msg) == 2:
                 can_msg = msg[0]
@@ -772,7 +772,7 @@ class CANCom(object):
         self._currentTool = currentTool
 
     def buildCalibMessage(self, msg):
-        return (can.Message(arbitration_id=msg["node_id"], data=msg["data"], extended_id=False), False, msg["delay"])
+        return can.Message(arbitration_id=msg["node_id"], data=msg["data"], extended_id=False), False, msg["delay"]
 
     def calibratePrinter(self, delay=1):
         x_curr_msg = {
@@ -1019,7 +1019,7 @@ class CANCom(object):
                 eventManager().fire(Events.ERROR, {"error": self.getErrorString()})
         self._log("Connection closed, closing down monitor")
 
-    def calibrate(self):
+    def calibrateTools(self):
         return {
             "A": {
                 "X": 0,
