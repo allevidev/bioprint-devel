@@ -1053,27 +1053,30 @@ class CANCom(object):
                 }
             }
 
-
-
-    def selectFile(self, filename, sd, extruders, wellplate, cl_params, tempData):
-        if extruders is None:
-            extruders = self.calibrateTools()
-
-        wellplate = 1
+    def selectFile(self, filename=None, sd=None, apiPrint=None, wellplate=1, extruder_positions=None, cl_params=None, tempData=None):
+        
+        if extruder_positions is None:
+            extruder_positions = self.calibrateTools()
 
         if self.isBusy():
             return
 
-        selectedFile = PrintingGcodeFileInformation(filename, offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
+        if apiPrint is None and filename is not None:
+            selectedFile = PrintingGcodeFileInformation(filename, offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
 
-        payload = {
-            "file": selectedFile.getFilename(),
-            "filename": os.path.basename(selectedFile.getFilename()),
-            "origin": selectedFile.getFileLocation()
-        }
+            payload = {
+                "file": selectedFile.getFilename(),
+                "filename": os.path.basename(selectedFile.getFilename()),
+                "origin": selectedFile.getFileLocation()
+            }
 
-        selectedFile.close()
-        processed = post_process.bb2_post_process(payload, extruders, wellplate, cl_params, tempData)
+            selectedFile.close()
+
+            processed = post_process.bb2_post_process_local(payload, extruder_offsets)
+        elif apiPrint is not None:
+            processed = post_process.bb2_post_process_api(apiPrint)
+        else:
+            self._log("No print file, local or API selected")
 
         self._currentFile = PrintingGcodeFileInformation(processed["file"], offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
 

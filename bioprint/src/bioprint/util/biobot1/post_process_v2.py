@@ -335,25 +335,25 @@ def remove_e(line):
     return ' '.join(filter(lambda x: x != '', [i.strip() if e_value(i) is None else ''.strip() for i in line.split(' ')]))
 
 
-def g1_modify(line, x_offset, y_offset):
+def g1_modify(line, active_e, x_ctr, y_ctr):
     '''
     Remove the E value from a line, for example
     returns "G1 X13.932 Y45.135" on input "G1 X13.932 Y45.135 E1.81780"
     '''
     command = []
-    if x_offset is not None and y_offset is not None:
-        for i in line.split(' '):
-            if x_value(i) is not None:
-                command.append('X' + str(x_value(i) + x_offset))
-            elif y_value(i) is not None:
-                command.append('Y' + str(y_value(i) + y_offset))
-            elif z_value(i) is not None:
-                next
-                # command.append('Z' + str(z_value(i)))
-            elif e_value(i) is not None:
-                next
-            else:
-                command.append(i)
+    for i in line.split(' '):
+        if x_value(i) is not None:
+            command.append('X' + str(x_value(i) + x_ctr[active_e]))
+        elif y_value(i) is not None:
+            print y_value(i), y_ctr[active_e], y_value(i) + y_ctr[active_e]
+            command.append('Y' + str(y_value(i) + y_ctr[active_e]))
+        elif z_value(i) is not None:
+            next
+            # command.append('Z' + str(z_value(i)))
+        elif e_value(i) is not None:
+            next
+        else:
+            command.append(i)
    # command.append('; X offset of ' + str(x_offset) + ' Y offset of ' + str(y_offset) + ' and Z offset of ' + str(z_offset) + ' added.')
     return ' '.join(command)
 
@@ -382,64 +382,28 @@ def post_processed_check(line):
         return False if res == [] else True
 
 
-def start_extrude(extruder, e0_pos, e1_pos, z):
-    if extruder is 0:
-        onPin = 16
-        target = e0_pos
-    elif extruder is 1:
-        onPin = 17
-        target = e1_pos
+def start_extrude(active_e, layer_z):
+    onPin = 16
     commands = [
-        'G1 E' + str(target) + ' ; Move extruder to E' + str(extruder) + ' position of ' + str(target),
-        'G1 Z' + str(z[extruder]),
-        'M400 ; wait for commands to complete',
-        'M42 P' + str(onPin) + ' S255 ; turn extruder ' + str(extruder) + ' on',
-        'M400 ; wait for commands to complete']
+        'G1 Z' + str(layer_z[active_e]),
+        'M42 P' + str(onPin) + ' S255 ; turn extruder ' + str(active_e) + ' on']
     return '\n'.join(commands)
 
 
-def stop_extrude(extruder):
-    if extruder is 0:
-        offPin = 16
-        retractDir = -1
-    elif extruder is 1:
-        offPin = 17
-        retractDir = 1
+def stop_extrude(active_e):
+    offPin = 16
     commands = [
-        'M400 ; wait for commands to complete',
         'M42 P' + str(offPin) + ' S0' 
-        ' ; turn extruder ' + str(extruder) + ' off',
-        'M400',
-        'G90'] #,
-        # 'G1 E' + str(mid) + ' F1000 ; Move extruder to mid point']
+        ' ; turn extruder ' + str(active_e) + ' off']
     return '\n'.join(commands)
 
 
-def switch_extruder(extruder, e0_pos, e1_pos, e0_Xctr, e0_Yctr, e1_Xctr, e1_Yctr):
-    if extruder is 0:
-        onPin = 16
-        offPin = 17
-        direction = -1
-        target = e0_pos
-        x = e0_Xctr
-        y = e0_Yctr
-        z = 50
-    elif extruder is 1:
-        onPin = 17
-        offPin = 16
-        direction = 1
-        target = e1_pos
-        x = e1_Xctr
-        y = e1_Yctr
-        z = 50
-
+def switch_extruder(active_e):
+    
     commands = [
-        'T0 ; ensure we keep T0 active to prevent changing pressure',
-        'M400 ; wait for commands to complete',
-        'G1 E' + str(mid) + ' F' + str(e_rate) +
-        ' ; move extruder to midpoint',
-        'M400 ; wait for commands to complete',
-        'G1 Z' + str(z)
+        'C1 S0 ; uncap the extruder',
+        'T' + str(active_e) + ' ; switch the extruder',
+        'C1 S255 ; cap the extruder'
         ]
 
     return '\n'.join(commands)
@@ -586,12 +550,8 @@ def end_print():
     ]
     return '\n'.join(commands)
 
-def post_process(payload, positions, wellPlate, cl_params, tempData):
-    '''
-    Read a gcode file and add M106 after E1.000 lines and
-    M107, M126, M127 after each E peak.
-    '''
-    
+
+def can_post_process_local(payload, positions, wellPlate, cl_params, tempData):
     processed = False
 
     with open(payload["file"], 'r') as f:
@@ -600,8 +560,6 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
                 processed = True
                 return payload
 
-    e0_pos = 46
-    e1_pos = 0
     filename = str(payload["file"])
 
     fName = '.'.join(str.split(filename, '.')[0:-1])
@@ -617,219 +575,85 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
         outputFileName = inputFileName + '_processed_' + timestamp + '.' + fType
         outputFile = fName + '_processed_' + timestamp + '.' + fType
 
-
     if processed == False:
-        wellPlatePositions = calculate_wellplate_positions(positions)
-        rows = sorted(wellPlatePositions[wellPlate].keys())
-
-
         with open(outputFile, 'w') as o:
             o.write('; POST PROCESSED\n')
             active_e = 0
             last_e = 0
             extruding = False
-            layer_z = [positions["tool0"]["Z"],positions["tool1"]["Z"]]
-            for r in rows:
-                columns = sorted(wellPlatePositions[wellPlate][r].keys())
-                for c in columns:
-                    layer = 0
+            x_ctr, y_ctr = map(lambda x: positions[x]['X'], positions), map(lambda x: positions[x]['Y'], positions)
+            x_pos, x_pos_old = map(lambda x: positions[x]['X'], positions), map(lambda x: positions[x]['X'], positions)
+            y_pos, y_pos_old = map(lambda x: positions[x]['Y'], positions), map(lambda x: positions[x]['Y'], positions)
 
-                    e0_Xctr = wellPlatePositions[wellPlate][r][c][0]["X"]
-                    e0_Yctr = wellPlatePositions[wellPlate][r][c][0]["Y"]
-                    e0_Z = wellPlatePositions[wellPlate][r][c][0]["Z"]
+            layer_z = map(lambda x: positions[x]['Z'], positions)
+            layer = 0
 
-                    e1_Xctr = wellPlatePositions[wellPlate][r][c][1]["X"]
-                    e1_Yctr = wellPlatePositions[wellPlate][r][c][1]["Y"]
-                    e1_Z = wellPlatePositions[wellPlate][r][c][1]["Z"]
-                    x_pos, x_pos_old = [e0_Xctr, e1_Xctr], [e0_Xctr, e1_Xctr]
-                    y_pos, y_pos_old = [e0_Yctr, e1_Yctr], [e0_Yctr, e1_Yctr]
-                    with open(filename, 'r') as f:
-                        o.write('G1 Z50\n')
-                        o.write('G1 E' + str(mid) + '\n')
-                        o.write('G21\n')
-                        o.write('G1 X' + str(e0_Xctr) + ' Y' + str(e0_Yctr) + ' F1000\n')
-                        for i, line in enumerate(f):
-                            if z_value(line) is not None:
-                                o.write(stop_extrude(active_e) + '\n')
-                                last_e = 0
-                                extruding = False
-                                if cl_params["cl_layers_enabled"]:
-                                    if layer % cl_params["cl_layers"] == 0 and layer != 0:
-                                        if active_e == 0:
-                                            target_x = e0_Xctr
-                                            target_y = e0_Yctr
-                                        elif active_e == 1:
-                                            target_x = e1_Xctr
-                                            target_y = e1_Yctr
-                                        o.write(crosslink(e1_Xctr, e1_Yctr, target_x, target_y, layer_z, wellPlate, cl_params["cl_duration"], cl_params["cl_intensity"]) + '\n')
-                                
-                                layer_z[0] = z_value(line) + e0_Z
-                                layer_z[1] = z_value(line) + e1_Z
-                                layer += 1
+            with open(filename, 'r') as f:
+                for i, line in enumerate(f):
+                    if z_value(line) is not None:
+                        o.write(stop_extrude(active_e) + '\n')
+                        last_e = 0
+                        extruding = False
+                        layer_z = map(lambda x: positions[x]['Z'] + z_value(line), positions)
+                        layer += 1
+                        next
+                    if m_value(line) == 190.0 or m_value(line) == 104.0 or m_value(line) == 109.0:
+                        next
+                    else:
+                        if g_value(line) is not None:
+                            if g_value(line) == 28.0:
                                 next
-                            if m_value(line) == 190.0 or m_value(line) == 104.0 or m_value(line) == 109.0:
-                                next
-                            else:
-                                if x_value(line) is not None:
-                                    x_pos_old[active_e] = x_pos[active_e]
-                                    if active_e == 0:
-                                        x_pos[active_e] = x_value(line) + e0_Xctr    
-                                    elif active_e == 1:
-                                        x_pos[active_e] = x_value(line) + e1_Xctr
-                                if y_value(line) is not None:
-                                    y_pos_old[active_e] = y_pos[active_e]
-                                    if active_e == 0:
-                                        y_pos[active_e] = y_value(line) + e0_Yctr    
-                                    elif active_e == 1:
-                                        y_pos[active_e] = y_value(line) + e1_Yctr
-                                if g_value(line) is not None:
-                                    if g_value(line) == 28.0:
+                            elif g_value(line) == 1 or e_value(line) is not None:
+                                if g_value(line) == 1:
+                                    if x_value(line) is not None:
+                                        x_pos_old[active_e] = x_pos[active_e]
+                                        x_pos[active_e] = x_value(line) + x_ctr[active_e]
+                                    if y_value(line) is not None:
+                                        y_pos_old[active_e] = y_pos[active_e]
+                                        y_pos[active_e] = y_value(line) + y_ctr[active_e]
+
+                                if e_value(line) is not None:
+                                    d_e = e_value(line) - last_e
+                                    if d_e > 0:
+                                        o.write('G1 X' + str(x_pos_old[active_e]) + ' Y' + str(y_pos_old[active_e]) + '\n')
+                                        if not extruding:
+                                            o.write(start_extrude(active_e, layer_z) + '\n')
+                                            extruding = True
+                                        o.write(g1_modify(line, active_e, x_ctr, y_ctr) + '\n')
+                                        last_e = e_value(line)
                                         next
-                                    elif g_value(line) == 1 or e_value(line) is not None:
-                                        if e_value(line) is not None:
-                                            d_e = e_value(line) - last_e
-                                            if d_e > 0:
-                                                o.write('G1 X' + str(x_pos_old[active_e]) + ' Y' + str(y_pos_old[active_e]) + '\n')
-                                                if not extruding:
-                                                    o.write(start_extrude(active_e, e0_pos, e1_pos, layer_z) + '\n')
-                                                    extruding = True
-                                                if active_e == 0:
-                                                    o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
-                                                elif active_e == 1:
-                                                    o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
-                                                last_e = e_value(line)
-                                                next
-                                            elif d_e < 0:
-                                                if active_e == 0:
-                                                    o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
-                                                elif active_e == 1:
-                                                    o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
-                                                if extruding:
-                                                    o.write(stop_extrude(active_e) + '\n')   
-                                                    extruding = False
-                                                last_e = e_value(line)
-                                                next
-                                        elif g_value(line) == 1:
-                                            if e_value(line) is None and last_e > 0:
-                                                if extruding:
-                                                    o.write(stop_extrude(active_e) + '\n')   
-                                                    extruding = not extruding
-                                                last_e = 0
-                                                if active_e == 0:
-                                                    o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
-                                                elif active_e == 1:
-                                                    o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
-                                                next
-                                            else:
-                                                if active_e == 0:
-                                                    o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
-                                                elif active_e == 1:
-                                                    o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
+                                    elif d_e < 0:
+                                        o.write(g1_modify(line, active_e, x_ctr, y_ctr))
+                                        if extruding:
+                                            o.write(stop_extrude(active_e) + '\n')
+                                            extruding = False
+                                        last_e = e_value(line)
+                                        next
+                                elif g_value(line) == 1:
+                                    if e_value(line) is None and last_e > 0:
+                                        if extruding:
+                                            o.write(stop_extrude(active_e) + '\n')
+                                            extruding = False
+                                        last_e = 0
+                                        o.write(g1_modify(line, active_e, x_ctr, y_ctr) + '\n')
+                                        next
                                     else:
-                                        o.write(line)
-                                elif line.startswith('T') and t_value(line) is not None:
-                                    active_e = int(t_value(line))
-                                    o.write(switch_extruder(active_e, e0_pos, e1_pos, e0_Xctr, e0_Yctr, e1_Xctr, e1_Yctr) + '\n')
-                                elif m_value(line) == 106.0:
-                                    o.write(start_extrude(active_e, e0_pos, e1_pos, layer_z) + '\n')
-                                elif m_value(line) == 107.0:
-                                    o.write(stop_extrude(active_e) + '\n')
-                                else:
-                                    o.write(line)
-                        if cl_params["cl_end"]:
-                            o.write(stop_extrude(active_e) + '\n')
-                            if active_e == 0:
-                                target_x = e0_Xctr
-                                target_y = e0_Yctr
-                            elif active_e == 1:
-                                target_x = e1_Xctr
-                                target_y = e1_Yctr
-                            o.write(crosslink(e1_Xctr, e1_Yctr, target_x, target_y, layer_z, wellPlate, cl_params["cl_end_duration"], cl_params["cl_end_intensity"])+ '\n')
-                    f.close()
+                                        o.write(g1_modify(line, active_e, x_ctr, y_ctr) + '\n')
+                            else:
+                                o.write(line)
+                        elif line.startswith('T') and t_value(line) is not None:
+                            active_e = int(t_value(line))
+                            o.write(switch_extruder(active_e) + '\n')
+                        elif m_value(line) == 106.0:
+                            o.write(start_extrude(active_e, layer_z) + '\n')
+                        elif m_value(line) == 107.0:
+                            o.write(stop_extrude(active_e, layer_z) + '\n')
+                        else:
+                            o.write(line)
+                f.close()
             o.write(end_print() + '\n')
-        o.close()
+        o.close
 
-    if analytics:
-        if connected_to_biobots() and current_user:
-            user_info = {
-                'email': current_user.get_email(),
-                'serial': current_user.get_serial()
-            }
-
-            permission = requests.post(biobots_url+'/permission', json=user_info)
-            
-            credentials = json.loads(permission.text)["Credentials"]
-            
-            s3 = boto3.resource('s3', aws_access_key_id=credentials["AccessKeyId"], aws_secret_access_key=credentials["SecretAccessKey"], aws_session_token=credentials["SessionToken"])
-            folder = user_info['email'] + '/' + str(user_info['serial']) + '/' + timestamp + '/'
-            inputObject = s3.Object('biobots-analytics', folder + inputFileName);
-            inputObject.put(ACL='public-read', Body=open(filename, 'rb'))
-            outputObject = s3.Object('biobots-analytics', folder + outputFileName);
-            outputObject.put(ACL='public-read', Body=open(outputFile, 'rb'))
-            if processed == True:
-                tool0 = {
-                    "temperature": {
-                        "actual": tempData['tool0']['actual'] if tempData['tool0'] else 0,
-                        "target": tempData['tool0']['target'] if tempData['tool0'] else 0
-                    },
-                    "pressure": tempData['bed']['actual'] if 'bed' in tempData.keys() else 0,
-                    "X": "",
-                    "Y": "",
-                    "Z": "",
-                    "E": e0_pos
-                }
-                tool1 = {
-                    "temperature": {
-                        "actual": tempData['tool1']['actual'] if tempData['tool1'] else 0,
-                        "target": tempData['tool1']['target'] if tempData['tool1'] else 0
-                    },
-                    "pressure": tempData['tool2']['actual'] if 'tool2' in tempData.keys() else 0,
-                    "X": "",
-                    "Y": "",
-                    "Z": "",
-                    "E": e1_pos
-                }
-            elif processed == False:
-                tool0 = {
-                    "temperature": {
-                        "actual": tempData['tool0']['actual'] if tempData['tool0'] else 0,
-                        "target": tempData['tool0']['target'] if tempData['tool0'] else 0
-                    },
-                    "pressure": tempData['bed']['actual'] if 'bed' in tempData.keys() else 0,
-                    "X": positions["tool0"]["X"],
-                    "Y": positions["tool0"]["Y"],
-                    "Z": positions["tool0"]["Z"],
-                    "E": e0_pos
-                }
-                tool1 = {
-                    "temperature": {
-                        "actual": tempData['tool1']['actual'] if tempData['tool1'] else 0,
-                        "target": tempData['tool1']['target'] if tempData['tool1'] else 0
-                    },
-                    "pressure": tempData['tool2']['actual'] if 'tool2' in tempData.keys() else 0,
-                    "X": positions["tool1"]["X"],
-                    "Y": positions["tool1"]["Y"],
-                    "Z": positions["tool1"]["Z"],
-                    "E": e1_pos
-                }
-
-            print_info = {
-                'input': inputObject.key,
-                'output': outputObject.key,
-                'tool0': tool0,
-                'tool1': tool1,
-                'positions': positions,
-                'wellPlate': wellPlate,
-                'cl_params': cl_params
-            }
-
-            print print_info
-
-            data = {
-                'user_info': user_info,
-                'print_info': print_info
-            };
-            requests.post(biobots_url+'/analytics', json=data).text;
     if processed == True:
         return payload
     else:
@@ -839,43 +663,8 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
             "origin": payload["origin"]
         }
 
-
-def bb2_post_process(payload, positions, wellPlate, cl_params, tempData):
-    processed = False
-
-    with open(payload["file"], 'r') as f:
-        for i, line in enumerate(f):
-            if post_processed_check(line) == True:
-                processed = True
-                return payload
-
-    filename = str(payload["file"])
-
-    fName = '.'.join(str.split(filename, '.')[0:-1])
-    fType = str.split(filename, '.')[-1]
-    timeformat = '%Y-%m-%d-%H-%M-%S'
-    timestamp = datetime.datetime.fromtimestamp(time.time()).strftime(timeformat)
-    inputFileName = '.'.join(str.split(str.split(filename, '/')[-1], '.')[0:-1]) + '.' + fType
-    
-    if processed == True:
-        outputFileName = inputFileName + timestamp + '.' + fType
-        outputFile = fName + timestamp + '.' + fType    
-    elif processed == False:
-        outputFileName = inputFileName + '_processed_' + timestamp + '.' + fType
-        outputFile = fName + '_processed_' + timestamp + '.' + fType
-
-    if processed == False:
-        with open(outputFile, 'w') as o:
-            o.write('; POST PROCESSED\n')
-            active_e = 0
-            last_e = 0
-            extruding = False
-
-            with open(filename, 'r') as f:
-                for i, line in enumerate(f):
-                    if z_value(line) is not None:
-                        o.write
-    return payload
+def can_post_process_api(apiPrint):
+    return apiPrint
 
 test_payload = {
     'origin': 'local', 
@@ -906,6 +695,46 @@ cl_params = {
     "cl_end_intensity": 100
 }
 
+payload_6 = {
+    'origin': 'local',
+    'file': 'test_files/bb2.gcode',
+    'filename': u'test_files/bb2.gcode'
+}
+
+positions_6 = {
+            "A": {
+                "X": 107,
+                "Y": 57,
+                "Z": 0
+                },
+            "B": {
+                "X": 107,
+                "Y": 57,
+                "Z": 0
+                },
+            "C": {
+                "X": 107,
+                "Y": 57,
+                "Z": 0
+                },
+            "D": {
+                "X": 107,
+                "Y": 57,
+                "Z": 0
+                },
+            "E": {
+                "X": 107,
+                "Y": 57,
+                "Z": 0
+                },
+            "F": {
+                "X": 107,
+                "Y": 57,
+                "Z": 0
+                }
+            }
+
 # post_process(test_payload, test_positions, 1, cl_params, None)
+can_post_process_local(payload_6, positions_6, 1, cl_params, None)
 # print calculate_wellplate_positions(test_positions, 24)
 

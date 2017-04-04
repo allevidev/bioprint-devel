@@ -379,20 +379,25 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		self.commands("M221 S%d" % factor)
 
 	def crosslink(self, cl_params):
-		print "HERE"
 		self.cl_params = cl_params
 
 	def light_intensity(self, intensity):
 		self.commands("M42 P4 S" + str(intensity))
 
-	def select_file(self, path, sd, printAfterSelect=False):
+	def select_file(self, path, sd, printAfterSelect=False, apiPrint=None):
 		if self._comm is None or (self._comm.isBusy() or self._comm.isStreaming()):
 			self._logger.info("Cannot load file: printer not connected or currently busy")
 			return
 
 		self._printAfterSelect = printAfterSelect
-		
-		self._comm.selectFile("/" + path if sd else path, sd, self.extruder_positions, self.wellplate, self.cl_params, self.get_current_temperatures())
+
+		print '\n\n\n\n\n', path, '\n\n\n\n'
+
+		if apiPrint is None:
+			self._comm.selectFile("/" + path if sd else path, sd, self.extruder_positions, self.wellplate, self.cl_params, self.get_current_temperatures())
+		else:
+			self._comm.selectFile(path, apiPrint)
+			
 		self._setProgressData(0, None, None, None)
 		self._setCurrentZ(None)
 
@@ -413,10 +418,11 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 			return
 		if self._selectedFile is None:
 			return
-		#if self.extruder_positions is None:
-		#	return 
-		#if self.wellplate is None:
-		#	return
+		if self._type != 'can':
+			if self.extruder_positions is None:
+				return 
+			if self.wellplate is None:
+				return
 
 		rolling_window = None
 		threshold = None
