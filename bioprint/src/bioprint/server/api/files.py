@@ -273,6 +273,25 @@ def readGcodeFile(target, filename):
 
 	return jsonify(file)
 
+@api.route("/files/api", methods=["POST"])
+def apiFileCommand():
+	valid_commands = {
+		"select": []
+	}
+
+	command, data, response = get_json_command_from_request(request)
+	if response is not None:
+		return response
+
+	if command == "select":
+		printAfterLoading = False
+		if "print" in data.keys() and data["print"] in valid_boolean_trues:
+			if not printer.is_operational():
+				return make_response("Printer is not operational, cannot directly start printing", 409)
+			printAfterLoading = True
+
+		print data
+
 
 @api.route("/files/<string:target>/<path:filename>", methods=["POST"])
 @restricted_access
@@ -288,6 +307,9 @@ def gcodeFileCommand(filename, target):
 		"select": [],
 		"slice": []
 	}
+
+	print '\n\n\n\n\n', request, '\n\n\n\n'
+		pass
 
 	command, data, response = get_json_command_from_request(request, valid_commands)
 	if response is not None:
