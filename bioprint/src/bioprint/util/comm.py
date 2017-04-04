@@ -639,7 +639,7 @@ class CANCom(object):
                 self._process_command_phase("sent", command, command_type, can=can)
 
                 use_up_clear = self._unknownCommandsNeedAck
-                if can is not None:
+                if gcode is not None:
                     use_up_clear = True
 
                 if use_up_clear:
@@ -726,7 +726,6 @@ class CANCom(object):
 
     def sendCanMessage(self, msg):
         try:
-            print msg
             if len(msg) == 2:
                 can_msg = msg[0]
                 sending_lock = msg[1]
@@ -740,10 +739,8 @@ class CANCom(object):
             
             self._can.send(can_msg)
             self._log("Send: ID: %s Data: %s" % ( can_msg.arbitration_id, binascii.hexlify(can_msg.data) ))
-            print "Mesage sent on", self._can.channel_info
             return (msg.arbitration_id, True)
         except can.CanError:
-            print "Message NOT sent"
             return (msg.arbitration_id, False)
 
     def _doSendWithoutChecksum(self, cmd):
@@ -752,8 +749,6 @@ class CANCom(object):
 
         msgs, relativePos, currentTool = can_command_for_cmd(cmd, relative_pos=self._relativePos, current_tool=self._currentTool)
        
-        print msgs
-
         msg_responses = map(self.sendCanMessage, msgs)
 
         self._relativePos = relativePos
@@ -769,22 +764,21 @@ class CANCom(object):
         eventManager().fire(Events.CONNECTED)
 
     def _sendFromQueue(self):
-        if not self._commandQueue.empty() and len(self._sendingLocks) == 0:
-            entry = self._commandQueue.get()
-            print isinstance(entry, tuple) 
-            if isinstance(entry, tuple):
-                if len(entry) == 3:
-                    priority, cmd, cmd_type = entry
-                elif len(entry) == 2:
-                    priority, cmd = entry
-                    cmd_type = None
+        if not self._commandQueue.empty():
+            if len(self._sendingLocks) == 0:
+                entry = self._commandQueue.get()
+                if isinstance(entry, tuple):
+                    if len(entry) == 3:
+                        priority, cmd, cmd_type = entry
+                    elif len(entry) == 2:
+                        priority, cmd = entry
+                        cmd_type = None
+                    else:
+                        return False
+                    self._sendCommand(cmd, cmd_type=cmd_type)
+                    return True
                 else:
                     return False
-                print cmd
-                self._sendCommand(cmd, cmd_type=cmd_type)
-                return True
-            else:
-                return False
 
     def _openCAN(self):
         self._log("Connecting to CAN")
@@ -834,10 +828,8 @@ class CANCom(object):
             self._clear_to_send.set()
             try:
                 msg = self._readline()
-                if len(self._sendingLocks) == 0:
-                    self._clear_to_send.set()
-                else:
-                    if msg is not None:
+                if msg is not None:
+                    if len(self._sendingLocks) > 0:
                         if str(msg.arbitration_id) in self._sendingLocks:
                             if self._sendingLocks[str(msg.arbitration_id)][:1] == msg.data[:1]:
                                 self._clear_to_send.set()
@@ -864,19 +856,15 @@ class CANCom(object):
                         self._log("Awaiting responses from nodes: %s" % self._sendingLocks.keys())
                         pass
                 elif self._state == self.STATE_PRINTING:
-                    print len(self._sendingLocks)
                     if len(self._sendingLocks) is 0:
-                        if self._resentSwallowNextOk:
-                            self._resendSwallowNextOk = False
-                        elif self._resendDelta is not None:
-                            self._resendNextCommand()
+                        if self._sendFromQueue():
+                            pass
                         else:
-                            if self._sendFromQueue():
-                                print "HERE"
-                                pass
-                            else:
-                                print "HERE2"
-                                self._sendNext()
+                            self._sendNext()
+
+                    else:
+                        self._log("Awaiting responses from nodes: %s" % self._sendingLocks.keys())
+                        pass
             except:
                 self._log("Something crashed inside the CAN connection loop, please report this in bioprint's bug tracker:")
 
@@ -924,8 +912,6 @@ class CANCom(object):
 
 
     def selectFile(self, filename, sd, extruders, wellplate, cl_params, tempData):
-        print extruders, wellplate, cl_params, tempData
-
         if extruders is None:
             extruders = self.calibrate()
 
@@ -1055,6 +1041,13 @@ class CANCom(object):
             self.sendGcodeScript("afterPrintDone", replacements=dict(event=payload))
 
         return line
+
+    def _sendNext(self):
+        with self._sendNextLock:
+            line = self._getNext()
+            if line is not None:
+                self._sendCommand(line)
+                self._callback.on_comm_progress()
 
 class MachineCom(object):
     STATE_NONE = 0
