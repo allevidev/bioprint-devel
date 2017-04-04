@@ -728,14 +728,9 @@ class CANCom(object):
         try:
             if len(msg) == 2:
                 can_msg = msg[0]
-                sending_lock = msg[1]
 
             else:
                 can_msg = msg
-                sending_lock = False
-
-            if sending_lock is True:
-                self._sendingLocks[str(can_msg.arbitration_id)] = can_msg.data
             
             self._can.send(can_msg)
             self._log("Send: ID: %s Data: %s" % ( can_msg.arbitration_id, binascii.hexlify(can_msg.data) ))
@@ -743,13 +738,28 @@ class CANCom(object):
         except can.CanError:
             return (msg.arbitration_id, False)
 
+    def setSendingLock(self, msg):
+        if len(msg) == 2:
+            can_msg = msg[0]
+            sending_lock = msg[1]
+
+        else:
+            can_msg = msg
+            sending_lock = False
+
+        if sending_lock is True:
+            self._sendingLocks[str(can_msg.arbitration_id)] = can_msg.data
+
+        return (can_msg, sending_lock)
+
     def _doSendWithoutChecksum(self, cmd):
         if self._can is None:
             return
 
         msgs, relativePos, currentTool = can_command_for_cmd(cmd, relative_pos=self._relativePos, current_tool=self._currentTool)
        
-        msg_responses = map(self.sendCanMessage, msgs)
+        msg_success = map(self.sendCanMessage, msgs)
+        sending_locks = map(self.setSendingLock, msgs)
 
         self._relativePos = relativePos
         self._currentTool = currentTool
