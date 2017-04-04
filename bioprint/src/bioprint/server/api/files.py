@@ -309,7 +309,6 @@ def gcodeFileCommand(filename, target):
 	}
 
 	print '\n\n\n\n\n', request, '\n\n\n\n'
-		pass
 
 	command, data, response = get_json_command_from_request(request, valid_commands)
 	if response is not None:
