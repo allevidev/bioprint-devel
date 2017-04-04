@@ -726,26 +726,30 @@ class CANCom(object):
 
     def sendCanMessage(self, msg):
         try:
-            if len(msg) == 2:
+            if len(msg) == 3:
+                can_msg = msg[0],
+                delay = msg[2]
+            elif len(msg) == 2:
                 can_msg = msg[0]
-
+                delay = 0
             else:
                 can_msg = msg
+                delay = 0
 
             print "Sending...", time.time()
+            self.setSendingLock(msg)
             self._can.send(can_msg)
             self._log("Send: ID: %s Data: %s" % ( can_msg.arbitration_id, binascii.hexlify(can_msg.data) ))
-            
+            time.sleep(delay)
             print "Ready to send next", time.time()
             return msg
         except can.CanError:
             return msg
 
     def setSendingLock(self, msg):
-        if len(msg) == 2:
+        if len(msg) > 0:
             can_msg = msg[0]
             sending_lock = msg[1]
-
         else:
             can_msg = msg
             sending_lock = False
@@ -767,10 +771,137 @@ class CANCom(object):
         self._relativePos = relativePos
         self._currentTool = currentTool
 
+    def buildCalibMessage(self, msg):
+        return (can.Message(arbitration_id=msg["node_id"], data=msg["data"], extended_id=False), False, msg["delay"])
+
+    def calibratePrinter(self, delay=1):
+        x_curr_msg = {
+            "node_id": 0x01,
+            "data": [ 0x09, 0x01, 0xF4, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay": 1
+        }
+        x_ustep_msg = {
+            "node_id": 0x01,
+            "data": [ 0x05, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay": 1
+        }
+        x_screw_dist_turn_msg = {
+            "node_id": 0x01,
+            "data": [ 0x0B, 0x13, 0x15, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay": 1
+        }
+        x_step_rev_msg = {
+            "node_id": 0x01,
+            "data": [ 0x0C, 0x01, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay": 1
+        }
+        x_lin_act_max_pos = {
+            "node_id": ,
+            "data": [ 0x0D, 0x00, 0x03, 0x0D, 0x40, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        x_lin_act_min_pos = {
+            "node_id": ,
+            "data": [ 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        x_calib_messages = [x_curr_msg, x_ustep_msg, x_screw_dist_turn_msg, x_step_rev_msg, x_lin_act_max_pos, x_lin_act_min_pos]
+        x_to_send = map(self.buildCalibMessage, x_calib_messages)
+        x_sent = map(self.sendCanMessage, x_to_send)
+
+        y_curr_msg = {
+            "node_id": ,
+            "data": [ 0x09, 0x01, 0xF4, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        y_ustep_msg = {
+            "node_id": ,
+            "data": [ 0x05, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        y_screw_dist_turn_msg = {
+            "node_id": ,
+            "data": [ 0x0B, 0x13, 0x15, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        y_step_rev_msg = {
+            "node_id": ,
+            "data": [ 0x0C, 0x01, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        y_lin_act_max_pos = {
+            "node_id": ,
+            "data": [ 0x0D, 0x00, 0x01, 0x5F, 0x90, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        y_lin_act_min_pos = {
+            "node_id": ,
+            "data": [ 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        y_calib_messages = [y_curr_msg, y_ustep_msg, y_screw_dist_turn_msg, y_step_rev_msg, y_lin_act_max_pos, y_lin_act_min_pos]
+        y_to_send = map(self.buildCalibMessage, y_calib_messages)
+        y_sent = map(self.sendCanMessage, y_to_send)
+
+        z_curr_msg = {
+            "node_id": ,
+            "data": [ 0x09, 0x03, 0xE8, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        z_ustep_msg = {
+            "node_id": ,
+            "data": [ 0x05, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        z_screw_dist_turn_msg = {
+            "node_id": ,
+            "data": [ 0x0B, 0x09, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        z_step_rev_msg = {
+            "node_id": ,
+            "data": [ 0x0C, 0x00, 0xC8, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        z_lin_act_max_pos = {
+            "node_id": ,
+            "data": [ 0x0D, 0x00, 0x00, 0xEA, 0x60, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        z_lin_act_min_pos = {
+            "node_id": ,
+            "data": [ 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        z_calib_messages = [z_curr_msg, z_ustep_msg, z_screw_dist_turn_msg, z_step_rev_msg, z_lin_act_max_pos, z_lin_act_min_pos]
+        z_to_send = map(self.buildCalibMessage, z_calib_messages)
+        z_sent = map(self.sendCanMessage, z_to_send)
+
+        turr_curr_msg = {
+            "node_id": ,
+            "data": [ 0x09, 0x03, 0xE8, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        turr_ustep_msg = {
+            "node_id": ,
+            "data": [ 0x05, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        turr_step_rev_msg = {
+            "node_id": ,
+            "data": [ 0x0C, 0x01, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "delay":1
+        }
+        turr_calib_messages = [turr_curr_msg, turr_ustep_msg, turr_step_rev_msg]
+        turr_to_send = map(self.buildCalibMessage, turr_calib_messages)
+        turr_sent = map(self.sendCanMessage, turr_to_send)
+
     def _onConnected(self):
         self._timeout = settings().getFloat(["can", "timeout", "communication"])
        # self._temperature_timer = RepeatedTimer(lambda: get_can_interval("temperature", default_value=4.0), self._poll_temperature, run_first=True)
         #self._temperature_timer.start()
+
+        self.calibratePrinter()
 
         self._changeState(self.STATE_OPERATIONAL)
 
