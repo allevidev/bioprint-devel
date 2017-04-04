@@ -810,32 +810,32 @@ class CANCom(object):
         x_sent = map(self.sendCanMessage, x_to_send)
 
         y_curr_msg = {
-            "node_id": ,
+            "node_id": 0x02,
             "data": [ 0x09, 0x01, 0xF4, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
         y_ustep_msg = {
-            "node_id": ,
+            "node_id": 0x02,
             "data": [ 0x05, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
         y_screw_dist_turn_msg = {
-            "node_id": ,
+            "node_id": 0x02,
             "data": [ 0x0B, 0x13, 0x15, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
         y_step_rev_msg = {
-            "node_id": ,
+            "node_id": 0x02,
             "data": [ 0x0C, 0x01, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
         y_lin_act_max_pos = {
-            "node_id": ,
+            "node_id": 0x02,
             "data": [ 0x0D, 0x00, 0x01, 0x5F, 0x90, 0x00, 0x00, 0x00 ],
             "delay":1
         }
         y_lin_act_min_pos = {
-            "node_id": ,
+            "node_id": 0x02,
             "data": [ 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
@@ -844,32 +844,32 @@ class CANCom(object):
         y_sent = map(self.sendCanMessage, y_to_send)
 
         z_curr_msg = {
-            "node_id": ,
+            "node_id": 0x03,
             "data": [ 0x09, 0x03, 0xE8, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
         z_ustep_msg = {
-            "node_id": ,
+            "node_id": 0x03,
             "data": [ 0x05, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
         z_screw_dist_turn_msg = {
-            "node_id": ,
+            "node_id": 0x03,
             "data": [ 0x0B, 0x09, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
         z_step_rev_msg = {
-            "node_id": ,
+            "node_id": 0x03,
             "data": [ 0x0C, 0x00, 0xC8, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
         z_lin_act_max_pos = {
-            "node_id": ,
+            "node_id": 0x03,
             "data": [ 0x0D, 0x00, 0x00, 0xEA, 0x60, 0x00, 0x00, 0x00 ],
             "delay":1
         }
         z_lin_act_min_pos = {
-            "node_id": ,
+            "node_id": 0x03,
             "data": [ 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
@@ -878,17 +878,17 @@ class CANCom(object):
         z_sent = map(self.sendCanMessage, z_to_send)
 
         turr_curr_msg = {
-            "node_id": ,
+            "node_id": 0x04,
             "data": [ 0x09, 0x03, 0xE8, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
         turr_ustep_msg = {
-            "node_id": ,
+            "node_id": 0x04,
             "data": [ 0x05, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
         turr_step_rev_msg = {
-            "node_id": ,
+            "node_id": 0x04,
             "data": [ 0x0C, 0x01, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
