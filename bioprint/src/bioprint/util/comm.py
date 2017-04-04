@@ -25,6 +25,7 @@ from flask.ext.login import current_user
 from bioprint.util.avr_isp import stk500v2
 from bioprint.util.avr_isp import ispBase
 from bioprint.util.biobot1 import post_process
+from bioprint.util.can import can_post_process
 
 from bioprint.settings import settings, default_settings
 from bioprint.events import eventManager, Events
