@@ -834,17 +834,21 @@ class CANCom(object):
             self._clear_to_send.set()
             try:
                 msg = self._readline()
-                if msg is not None:
-                    if str(msg.arbitration_id) in self._sendingLocks:
-                        if self._sendingLocks[str(msg.arbitration_id)][:1] == msg.data[:1]:    
-                            self._sendingLocks.pop(str(msg.arbitration_id))
-                            continue
+                if len(self._sendingLocks) == 0:
+                    self._clear_to_send.set()
+                else:
+                    if msg is not None:
+                        if str(msg.arbitration_id) in self._sendingLocks:
+                            if self._sendingLocks[str(msg.arbitration_id)][:1] == msg.data[:1]:
+                                self._clear_to_send.set()
+                                self._sendingLocks.pop(str(msg.arbitration_id))
+                                continue
+                            else:
+                                pass
                         else:
                             pass
                     else:
-                        pass
-                else:
-                    continue
+                        self._clear_to_send.set()
 
                 if self._state == self.STATE_CONNECTING:
                     self._clear_to_send.set()
