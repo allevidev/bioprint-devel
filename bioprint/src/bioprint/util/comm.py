@@ -731,12 +731,15 @@ class CANCom(object):
 
             else:
                 can_msg = msg
-            
+
+            print "Sending...", time.time()
             self._can.send(can_msg)
             self._log("Send: ID: %s Data: %s" % ( can_msg.arbitration_id, binascii.hexlify(can_msg.data) ))
-            return (msg.arbitration_id, True)
+            
+            print "Ready to send next", time.time()
+            return msg
         except can.CanError:
-            return (msg.arbitration_id, False)
+            return msg
 
     def setSendingLock(self, msg):
         if len(msg) == 2:
@@ -757,7 +760,7 @@ class CANCom(object):
             return
 
         msgs, relativePos, currentTool = can_command_for_cmd(cmd, relative_pos=self._relativePos, current_tool=self._currentTool)
-       
+
         msg_success = map(self.sendCanMessage, msgs)
         sending_locks = map(self.setSendingLock, msgs)
 
@@ -924,6 +927,8 @@ class CANCom(object):
     def selectFile(self, filename, sd, extruders, wellplate, cl_params, tempData):
         if extruders is None:
             extruders = self.calibrate()
+
+        wellplate = 1
 
         if self.isBusy():
             return
@@ -3340,7 +3345,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
     if not cmd:
         return None
 
-    pressure_node_id = 0x00
+    pressure_node_id = 0x00A
 
     # Node IDs for all the movement axes
     x_axis_node_id = 0x01
@@ -3354,7 +3359,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
     G = gcodeInterpreter.getCodeInt(cmd, 'G')
     M = gcodeInterpreter.getCodeInt(cmd, 'M')
     T = gcodeInterpreter.getCodeInt(cmd, 'T')
-
+    C = gcodeInterpreter.getCodeInt(cmd, 'C')
     msgs = []
 
     if T is not None:
@@ -3364,8 +3369,19 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
         tool_change_sending_lock = True
 
         msgs.append((tool_change_msg, tool_change_sending_lock))
-
         current_tool = T
+
+    if C is not None:
+        s = gcodeInterpreter.getCodeFloat(cmd, 'S')
+        if s > 0:
+            tool_cap_val = 1
+        else:
+            tool_cap_val = 0
+        tool_cap_data =  [ 0x03, tool_cap_val ]
+        tool_cap_msg = can.Message(arbitration_id=pressure_node_id, data=tool_cap_data, extended_id=False)
+        tool_cap_sending_lock = False
+
+        msgs.append((tool_cap_msg, tool_cap_sending_lock))
 
     if G is not None:
         if G == 0 or G == 1:
@@ -3373,8 +3389,8 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
             y = gcodeInterpreter.getCodeFloat(cmd, 'Y')
             z = gcodeInterpreter.getCodeFloat(cmd, 'Z')
             e = gcodeInterpreter.getCodeFloat(cmd, 'E')
-            f = gcodeInterpreter.getCodeFloat(cmd, 'F')
-
+            #f = gcodeInterpreter.getCodeFloat(cmd, 'F')
+            f = None
             if f is not None:
                 feedrate_data = [0x02]
                 feedrate_data.extend(feedrate_to_data(f))
@@ -3393,7 +3409,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
 
             if x is not None:
                 if relative_pos == False:
-                    x_pos_data = [ 0x01 ]
+                    x_pos_data = [ 0x00 ]
                 else:
                     x_pos_data = [ 0x03 ]
                 x_pos_data.extend(pos_to_data(x))
@@ -3402,7 +3418,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
 
             if y is not None:
                 if relative_pos == False:
-                    y_pos_data = [ 0x01 ]
+                    y_pos_data = [ 0x00 ]
                 else:
                     y_pos_data = [ 0x03 ]
                 y_pos_data.extend(pos_to_data(y))
@@ -3411,7 +3427,7 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
 
             if z is not None:
                 if relative_pos == False:
-                    z_pos_data = [ 0x01 ]
+                    z_pos_data = [ 0x00 ]
                 else:
                     z_pos_data = [ 0x03 ]
                 z_pos_data.extend(pos_to_data(z))
