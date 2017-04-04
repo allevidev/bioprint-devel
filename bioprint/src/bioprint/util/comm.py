@@ -1022,8 +1022,8 @@ class CANCom(object):
     def calibrateTools(self):
         return {
             "A": {
-                "X": 0,
-                "Y": 0,
+                "X": 107,
+                "Y": 57,
                 "Z": 0
                 },
             "B": {
@@ -1057,7 +1057,7 @@ class CANCom(object):
 
     def selectFile(self, filename, sd, extruders, wellplate, cl_params, tempData):
         if extruders is None:
-            extruders = self.calibrate()
+            extruders = self.calibrateTools()
 
         wellplate = 1
 

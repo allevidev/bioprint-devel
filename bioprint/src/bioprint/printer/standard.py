@@ -413,10 +413,10 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 			return
 		if self._selectedFile is None:
 			return
-		if self.extruder_positions is None:
-			return 
-		if self.wellplate is None:
-			return
+		#if self.extruder_positions is None:
+		#	return 
+		#if self.wellplate is None:
+		#	return
 
 		rolling_window = None
 		threshold = None
