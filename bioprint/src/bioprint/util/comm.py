@@ -796,12 +796,12 @@ class CANCom(object):
             "delay": 1
         }
         x_lin_act_max_pos = {
-            "node_id": ,
+            "node_id": 0x01,
             "data": [ 0x0D, 0x00, 0x03, 0x0D, 0x40, 0x00, 0x00, 0x00 ],
             "delay":1
         }
         x_lin_act_min_pos = {
-            "node_id": ,
+            "node_id": 0x01,
             "data": [ 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
