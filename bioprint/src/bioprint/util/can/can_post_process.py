@@ -735,6 +735,6 @@ positions_6 = {
             }
 
 # post_process(test_payload, test_positions, 1, cl_params, None)
-can_post_process_local(payload_6, positions_6, 1, cl_params, None)
+#can_post_process_local(payload_6, positions_6, 1, cl_params, None)
 # print calculate_wellplate_positions(test_positions, 24)
 
