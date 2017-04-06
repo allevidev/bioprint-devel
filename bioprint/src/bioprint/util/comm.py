@@ -284,7 +284,7 @@ class CANCom(object):
         self._sendNextLock = threading.Lock()
         self._sendingLock = threading.RLock()
         self._sendingLocks = {}
-
+        self._receivedLocks = []
         # monitoring thread
         self._monitoring_active = True
         self.monitoring_thread = threading.Thread(target=self._monitor, name="comm._monitor")
@@ -737,7 +737,7 @@ class CANCom(object):
                 can_msg = msg
                 delay = 0
 
-            print "Sending...", time.time()
+            print "Setting sending lock for msg: ID: %s Data: %s Timestamp: %s" % ( can_msg.arbitration_id, binascii.hexlify(can_msg.data), time.time())
             self.setSendingLock(msg)
             self._can.send(can_msg)
             self._log("Send: ID: %s Data: %s" % ( can_msg.arbitration_id, binascii.hexlify(can_msg.data) ))
@@ -767,7 +767,6 @@ class CANCom(object):
         msgs, relativePos, currentTool = can_command_for_cmd(cmd, relative_pos=self._relativePos, current_tool=self._currentTool)
 
         msg_success = map(self.sendCanMessage, msgs)
-        sending_locks = map(self.setSendingLock, msgs)
 
         self._relativePos = relativePos
         self._currentTool = currentTool
@@ -924,6 +923,8 @@ class CANCom(object):
                     return True
                 else:
                     return False
+            else:
+                print '\n\n\n\n', self._receivedLocks, self._sendingLocks, '\n\n\n\n'
 
     def _openCAN(self):
         self._log("Connecting to CAN")
@@ -985,6 +986,11 @@ class CANCom(object):
                         else:
                             pass
                     else:
+                        print "HITTING IN HERE"
+                        if msg.arbitration_id in [ 0x01, 0x02, 0x03, 0x04 ]:
+                            if msg.data[:1] in [ 0x00, 0x01, 0x03 ]:
+                                self._receivedLocks.append(msg)
+                        
                         self._clear_to_send.set()
 
                 if self._state == self.STATE_CONNECTING:
@@ -1028,28 +1034,28 @@ class CANCom(object):
                 "Z": 0
                 },
             "B": {
-                "X": 0,
-                "Y": 0,
+                "X": 107,
+                "Y": 57,
                 "Z": 0
                 },
             "C": {
-                "X": 0,
-                "Y": 0,
+                "X": 107,
+                "Y": 57,
                 "Z": 0
                 },
             "D": {
-                "X": 0,
-                "Y": 0,
+                "X": 107,
+                "Y": 57,
                 "Z": 0
                 },
             "E": {
-                "X": 0,
-                "Y": 0,
+                "X": 107,
+                "Y": 57,
                 "Z": 0
                 },
             "F": {
-                "X": 0,
-                "Y": 0,
+                "X": 107,
+                "Y": 57,
                 "Z": 0
                 }
             }
@@ -1062,6 +1068,8 @@ class CANCom(object):
         if self.isBusy():
             return
 
+        print filename, sd, wellplate, extruder_positions, cl_params, tempData
+
         if apiPrint is None and filename is not None:
             selectedFile = PrintingGcodeFileInformation(filename, offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
 
@@ -1073,9 +1081,11 @@ class CANCom(object):
 
             selectedFile.close()
 
-            processed = post_process.bb2_post_process_local(payload, extruder_offsets)
+            processed = can_post_process.can_post_process_local(payload=payload,
+                    positions=extruder_positions,
+                    wellPlate=wellplate, cl_params=cl_params, tempData=tempData)
         elif apiPrint is not None:
-            processed = post_process.bb2_post_process_api(apiPrint)
+            processed = can_post_process.can_post_process_api(apiPrint)
         else:
             self._log("No print file, local or API selected")
 
@@ -1164,6 +1174,7 @@ class CANCom(object):
             msg = self._bufferedReader.get_message()
 
             if msg is not None:
+                print "Received msg: ID: %s Data: %s Timestamp: %s" % ( msg.arbitration_id, binascii.hexlify(msg.data), time.time() )
                 self._log("Recv: ID: %s Data: %s" % ( msg.arbitration_id, binascii.hexlify(msg.data) ))
                 return msg
             else:

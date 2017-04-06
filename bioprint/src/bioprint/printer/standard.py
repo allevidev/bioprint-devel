@@ -394,7 +394,12 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		print '\n\n\n\n\n', path, '\n\n\n\n'
 
 		if apiPrint is None:
-			self._comm.selectFile("/" + path if sd else path, sd, self.extruder_positions, self.wellplate, self.cl_params, self.get_current_temperatures())
+			self._comm.selectFile(filename="/" + path if sd else path,
+                                sd=sd,
+                                extruder_positions=self.extruder_positions,
+                                wellplate=self.wellplate,
+                                cl_params=self.cl_params,
+                                tempData=self.get_current_temperatures())
 		else:
 			self._comm.selectFile(path, apiPrint)
 			
