@@ -385,6 +385,7 @@ def post_processed_check(line):
 def start_extrude(active_e, layer_z):
     onPin = 16
     commands = [
+        'C1 S255 ; cap the extruder',
         'G1 Z' + str(layer_z[active_e]),
         'M42 P' + str(onPin) + ' S255 ; turn extruder ' + str(active_e) + ' on']
     return '\n'.join(commands)
@@ -398,11 +399,12 @@ def stop_extrude(active_e):
     return '\n'.join(commands)
 
 
-def switch_extruder(active_e):
+def switch_extruder(active_e, layer_z):
     
     commands = [
         'C1 S0 ; uncap the extruder',
         'T' + str(active_e) + ' ; switch the extruder',
+        'G1 Z' + str(layer_z[active_e] + 25.00),
         'C1 S255 ; cap the extruder'
         ]
 
@@ -438,15 +440,35 @@ def calculate_wellplate_positions(positions):
     petri = {
         "A": {
             0: {
-                0: {
-                    "X": float(positions["tool0"]["X"]),
-                    "Y": float(positions["tool0"]["Y"]),
-                    "Z": float(positions["tool0"]["Z"])
+                "A": {
+                    "X": float(positions["A"]["X"]),
+                    "Y": float(positions["A"]["Y"]),
+                    "Z": float(positions["A"]["Z"])
                 },
-                1: {
-                    "X": float(positions["tool1"]["X"]),
-                    "Y": float(positions["tool1"]["Y"]),
-                    "Z": float(positions["tool1"]["Z"])
+                "B": {
+                    "X": float(positions["B"]["X"]),
+                    "Y": float(positions["B"]["Y"]),
+                    "Z": float(positions["B"]["Z"])
+                },
+                "C": {
+                    "X": float(positions["C"]["X"]),
+                    "Y": float(positions["C"]["Y"]),
+                    "Z": float(positions["C"]["Z"])
+                },
+                "D": {
+                    "X": float(positions["D"]["X"]),
+                    "Y": float(positions["D"]["Y"]),
+                    "Z": float(positions["D"]["Z"])
+                },
+                "E": {
+                    "X": float(positions["E"]["X"]),
+                    "Y": float(positions["E"]["Y"]),
+                    "Z": float(positions["E"]["Z"])
+                },
+                "F": {
+                    "X": float(positions["F"]["X"]),
+                    "Y": float(positions["F"]["Y"]),
+                    "Z": float(positions["F"]["Z"])
                 }
             }
         }
@@ -458,82 +480,43 @@ def calculate_wellplate_positions(positions):
         row_out = {}
         for j in xrange(column_6):
             row_out[j] = {
-                0: {
-                    "X": float(positions["tool0"]["X"]) + j * 39.12,
-                    "Y": float(positions["tool0"]["Y"]) + i * 39.12,
-                    "Z": float(positions["tool0"]["Z"])
+                "A": {
+                    "X": float(positions["A"]["X"]) - j * 39.12,
+                    "Y": float(positions["A"]["Y"]) - i * 39.12,
+                    "Z": float(positions["A"]["Z"])
                 },
-                1: {
-                    "X": float(positions["tool1"]["X"]) + j * 39.12,
-                    "Y": float(positions["tool1"]["Y"]) + i * 39.12,
-                    "Z": float(positions["tool1"]["Z"])
-                }
+                "B": {
+                    "X": float(positions["B"]["X"]) + j * 39.12,
+                    "Y": float(positions["B"]["Y"]) + i * 39.12,
+                    "Z": float(positions["B"]["Z"])
+                },
+                "C": {
+                    "X": float(positions["C"]["X"]) + j * 39.12,
+                    "Y": float(positions["C"]["Y"]) + i * 39.12,
+                    "Z": float(positions["C"]["Z"])
+                },
+                "D": {
+                    "X": float(positions["D"]["X"]) + j * 39.12,
+                    "Y": float(positions["D"]["Y"]) + i * 39.12,
+                    "Z": float(positions["D"]["Z"])
+                },
+                "E": {
+                    "X": float(positions["D"]["X"]) + j * 39.12,
+                    "Y": float(positions["D"]["Y"]) + i * 39.12,
+                    "Z": float(positions["D"]["Z"])
+                },
+                "F": {
+                    "X": float(positions["E"]["X"]) + j * 39.12,
+                    "Y": float(positions["E"]["Y"]) + i * 39.12,
+                    "Z": float(positions["E"]["Z"])
+                },
+
             }
         out_6[row_6[i]] = row_out
-    row_12 = ["A", "B", "C"]
-    column_12 = 4
-    out_12 = {}
-    for i in xrange(len(row_12)):
-        row_out = {}
-        for j in xrange(column_12):
-            row_out[j] = {
-                0: {
-                    "X": float(positions["tool0"]["X"]) + j * 26.01,
-                    "Y": float(positions["tool0"]["Y"]) + i * 26.01,
-                    "Z": float(positions["tool0"]["Z"])
-                },
-                1: {
-                    "X": float(positions["tool1"]["X"]) + j * 26.01,
-                    "Y": float(positions["tool1"]["Y"]) + i * 26.01,
-                    "Z": float(positions["tool1"]["Z"])
-                }
-            }
-        out_12[row_12[i]] = row_out
-    row_24 = ["A", "B", "C", "D"]
-    column_24 = 6
-    out_24 = {}
-    for i in xrange(len(row_24)):
-        row_out = {}
-        for j in xrange(column_24):
-            row_out[j] = {
-                0: {
-                    "X": float(positions["tool0"]["X"]) + j * 19.3,
-                    "Y": float(positions["tool0"]["Y"]) + i * 19.3,
-                    "Z": float(positions["tool0"]["Z"])
-                },
-                1: {
-                    "X": float(positions["tool1"]["X"]) + j * 19.3,
-                    "Y": float(positions["tool1"]["Y"]) + i * 19.3,
-                    "Z": float(positions["tool1"]["Z"])
-                }
-            }
-        out_24[row_24[i]] = row_out
-    row_96 = ["A", "B", "C", "D", "E", "F"]
-    column_96 = 12
-    out_96 = {}
-    for i in xrange(len(row_96)):
-        row_out = {}
-        for j in xrange(column_96):
-            row_out[j] = {
-                0: {
-                    "X": float(positions["tool0"]["X"]) + j * 9,
-                    "Y": float(positions["tool0"]["Y"]) + i * 9,
-                    "Z": float(positions["tool0"]["Z"])
-                },
-                1: {
-                    "X": float(positions["tool1"]["X"]) + j * 9,
-                    "Y": float(positions["tool1"]["Y"]) + i * 9,
-                    "Z": float(positions["tool1"]["Z"])
-                }
-            }
-        out_96[row_96[i]] = row_out
 
     return {
         1: petri,
-        6: out_6,
-        12: out_12,
-        24: out_24,
-        96: out_96
+        6: out_6
     }
 
 def end_print():
@@ -576,80 +559,90 @@ def can_post_process_local(payload, positions, wellPlate, cl_params, tempData):
         outputFile = fName + '_processed_' + timestamp + '.' + fType
 
     if processed == False:
+        
+        print calculate_wellplate_positions(positions)
+        wellplatePositions = calculate_wellplate_positions(positions)[wellPlate]
+        rows = sorted(wellplatePositions.keys())
+
+        print wellplatePositions
+
         with open(outputFile, 'w') as o:
             o.write('; POST PROCESSED\n')
             active_e = 0
             last_e = 0
             extruding = False
-            x_ctr, y_ctr = map(lambda x: positions[x]['X'], positions), map(lambda x: positions[x]['Y'], positions)
-            x_pos, x_pos_old = map(lambda x: positions[x]['X'], positions), map(lambda x: positions[x]['X'], positions)
-            y_pos, y_pos_old = map(lambda x: positions[x]['Y'], positions), map(lambda x: positions[x]['Y'], positions)
-
             layer_z = map(lambda x: positions[x]['Z'], positions)
-            layer = 0
+            for r in rows:
+                columns = sorted(wellplatePositions[r].keys())
+                for c in columns:
+                    x_ctr, y_ctr = map(lambda x: wellplatePositions[r][c][x]['X'], positions), map(lambda x: wellplatePositions[r][c][x]['Y'], positions)
+                    x_pos, x_pos_old = map(lambda x: wellplatePositions[r][c][x]['X'], positions), map(lambda x: wellplatePositions[r][c][x]['X'], positions)
+                    y_pos, y_pos_old = map(lambda x: wellplatePositions[r][c][x]['Y'], positions), map(lambda x: wellplatePositions[r][c][x]['Y'], positions)
 
-            with open(filename, 'r') as f:
-                for i, line in enumerate(f):
-                    if z_value(line) is not None:
-                        o.write(stop_extrude(active_e) + '\n')
-                        last_e = 0
-                        extruding = False
-                        layer_z = map(lambda x: positions[x]['Z'] + z_value(line), positions)
-                        layer += 1
-                        next
-                    if m_value(line) == 190.0 or m_value(line) == 104.0 or m_value(line) == 109.0:
-                        next
-                    else:
-                        if g_value(line) is not None:
-                            if g_value(line) == 28.0:
+                    layer = 0
+
+                    with open(filename, 'r') as f:
+                        for i, line in enumerate(f):
+                            if z_value(line) is not None:
+                                o.write(stop_extrude(active_e) + '\n')
+                                last_e = 0
+                                extruding = False
+                                layer_z = map(lambda x: wellplatePositions[r][c][x]['Z'] + z_value(line), positions)
+                                layer += 1
                                 next
-                            elif g_value(line) == 1 or e_value(line) is not None:
-                                if g_value(line) == 1:
-                                    if x_value(line) is not None:
-                                        x_pos_old[active_e] = x_pos[active_e]
-                                        x_pos[active_e] = x_value(line) + x_ctr[active_e]
-                                    if y_value(line) is not None:
-                                        y_pos_old[active_e] = y_pos[active_e]
-                                        y_pos[active_e] = y_value(line) + y_ctr[active_e]
-
-                                if e_value(line) is not None:
-                                    d_e = e_value(line) - last_e
-                                    if d_e > 0:
-                                        o.write('G1 X' + str(x_pos_old[active_e]) + ' Y' + str(y_pos_old[active_e]) + '\n')
-                                        if not extruding:
-                                            o.write(start_extrude(active_e, layer_z) + '\n')
-                                            extruding = True
-                                        o.write(g1_modify(line, active_e, x_ctr, y_ctr) + '\n')
-                                        last_e = e_value(line)
-                                        next
-                                    elif d_e < 0:
-                                        o.write(g1_modify(line, active_e, x_ctr, y_ctr))
-                                        if extruding:
-                                            o.write(stop_extrude(active_e) + '\n')
-                                            extruding = False
-                                        last_e = e_value(line)
-                                        next
-                                elif g_value(line) == 1:
-                                    if e_value(line) is None and last_e > 0:
-                                        if extruding:
-                                            o.write(stop_extrude(active_e) + '\n')
-                                            extruding = False
-                                        last_e = 0
-                                        o.write(g1_modify(line, active_e, x_ctr, y_ctr) + '\n')
-                                        next
-                                    else:
-                                        o.write(g1_modify(line, active_e, x_ctr, y_ctr) + '\n')
+                            if m_value(line) == 190.0 or m_value(line) == 104.0 or m_value(line) == 109.0:
+                                next
                             else:
-                                o.write(line)
-                        elif line.startswith('T') and t_value(line) is not None:
-                            active_e = int(t_value(line))
-                            o.write(switch_extruder(active_e) + '\n')
-                        elif m_value(line) == 106.0:
-                            o.write(start_extrude(active_e, layer_z) + '\n')
-                        elif m_value(line) == 107.0:
-                            o.write(stop_extrude(active_e, layer_z) + '\n')
-                        else:
-                            o.write(line)
+                                if g_value(line) is not None:
+                                    if g_value(line) == 28.0:
+                                        next
+                                    elif g_value(line) == 1 or e_value(line) is not None:
+                                        if g_value(line) == 1:
+                                            if x_value(line) is not None:
+                                                x_pos_old[active_e] = x_pos[active_e]
+                                                x_pos[active_e] = x_value(line) + x_ctr[active_e]
+                                            if y_value(line) is not None:
+                                                y_pos_old[active_e] = y_pos[active_e]
+                                                y_pos[active_e] = y_value(line) + y_ctr[active_e]
+
+                                        if e_value(line) is not None:
+                                            d_e = e_value(line) - last_e
+                                            if d_e > 0:
+                                                if not extruding:
+                                                    o.write('G1 X' + str(x_pos_old[active_e]) + ' Y' + str(y_pos_old[active_e]) + '\n')
+                                                    o.write(start_extrude(active_e, layer_z) + '\n')
+                                                    extruding = True
+                                                o.write(g1_modify(line, active_e, x_ctr, y_ctr) + '\n')
+                                                last_e = e_value(line)
+                                                next
+                                            elif d_e < 0:
+                                                o.write(g1_modify(line, active_e, x_ctr, y_ctr))
+                                                if extruding:
+                                                    o.write(stop_extrude(active_e) + '\n')
+                                                    extruding = False
+                                                last_e = e_value(line)
+                                                next
+                                        elif g_value(line) == 1:
+                                            if e_value(line) is None and last_e > 0:
+                                                if extruding:
+                                                    o.write(stop_extrude(active_e) + '\n')
+                                                    extruding = False
+                                                last_e = 0
+                                                o.write(g1_modify(line, active_e, x_ctr, y_ctr) + '\n')
+                                                next
+                                            else:
+                                                o.write(g1_modify(line, active_e, x_ctr, y_ctr) + '\n')
+                                    else:
+                                        o.write(line)
+                                elif line.startswith('T') and t_value(line) is not None:
+                                    active_e = int(t_value(line))
+                                    o.write(switch_extruder(active_e, layer_z) + '\n')
+                                elif m_value(line) == 106.0:
+                                    o.write(start_extrude(active_e, layer_z) + '\n')
+                                elif m_value(line) == 107.0:
+                                    o.write(stop_extrude(active_e, layer_z) + '\n')
+                                else:
+                                    o.write(line)
                 f.close()
             o.write(end_print() + '\n')
         o.close
@@ -735,6 +728,6 @@ positions_6 = {
             }
 
 # post_process(test_payload, test_positions, 1, cl_params, None)
-#can_post_process_local(payload_6, positions_6, 1, cl_params, None)
+#can_post_process_local(payload_6, positions_6, 6, cl_params, None)
 # print calculate_wellplate_positions(test_positions, 24)
 

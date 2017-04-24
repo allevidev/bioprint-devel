@@ -879,7 +879,7 @@ class CANCom(object):
 
         turr_curr_msg = {
             "node_id": 0x04,
-            "data": [ 0x09, 0x03, 0xE8, 0x00, 0x00, 0x00, 0x00, 0x00 ],
+            "data": [ 0x09, 0x04, 0xE2, 0x00, 0x00, 0x00, 0x00, 0x00 ],
             "delay":1
         }
         turr_ustep_msg = {
@@ -1029,34 +1029,34 @@ class CANCom(object):
     def calibrateTools(self):
         return {
             "A": {
-                "X": 107,
+                "X": 78,
                 "Y": 57,
-                "Z": 0
+                "Z": 3.6
                 },
             "B": {
-                "X": 107,
-                "Y": 57,
-                "Z": 0
+                "X": 78.5,
+                "Y": 55.5,
+                "Z": 4.4
                 },
             "C": {
-                "X": 107,
+                "X": 77,
                 "Y": 57,
-                "Z": 0
+                "Z": 4.4
                 },
             "D": {
-                "X": 107,
+                "X": 78,
                 "Y": 57,
-                "Z": 0
+                "Z": 4.2
                 },
             "E": {
-                "X": 107,
+                "X": 78,
                 "Y": 57,
-                "Z": 0
+                "Z": 4.4
                 },
             "F": {
-                "X": 107,
+                "X": 78,
                 "Y": 57,
-                "Z": 0
+                "Z": 3.2
                 }
             }
 
@@ -1065,6 +1065,9 @@ class CANCom(object):
         if extruder_positions is None:
             extruder_positions = self.calibrateTools()
 
+        if wellplate is None:
+            wellplate = 1
+        
         if self.isBusy():
             return
 
@@ -3518,16 +3521,28 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
         current_tool = T
 
     if C is not None:
-        s = gcodeInterpreter.getCodeFloat(cmd, 'S')
-        if s > 0:
-            tool_cap_val = 1
-        else:
-            tool_cap_val = 0
-        tool_cap_data =  [ 0x03, tool_cap_val, 0x00, 0x00, 0x00, 0x00, 0x00 ]
-        tool_cap_msg = can.Message(arbitration_id=pressure_node_id, data=tool_cap_data, extended_id=False)
-        tool_cap_sending_lock = False
+        if C == 1:
+            s = gcodeInterpreter.getCodeFloat(cmd, 'S')
+            if s > 0:
+                tool_cap_val = 1
+            else:
+                tool_cap_val = 0
+            tool_cap_data =  [ 0x03, tool_cap_val, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
+            tool_cap_msg = can.Message(arbitration_id=pressure_node_id, data=tool_cap_data, extended_id=False)
+            tool_cap_sending_lock = False
 
-        msgs.append((tool_cap_msg, tool_cap_sending_lock))
+            msgs.append((tool_cap_msg, tool_cap_sending_lock))
+        if C == 2:
+            s = gcodeInterpreter.getCodeInt(cmd, 'S')
+            if s > 145:
+                pressure = 145
+            else:
+                pressure = s
+            set_pressure_data = [ 0x01, pressure, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
+            set_pressure_msg = can.Message(arbitration_id=pressure_node_id, data=set_pressure_data, extended_id=False)
+            set_pressure_sending_lock = False
+
+            msgs.append((set_pressure_msg, set_pressure_sending_lock))
 
     if G is not None:
         if G == 0 or G == 1:
@@ -3646,9 +3661,9 @@ def can_command_for_cmd(cmd, relative_pos=False, current_tool=None):
                 extrude_data[1] = 0x02
 
             if s == 0:
-                extrude_data[2] = 0x01
-            elif s > 0:
                 extrude_data[2] = 0x00
+            elif s > 0:
+                extrude_data[2] = 0x01
 
             extrude_msg = can.Message(arbitration_id=pressure_node_id, data=extrude_data, extended_id=False)
             
