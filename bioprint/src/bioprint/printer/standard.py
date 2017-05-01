@@ -116,6 +116,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 					"origin": None,
 					"date": None
 				},
+				#current tool and karan
 				"estimatedPrintTime": None,
 				"lastPrintTime": None,
 				"filament": {

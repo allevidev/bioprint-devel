@@ -93,6 +93,7 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 		pass
 
 	def on_printer_send_current_data(self, data):
+
 		# add current temperature, log and message backlogs to sent data
 		with self._temperatureBacklogMutex:
 			temperatures = self._temperatureBacklog
@@ -137,7 +138,7 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 		self._emit("slicingProgress",
 		           dict(slicer=slicer, source_location=source_location, source_path=source_path, dest_location=dest_location, dest_path=dest_path, progress=progress)
 		)
-
+		
 	def on_plugin_message(self, plugin, data):
 		self._emit("plugin", dict(plugin=plugin, data=data))
 
