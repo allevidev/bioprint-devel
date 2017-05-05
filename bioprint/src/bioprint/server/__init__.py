@@ -115,82 +115,6 @@ def load_user(id):
 			return userManager.findUser(userid=id)
 	return users.DummyUser()
 
-#################### Bioprint socket manager for recieving data from react
-BIOPRINT_BASE_URL = os.environ['BIOPRINT_BASE_URL'] 																	#'http://localhost:8090/api/' #this bioprint instance's url
-PRINTER_ID = os.environ['PRINTER_ID'] 																								#'0001' #this printer's ID
-CLIENT_TYPE = os.environ['CLIENT_TYPE'] 																							#'PRINTER' #indicates that this is a printer
-SOCKET_MANAGER_LOGGING_PREFIX = 'CLOUD SOCKET MANAGER: ' 															#prefix for logging to terminal
-BIOBOTS_CLOUD_SOCKET_MANAGER = os.environ['BIOBOTS_CLOUD_SOCKET_MANAGER'] 						#'http://127.0.0.1' #Biobots cloud socket manager
-BIOBOTS_CLOUD_SOCKET_MANAGER_PORT = os.environ['BIOBOTS_CLOUD_SOCKET_MANAGER_PORT'] 	# 4000	biobots cloud socket manager port
-BIOBOTS_API_KEY = 'F9C07883B62C41B888335D4A2A07B07E' 																	#bioprint api key
-
-def logSocketManager(stringToLog):
-	print SOCKET_MANAGER_LOGGING_PREFIX , stringToLog
-
-def socketHandling():
-	
-	def on_connect_cloud():
-		#	Let Biobots Cloud Socket Manager know that this instance 
-		#	of bioprint is controlling printer: PRINTER_ID
-		cloudManagerSocket.emit('IDENTIFY_CLIENT', {
-      "clientType": CLIENT_TYPE,
-      "client": PRINTER_ID
-    })
-		logSocketManager('Connected to BioBots Cloud Socket Manager')
-
-	def on_disconnect_cloud():
-	  logSocketManager('Disconnected to BioBots Cloud Socket Manager')
-
-	def on_reconnect_cloud():
-	  logSocketManager('Reconnecting to BioBots Cloud Socket Manager')
-
-	def on_command_cloud(*args):
-		if (args[0]['type'] == 'GET'):
-			r = requests.get(
-				BIOPRINT_BASE_URL + args[0]["urlExtension"],
-				headers={
-					'x-api-key': BIOBOTS_API_KEY,
-					'Content-Type': 'application/json'
-				},)
-		elif (args[0]['type'] == 'POST'):
-			r = requests.post(
-					BIOPRINT_BASE_URL + args[0]["urlExtension"],
-					headers={
-		    		'x-api-key': BIOBOTS_API_KEY,
-		    		'Content-Type': 'application/json'
-		  		},
-		  		json=args[0]['body']
-				)
-
-		if (r.status_code >= 200 and r.status_code <= 300): 
-			logSocketManager('API Request Successful')
-			cloudManagerSocket.emit('SEND_MESSAGE', {
-        'targetClientType': args[0]["callbackClientType"],
-        'targetClient': args[0]["callbackClientTarget"],
-        'command': args[0]["emitMessageResponseCallback"],
-        'response':  r.json(),
-			})
-		else:
-			logSocketManager('API Request Failed')
-			cloudManagerSocket.emit('SEND_MESSAGE', {
-	  		'targetClientType': args[0]["callbackClientType"],
-	  		'command': args[0]["emitMessageFailureCallback"],
-        'targetClient': args[0]["callbackClientTarget"],
-	      'response' : "Could not complete bioprint api request",
-			})
-
-
-	cloudManagerSocket = SocketIO(BIOBOTS_CLOUD_SOCKET_MANAGER, BIOBOTS_CLOUD_SOCKET_MANAGER_PORT, LoggingNamespace)	#	TODO: CHange to env variables
-
-	cloudManagerSocket.on('connect', on_connect_cloud)
-	cloudManagerSocket.on('disconnect', on_disconnect_cloud)
-	cloudManagerSocket.on('reconnect', on_reconnect_cloud)
-	cloudManagerSocket.on('COMMAND', on_command_cloud)
-
-	cloudManagerSocket.wait()
-
-#######################################
-
 #~~ startup code
 class Server():
 	def __init__(self, configfile=None, basedir=None, host="0.0.0.0", port=5000, debug=False, allowRoot=False, logConf=None):
@@ -534,9 +458,10 @@ class Server():
 		# prepare our after startup function
 		def on_after_startup():
 			self._logger.info("Listening on http://%s:%d" % (self._host, self._port))
-
-			thread.start_new_thread(util.sockManager.SocketManager, (eventManager,)) #starts socket to cloud
-
+			
+			socketManager = util.sockManager.SocketManager(printer, fileManager, analysisQueue, userManager, eventManager, pluginManager, session)
+			socketManager.start()
+			
 			# now this is somewhat ugly, but the issue is the following: startup plugins might want to do things for
 			# which they need the server to be already alive (e.g. for being able to resolve urls, such as favicons
 			# or service xmls or the like). While they are working though the ioloop would block. Therefore we'll

@@ -86,6 +86,7 @@ src/bioprint/server/api/users.py
 src/bioprint/server/apps/__init__.py
 src/bioprint/server/util/__init__.py
 src/bioprint/server/util/flask.py
+src/bioprint/server/util/sockManager.py
 src/bioprint/server/util/sockjs.py
 src/bioprint/server/util/tornado.py
 src/bioprint/server/util/watchdog.py
