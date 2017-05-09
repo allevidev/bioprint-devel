@@ -81,6 +81,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		self._printTimeLeft = None
 
 		self._printAfterSelect = False
+		self._apiPrint = False
 
 		# sd handling
 		self._sdPrinting = False
@@ -391,17 +392,18 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 
 		self._printAfterSelect = printAfterSelect
 
-		print '\n\n\n\n\n', path, '\n\n\n\n'
-
 		if apiPrint is None:
+			self._apiPrint = False
 			self._comm.selectFile(filename="/" + path if sd else path,
-                                sd=sd,
-                                extruder_positions=self.extruder_positions,
-                                wellplate=self.wellplate,
-                                cl_params=self.cl_params,
-                                tempData=self.get_current_temperatures())
+                            sd=sd,
+                            extruder_positions=self.extruder_positions,
+                            wellplate=self.wellplate,
+                            cl_params=self.cl_params,
+                            tempData=self.get_current_temperatures())
 		else:
-			self._comm.selectFile(path, apiPrint)
+			self._apiPrint = True
+			self._comm.selectAPIFile(apiPrint)
+
 			
 		self._setProgressData(0, None, None, None)
 		self._setCurrentZ(None)
@@ -425,8 +427,10 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 			return
 		if self._type != 'can':
 			if self.extruder_positions is None:
+				self._logger.info("Extruders are not calibrated! Must calibrate before printing")
 				return 
 			if self.wellplate is None:
+				self._logger.info("No wellplate selected! Must select a wellplate before printing")
 				return
 
 		rolling_window = None
@@ -447,7 +451,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		self._lastProgressReport = None
 		self._setProgressData(0, None, None, None)
 		self._setCurrentZ(None)
-		self._comm.startPrint(self.extruder_positions, self.wellplate)
+		self._comm.startPrint()
 
 	def toggle_pause_print(self):
 		"""

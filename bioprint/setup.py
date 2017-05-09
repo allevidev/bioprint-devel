@@ -35,7 +35,8 @@ INSTALL_REQUIRES = [
 	"psutil==3.2.1",
 	"appdirs",
 	"boto3==1.2.3",
-	"python-can"
+	"python-can",
+	"socketIO-client"
 ]
 
 # Additional requirements for optional install options

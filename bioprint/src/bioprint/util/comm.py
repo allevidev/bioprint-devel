@@ -275,6 +275,11 @@ class CANCom(object):
 
         # print job
         self._currentFile = None
+        self._currentAPIFile = None
+
+        self._wellplate = None
+        self._currentRow = None
+        self._currentColumn = None
 
         # regexes
 
@@ -542,7 +547,7 @@ class CANCom(object):
             self.sendCommand(line)
         return "\n".join(scriptLines)
 
-    def startPrint(self, extruder_positions, wellplate):
+    def startPrint(self):
         if not self.isOperational() or self.isPrinting():
             return
 
@@ -1060,7 +1065,7 @@ class CANCom(object):
                 }
             }
 
-    def selectFile(self, filename=None, sd=None, apiPrint=None, wellplate=1, extruder_positions=None, cl_params=None, tempData=None):
+    def selectFile(self, filename=None, sd=None, wellplate=1, extruder_positions=None, cl_params=None, tempData=None):
         
         if extruder_positions is None:
             extruder_positions = self.calibrateTools()
@@ -1073,7 +1078,7 @@ class CANCom(object):
 
         print filename, sd, wellplate, extruder_positions, cl_params, tempData
 
-        if apiPrint is None and filename is not None:
+        if filename is not None:
             selectedFile = PrintingGcodeFileInformation(filename, offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
 
             payload = {
@@ -1087,10 +1092,8 @@ class CANCom(object):
             processed = can_post_process.can_post_process_local(payload=payload,
                     positions=extruder_positions,
                     wellPlate=wellplate, cl_params=cl_params, tempData=tempData)
-        elif apiPrint is not None:
-            processed = can_post_process.can_post_process_api(apiPrint)
         else:
-            self._log("No print file, local or API selected")
+            self._log("No print file selected")
 
         self._currentFile = PrintingGcodeFileInformation(processed["file"], offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
 
@@ -1102,6 +1105,26 @@ class CANCom(object):
         })
 
         self._callback.on_comm_file_selected(processed["filename"], self._currentFile.getFilesize(), False)
+
+    def selectAPIFile(self, apiPrint):
+        if apiPrint is not None:
+            if apiPrint.extruderPositions is None and apiPrint.printer.autoCalibrate is True:
+                apiPrint.extruder_positions = self.calibrateTools()
+
+            processed = can_post_process.can_post_process_api(apiPrint, positions)
+        else:
+            self._log("No api print file selected")
+
+        self._currentFile = PrintingGcodeFileInformation(processed["file"], offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
+        
+        eventManager().fire(Events.FILE_SELECTED, {
+            "file": self._currentFile.getFilename(),
+            "filename": os.path.basename(self._currentFile.getFilename()),
+            "origin": self._currentFile.getFileLocation()
+        })
+
+        self._callback.on_comm_file_selected(processed["filename"], self._currentFile.getFilesize(), False)
+
 
     def unselectFile(self):
         if self.isBusy():
@@ -1310,6 +1333,11 @@ class MachineCom(object):
 
         # print job
         self._currentFile = None
+        self._currentAPIFile = None
+
+        self._wellplate = None
+        self._currentRow = None
+        self._currentColumn = None
 
         # regexes
 
@@ -1597,7 +1625,7 @@ class MachineCom(object):
             self.sendCommand(line)
         return "\n".join(scriptLines)
 
-    def startPrint(self, extruder_positions, wellplate):
+    def startPrint(self):
         if not self.isOperational() or self.isPrinting():
             return
 
@@ -1695,6 +1723,26 @@ class MachineCom(object):
             })
 
             self._callback.on_comm_file_selected(processed["filename"], self._currentFile.getFilesize(), False)
+
+    def selectAPIFile(self, apiPrint):
+        if apiPrint is not None:
+            if apiPrint.extruderPositions is None and apiPrint.printer.autoCalibrate is True:
+                apiPrint.extruder_positions = self.calibrateTools()
+            
+            processed = post_process.post_process_api(apiPrint)
+
+        else:
+            self._log("No api print file selected")
+
+        self._currentFile = PrintingGcodeFileInformation(processed["file"], offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
+        
+        eventManager().fire(Events.FILE_SELECTED, {
+            "file": self._currentFile.getFilename(),
+            "filename": os.path.basename(self._currentFile.getFilename()),
+            "origin": self._currentFile.getFileLocation()
+        })
+
+        self._callback.on_comm_file_selected(processed["filename"], self._currentFile.getFilesize(), False)
 
     def unselectFile(self):
         if self.isBusy():
@@ -2922,6 +2970,9 @@ class MachineComPrintCallback(object):
         pass
 
     def on_comm_z_change(self, newZ):
+        pass
+
+    def on_comm_api_file_selected(self, apiPrint):
         pass
 
     def on_comm_file_selected(self, filename, filesize, sd):

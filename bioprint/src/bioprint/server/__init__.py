@@ -65,7 +65,8 @@ import bioprint.slicing
 
 from . import util
 
-UI_API_KEY = ''.join('%02X' % ord(z) for z in uuid.uuid4().bytes)
+#UI_API_KEY = ''.join('%02X' % ord(z) for z in uuid.uuid4().bytes)
+UI_API_KEY = "BIOBOTS_API_KEY"
 
 versions = bioprint._version.get_versions()
 VERSION = versions['version']
@@ -450,6 +451,9 @@ class Server():
 		# prepare our after startup function
 		def on_after_startup():
 			self._logger.info("Listening on http://%s:%d" % (self._host, self._port))
+
+			socketManager = util.sockManager.SocketManager(printer, fileManager, analysisQueue, userManager, eventManager, pluginManager, session)
+			socketManager.start()
 
 			# now this is somewhat ugly, but the issue is the following: startup plugins might want to do things for
 			# which they need the server to be already alive (e.g. for being able to resolve urls, such as favicons
