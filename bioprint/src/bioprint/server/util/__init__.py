@@ -142,6 +142,22 @@ def get_api_key(request):
 
 	return None
 
+def get_socket_key(request):
+	# Check Flask GET/POST arguments
+	if hasattr(request, "values") and "socketKey" in request.values:
+		return request.values["socketKey"]
+
+	# Check Tornado GET/POST arguments
+	if hasattr(request, "arguments") and "socketKey" in request.arguments \
+		and len(request.arguments["socketKey"]) > 0 and len(request.arguments["socketKey"].strip()) > 0:
+		return request.arguments["socketKey"]
+
+	# Check Tornado and Flask headers
+	if "X-Socket-Key" in request.headers.keys():
+		return request.headers.get("X-Socket-Key")
+
+	return None
+
 
 #~~ reverse proxy compatible WSGI middleware
 
