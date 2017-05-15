@@ -318,6 +318,8 @@ def printerPrintheadCommand():
 
 	elif command == "position":
 
+		print '\n\n\n\n\n', data, '\n\n\n\n\n'
+
 		s = settings()
 
 		if data["positions"]["tool0"]["X"] != -1:

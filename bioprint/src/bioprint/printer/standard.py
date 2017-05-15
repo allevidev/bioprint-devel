@@ -402,7 +402,15 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
                             tempData=self.get_current_temperatures())
 		else:
 			self._apiPrint = True
-			self._comm.selectAPIFile(apiPrint)
+			# THIS IS JUST A HACK FOR THE DEMO
+			self._comm.selectFile(filename="/" + path if sd else path,
+                            sd=sd,
+                            extruder_positions=self.extruder_positions,
+                            wellplate=self.wellplate,
+                            cl_params=self.cl_params,
+                            tempData=self.get_current_temperatures())
+			# USE THIS FOR THE REAL JAWN
+			#self._comm.selectAPIFile(apiPrint)
 
 			
 		self._setProgressData(0, None, None, None)

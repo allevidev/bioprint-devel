@@ -1725,8 +1725,12 @@ class MachineCom(object):
             self._callback.on_comm_file_selected(processed["filename"], self._currentFile.getFilesize(), False)
 
     def selectAPIFile(self, apiPrint):
+
+        print '\n\n\n\n\n', apiPrint, '\n\n\n\n\n'
+        print apiPrint["extruderPositions"] is {}
+
         if apiPrint is not None:
-            if apiPrint.extruderPositions is None and apiPrint.printer.autoCalibrate is True:
+            if apiPrint["extruderPositions"] is None:
                 apiPrint.extruder_positions = self.calibrateTools()
             
             processed = post_process.post_process_api(apiPrint)

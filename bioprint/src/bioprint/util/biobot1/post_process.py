@@ -22,6 +22,10 @@ import requests
 import json
 from flask.ext.login import current_user
 
+from bioprint.filemanager.destinations import FileDestinations
+from bioprint.settings import settings, valid_boolean_trues
+from bioprint.server import printer, fileManager, slicingManager, eventManager, userManager, NO_CONTENT
+
 analytics = True
 # biobots_url = 'http://data.biobots.io/'
 biobots_url = 'http://data.biobots.io'
@@ -617,6 +621,8 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
         outputFileName = inputFileName + '_processed_' + timestamp + '.' + fType
         outputFile = fName + '_processed_' + timestamp + '.' + fType
 
+    print '\n\n\n\n\n\n', outputFileName, outputFile, '\n\n\n\n\n\n'
+
 
     if processed == False:
         wellPlatePositions = calculate_wellplate_positions(positions)
@@ -843,21 +849,14 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
 def post_process_api(apiPrint):
     processed = False
 
-    with open(payload["file"], 'r') as f:
-        for i, line in enumerate(f):
-            if post_processed_check(line) == True:
-                processed = True
-                return payload
-
     e0_pos = 46
     e1_pos = 0
-    filename = str(payload["file"])
+    filename = str(apiPrint["printName"])
 
     fName = '.'.join(str.split(filename, '.')[0:-1])
-    fType = str.split(filename, '.')[-1]
+    fType = '.gcode'
     timeformat = '%Y-%m-%d-%H-%M-%S'
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime(timeformat)
-    inputFileName = '.'.join(str.split(str.split(filename, '/')[-1], '.')[0:-1]) + '.' + fType
     
     if processed == True:
         outputFileName = inputFileName + timestamp + '.' + fType

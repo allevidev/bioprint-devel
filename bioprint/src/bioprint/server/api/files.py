@@ -133,9 +133,6 @@ def uploadGcodeFile(target):
 	if not target in [FileDestinations.LOCAL, FileDestinations.SDCARD]:
 		return make_response("Unknown target: %s" % target, 404)
 
-	print settings().getBaseFolder("uploads")
-	print '\n\n\n\n\n', request.values, '\n\n\n\n'
-
 	input_name = "file"
 	input_upload_name = input_name + "." + settings().get(["server", "uploads", "nameSuffix"])
 	input_upload_path = input_name + "." + settings().get(["server", "uploads", "pathSuffix"])
@@ -283,6 +280,7 @@ def apiFileCommand():
 	}
 
 	command, data, response = get_json_command_from_request(request, valid_commands)
+
 	if response is not None:
 		return response
 
@@ -321,7 +319,6 @@ def apiFileCommand():
 
 	if bioprint.filemanager.valid_file_type(added_file, "gcode"):
 		absFilename = fileManager.path_on_disk(FileDestinations.LOCAL, added_file)
-		printer.select_file(absFilename, False, True)
 
 	input_name = "file"
 	input_upload_name = input_name + "." + settings().get(["server", "uploads", "nameSuffix"])
@@ -330,9 +327,13 @@ def apiFileCommand():
 	if command == "select":
 		printAfterLoading = False
 		if "print" in data.keys() and data["print"] in valid_boolean_trues:
-			if not printer.is_operational():
-				return make_response("Printer is not operational, cannot directly start printing", 409)
+			# if not printer.is_operational():
+			# 	return make_response("Printer is not operational, cannot directly start printing", 409)
 			printAfterLoading = True
+		else:
+			printAfterLoading = False
+		print '\n\n\n\n', data['entry'], '\n\n\n\n\n'
+		printer.select_file(None, False, printAfterLoading, apiPrint=data["entry"])
 
 	r = make_response(200)
 	return r
@@ -353,8 +354,6 @@ def gcodeFileCommand(filename, target):
 		"slice": []
 	}
 
-	print '\n\n\n\n\n', filename, '\n\n\n\n'
-
 	command, data, response = get_json_command_from_request(request, valid_commands)
 	if response is not None:
 		return response
@@ -374,7 +373,9 @@ def gcodeFileCommand(filename, target):
 		else:
 			filenameToSelect = fileManager.path_on_disk(target, filename)
 
-		
+		print '\n\n\n\n\n', filenameToSelect, '\n\n\n\n\n'
+
+
 		printer.select_file(filenameToSelect, sd, printAfterLoading)
 
 	elif command == "slice":
