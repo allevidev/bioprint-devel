@@ -429,6 +429,7 @@ def restricted_access(func):
 	"""
 	@functools.wraps(func)
 	def decorated_view(*args, **kwargs):
+		#return func(*args, **kwargs)
 		# if bioprint hasn't been set up yet, abort
 		if settings().getBoolean(["server", "firstRun"]) and (bioprint.server.userManager is None or not bioprint.server.userManager.hasBeenCustomized()):
 			return flask.make_response("bioprint isn't setup yet", 403)
@@ -436,6 +437,12 @@ def restricted_access(func):
 		apikey = bioprint.server.util.get_api_key(flask.request)
 		if apikey == bioprint.server.UI_API_KEY:
 			# UI API key => call regular login_required decorator, we are using browser sessions here
+			
+			#if socket key is same as bioprint.server.SOCKET_KEY allow
+			socketkey = bioprint.server.util.get_socket_key(flask.request)	#if socket key matches allow access
+			if socketkey == bioprint.server.SOCKET_KEY:
+				return func(*args, **kwargs)
+
 			return flask.ext.login.login_required(func)(*args, **kwargs)
 
 		# try to determine user for key

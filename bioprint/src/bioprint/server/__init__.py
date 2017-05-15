@@ -67,6 +67,7 @@ from . import util
 
 #UI_API_KEY = ''.join('%02X' % ord(z) for z in uuid.uuid4().bytes)
 UI_API_KEY = "BIOBOTS_API_KEY"
+SOCKET_KEY = "BIOBOTS_SOCKET_KEY"
 
 versions = bioprint._version.get_versions()
 VERSION = versions['version']
