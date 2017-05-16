@@ -62,7 +62,7 @@ class SocketManager(sockjs.tornado.SockJSConnection, bioprint.printer.PrinterCal
 		self.UNREACHABLE_TARGET = 'UNREACHABLE_TARGET'
 		self.IDENTIFY_CLIENT = 'IDENTIFY_CLIENT'
 		self.SEND_MESSAGE = 'SEND_MESSAGE'
-		
+
 	#	Fired on <thread>.start() event of this class
 	def run(self):
 		self.cloudManagerSocket = SocketIO(self.cloudSocketManagerURL, self.cloudSocketManagerPort, LoggingNamespace)	#	TODO: CHange to env variables
@@ -211,7 +211,6 @@ class SocketManager(sockjs.tornado.SockJSConnection, bioprint.printer.PrinterCal
 			"messages": messages,
 			"busyFiles": busy_files,
 		})
-		#self._logger.info("Disconnected to BioBots Cloud Socket Manager")
 		self._emit("current", data)
 
 	def on_printer_send_initial_data(self, data):
