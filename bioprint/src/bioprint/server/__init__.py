@@ -453,7 +453,7 @@ class Server():
 		def on_after_startup():
 			self._logger.info("Listening on http://%s:%d" % (self._host, self._port))
 
-			socketManager = util.sockManager.SocketManager(printer, fileManager, analysisQueue, userManager, eventManager, pluginManager, session)
+			socketManager = util.sockManager.SocketManager(self._host, self._port, printer, fileManager, analysisQueue, userManager, eventManager, pluginManager, session)
 			socketManager.start()
 
 			# now this is somewhat ugly, but the issue is the following: startup plugins might want to do things for

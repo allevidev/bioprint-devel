@@ -21,14 +21,14 @@ from threading import Thread
 class SocketManager(sockjs.tornado.SockJSConnection, bioprint.printer.PrinterCallback, Thread):
 
 	# Initalize self variables for this class
-	def __init__(self, printer, fileManager, analysisQueue, userManager, eventManager, pluginManager, session):
+	def __init__(self, bioprintHost, bioprintPort, printer, fileManager, analysisQueue, userManager, eventManager, pluginManager, session):
 		Thread.__init__(self)
 		sockjs.tornado.SockJSConnection.__init__(self, session) # not sure if this is necessary - testing once I go in on monday
 		
 		#	Environment Variables
-		self.cloudSocketManagerURL = "127.0.0.1"	# Biobots cloud socket manager URL
-		self.cloudSocketManagerPort = "45400"	#	 Biobots cloud socket manager PORT
-		self.printerId = "001" #	This Printer's ID
+		self.cloudSocketManagerURL = "52.23.223.11"	# Biobots cloud socket manager URL
+		self.cloudSocketManagerPort = "35971"	#	 Biobots cloud socket manager PORT
+		self.printerId = "111" #	This Printer's ID
 
 		self._logger = logging.getLogger(__name__)
 		self._temperatureBacklog = []
@@ -50,20 +50,29 @@ class SocketManager(sockjs.tornado.SockJSConnection, bioprint.printer.PrinterCal
 		self.connected = False
 
 		self.clientType = 'PRINTER' #	This will always be printer (Identifes this instance as originating from a printer to cloud socket manager)
-		self.bioprintBaseUrl = 'http://0.0.0.0:8090/api/'  #	This will always be localhost (bioprint url)
+		self.bioprintBaseUrl = ''.join([bioprintHost, ':', str(bioprintPort)]) #	This instance's url
 		self.bioprintAPIKey = bioprint.server.UI_API_KEY
 		self.socketKey = bioprint.server.SOCKET_KEY
 	
+		#	Socket Events
+		self.CONNECT = 'connect'
+		self.DISCONNECT = 'disconnect'
+		self.RECONNECT = 'reconnect'
+		self.COMMAND = 'COMMAND'
+		self.UNREACHABLE_TARGET = 'UNREACHABLE_TARGET'
+		self.IDENTIFY_CLIENT = 'IDENTIFY_CLIENT'
+		self.SEND_MESSAGE = 'SEND_MESSAGE'
+		
 	#	Fired on <thread>.start() event of this class
 	def run(self):
 		self.cloudManagerSocket = SocketIO(self.cloudSocketManagerURL, self.cloudSocketManagerPort, LoggingNamespace)	#	TODO: CHange to env variables
 
 
-		self.cloudManagerSocket.on('connect', self._on_connect_cloud)
-		self.cloudManagerSocket.on('disconnect', self._on_disconnect_cloud)
-		self.cloudManagerSocket.on('reconnect', self._on_reconnect_cloud)
-		self.cloudManagerSocket.on('COMMAND', self._on_command_cloud)
-		self.cloudManagerSocket.on('on_unreachable_target', self.on_unreachable_target)
+		self.cloudManagerSocket.on(self.CONNECT, self._on_connect_cloud)
+		self.cloudManagerSocket.on(self.DISCONNECT, self._on_disconnect_cloud)
+		self.cloudManagerSocket.on(self.RECONNECT, self._on_reconnect_cloud)
+		self.cloudManagerSocket.on(self.COMMAND, self._on_command_cloud)
+		self.cloudManagerSocket.on(self.UNREACHABLE_TARGET, self._on_unreachable_target)
 		
 		self.cloudManagerSocket.wait()
 	
@@ -72,7 +81,7 @@ class SocketManager(sockjs.tornado.SockJSConnection, bioprint.printer.PrinterCal
 		self.connected = True
 		#	Let Biobots Cloud Socket Manager know that this instance 
 		#	of bioprint is controlling printer: self.printerId
-		self.cloudManagerSocket.emit('IDENTIFY_CLIENT', {
+		self.cloudManagerSocket.emit(self.IDENTIFY_CLIENT, {
       "clientType": self.clientType,
       "client": self.printerId
     })
@@ -158,7 +167,7 @@ class SocketManager(sockjs.tornado.SockJSConnection, bioprint.printer.PrinterCal
 				json_resp = json.dumps({})
 			
 			self._logger.info("Command: API Request Successful")
-			self.cloudManagerSocket.emit('SEND_MESSAGE', {
+			self.cloudManagerSocket.emit(self.SEND_MESSAGE, {
         'targetClientType': args[0]["callbackClientType"],
         'targetClient': args[0]["callbackClientTarget"],
         'command': args[0]["emitMessageResponseCallback"],
@@ -167,7 +176,7 @@ class SocketManager(sockjs.tornado.SockJSConnection, bioprint.printer.PrinterCal
 
 		else:
 			self._logger.warn("Command: API Request Failed")	
-			self.cloudManagerSocket.emit('SEND_MESSAGE', {
+			self.cloudManagerSocket.emit(self.SEND_MESSAGE, {
 	  		'targetClientType': args[0]["callbackClientType"],
 	  		'command': args[0]["emitMessageFailureCallback"],
         'targetClient': args[0]["callbackClientTarget"],
@@ -248,7 +257,7 @@ class SocketManager(sockjs.tornado.SockJSConnection, bioprint.printer.PrinterCal
 			self._logger.warn("Unable to emit data. No client connected to printer (client will auto connect on first request)")	 
 		else:
 			try:
-				self.cloudManagerSocket.emit('SEND_MESSAGE', {
+				self.cloudManagerSocket.emit(self.SEND_MESSAGE, {
 		      'targetClientType': self.currentClientType,
 		      'targetClient': self.currentClient,
 		      'command': 'UPDATE',
@@ -256,15 +265,15 @@ class SocketManager(sockjs.tornado.SockJSConnection, bioprint.printer.PrinterCal
 		      	'type': type,
 		      	'payload': payload,
 		     	},
-		     	'callbackClientTarget': '001',  		
-					'callbackClientType': 'PRINTER',		
-					'unreachableTargetCallback': 'UNREACHABLE_TARGET',			
+		     	'callbackClientTarget': self.printerId,  		
+					'callbackClientType': self.clientType,		
+					'unreachableTargetCallback': self.UNREACHABLE_TARGET,			
 				})
 				self._logger.info("Update successfully sent to client")
 			except Exception as e:
 				self._logger.warn("Could not send update data to client - Update Socket Error") 
 
-	def on_unreachable_target(self, data):
+	def _on_unreachable_target(self, data):
 		self._logger.warn("Unable to emit data. No client connected to printer (client will auto connect on first request)")
 
 				
