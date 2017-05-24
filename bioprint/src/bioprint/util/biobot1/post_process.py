@@ -26,7 +26,7 @@ from bioprint.filemanager.destinations import FileDestinations
 from bioprint.settings import settings, valid_boolean_trues
 from bioprint.server import printer, fileManager, slicingManager, eventManager, userManager, NO_CONTENT
 
-analytics = True
+analytics = False
 # biobots_url = 'http://data.biobots.io/'
 biobots_url = 'http://data.biobots.io'
 

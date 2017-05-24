@@ -291,6 +291,9 @@ def printerPrintheadCommand():
 
 	##~~ home command
 	elif command == "home":
+
+		print '\n\n\n\n', data, '\n\n\n\n'
+
 		validated_values = []
 		axes = data["axes"]
 		
@@ -348,6 +351,8 @@ def printerPrintheadCommand():
 
 	elif command == "wellplate":
 		wellplate = data["wellplate"]
+
+		print '\n\n\n\n\n', data, '\n\n\n\n\n'
 		
 		printer.set_wellplate(wellplate)
 

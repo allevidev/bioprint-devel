@@ -333,10 +333,13 @@ def apiFileCommand():
 		else:
 			printAfterLoading = False
 		print '\n\n\n\n', data['entry'], '\n\n\n\n\n'
-		printer.select_file(None, False, printAfterLoading, apiPrint=data["entry"])
 
-	r = make_response(200)
-	return r
+		# Hardcoding filename for Novartis demo
+		filenameToSelect = '/Users/karanhiremath/Library/Application Support/BioPrint/uploads/novartis.gcode'
+
+		printer.select_file(filenameToSelect, False, printAfterLoading, apiPrint=data["entry"])
+
+	return make_response("Print Started", 200)
 
 
 @api.route("/files/<string:target>/<path:filename>", methods=["POST"])
