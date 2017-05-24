@@ -50,7 +50,8 @@ class SocketManager(sockjs.tornado.SockJSConnection, bioprint.printer.PrinterCal
 		self.connected = False
 
 		self.clientType = 'PRINTER' #	This will always be printer (Identifes this instance as originating from a printer to cloud socket manager)
-		self.bioprintBaseUrl = ''.join([bioprintHost, ':', str(bioprintPort)]) #	This instance's url
+		self.bioprintBaseUrl = ''.join(['http://', bioprintHost, ':', str(bioprintPort), '/api/']) #	This instance's url
+		print(self.bioprintBaseUrl)
 		self.bioprintAPIKey = bioprint.server.UI_API_KEY
 		self.socketKey = bioprint.server.SOCKET_KEY
 	
