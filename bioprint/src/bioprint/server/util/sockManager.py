@@ -28,7 +28,7 @@ class SocketManager(sockjs.tornado.SockJSConnection, bioprint.printer.PrinterCal
 		#	Environment Variables
 		self.cloudSocketManagerURL = "52.23.223.11"	# Biobots cloud socket manager URL
 		self.cloudSocketManagerPort = "35971"	#	 Biobots cloud socket manager PORT
-		self.printerId = "111" #	This Printer's ID
+		self.printerId = "001" #	This Printer's ID
 
 		self._logger = logging.getLogger(__name__)
 		self._temperatureBacklog = []

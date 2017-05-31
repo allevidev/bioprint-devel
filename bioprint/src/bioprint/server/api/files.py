@@ -284,46 +284,6 @@ def apiFileCommand():
 	if response is not None:
 		return response
 
-	bucket = 'biobots-ui'
-	key = 'Files/gcode/590771b22206c9130039d2f6_admin@admin.com/59077ab82206c9130039d34f_design_multilayer_6_extruder.gcode'
-	filename = key.split('/')[-1]
-
-	client = boto3.client('cognito-identity')
-	IdentityId = client.get_id(
-		IdentityPoolId='us-east-1:d288096b-6104-4457-ac73-3900d39fbba6'
-	)['IdentityId']
-
-	credentials = client.get_credentials_for_identity(
-		IdentityId=IdentityId
-	)
-
-	ACCESS_KEY = credentials['Credentials']['AccessKeyId']
-	SECRET_KEY = credentials['Credentials']['SecretKey']
-	SESSION_TOKEN = credentials['Credentials']['SessionToken']
-
-	s3 = boto3.client(
-		's3',
-		aws_access_key_id=ACCESS_KEY,
-		aws_secret_access_key=SECRET_KEY,
-		aws_session_token=SESSION_TOKEN,
-	)
-
-	file = s3.download_file(bucket,
-		key,
-		'/tmp/' + filename
-	)
-
-	upload = bioprint.filemanager.util.DiskFileWrapper(filename, '/tmp/' + filename)
-
-	added_file = fileManager.add_file(FileDestinations.LOCAL, upload.filename, upload, allow_overwrite=True)
-
-	if bioprint.filemanager.valid_file_type(added_file, "gcode"):
-		absFilename = fileManager.path_on_disk(FileDestinations.LOCAL, added_file)
-
-	input_name = "file"
-	input_upload_name = input_name + "." + settings().get(["server", "uploads", "nameSuffix"])
-	input_upload_path = input_name + "." + settings().get(["server", "uploads", "pathSuffix"])
-
 	if command == "select":
 		printAfterLoading = False
 		if "print" in data.keys() and data["print"] in valid_boolean_trues:
@@ -332,12 +292,10 @@ def apiFileCommand():
 			printAfterLoading = True
 		else:
 			printAfterLoading = False
-		print '\n\n\n\n', data['entry'], '\n\n\n\n\n'
 
-		# Hardcoding filename for Novartis demo
-		filenameToSelect = '/Users/karanhiremath/Library/Application Support/BioPrint/uploads/novartis.gcode'
+		print '\n\n\n\n', data["entry"], '\n\n\n\n'
 
-		printer.select_file(filenameToSelect, False, printAfterLoading, apiPrint=data["entry"])
+		# printer.select_file(None, False, printAfterLoading, apiPrint=data["entry"])
 
 	return make_response("Print Started", 200)
 
@@ -375,9 +333,6 @@ def gcodeFileCommand(filename, target):
 			sd = True
 		else:
 			filenameToSelect = fileManager.path_on_disk(target, filename)
-
-		print '\n\n\n\n\n', filenameToSelect, '\n\n\n\n\n'
-
 
 		printer.select_file(filenameToSelect, sd, printAfterLoading)
 

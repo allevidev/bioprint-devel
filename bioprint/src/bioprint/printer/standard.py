@@ -392,6 +392,8 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 
 		self._printAfterSelect = printAfterSelect
 
+		print 'path', path
+
 		if apiPrint is None:
 			self._apiPrint = False
 			self._comm.selectFile(filename="/" + path if sd else path,
@@ -403,14 +405,15 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		else:
 			self._apiPrint = True
 			# THIS IS JUST A HACK FOR THE DEMO
-			self._comm.selectFile(filename="/" + path if sd else path,
-                            sd=sd,
-                            extruder_positions=self.extruder_positions,
-                            wellplate=self.wellplate,
-                            cl_params=self.cl_params,
-                            tempData=self.get_current_temperatures())
+			#self._comm.selectFile(filename="/" + path if sd else path,
+                            # sd=sd,
+                            # extruder_positions=self.extruder_positions,
+                            # wellplate=self.wellplate,
+                            # cl_params=self.cl_params,
+                            # tempData=self.get_current_temperatures())
 			# USE THIS FOR THE REAL JAWN
-			#self._comm.selectAPIFile(apiPrint)
+
+			self._comm.selectAPIFile(apiPrint)
 
 			
 		self._setProgressData(0, None, None, None)
@@ -433,7 +436,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 			return
 		if self._selectedFile is None:
 			return
-		if self._type != 'can':
+		if self._type != 'can' and self._apiPrint is False:
 			if self.extruder_positions is None:
 				self._logger.info("Extruders are not calibrated! Must calibrate before printing")
 				return 

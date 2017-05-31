@@ -1711,6 +1711,7 @@ class MachineCom(object):
                 "filename": os.path.basename(selectedFile.getFilename()),
                 "origin": selectedFile.getFileLocation()
             }
+
             selectedFile.close()
             processed = post_process.post_process(payload, extruder_positions, wellplate, cl_params, tempData)
 
@@ -1726,11 +1727,10 @@ class MachineCom(object):
 
     def selectAPIFile(self, apiPrint):
 
-        print '\n\n\n\n\n', apiPrint, '\n\n\n\n\n'
-        print apiPrint["extruderPositions"] is {}
+        print apiPrint
 
         if apiPrint is not None:
-            if apiPrint["extruderPositions"] is None:
+            if apiPrint["content"]["extruderPositions"] is None:
                 apiPrint.extruder_positions = self.calibrateTools()
             
             processed = post_process.post_process_api(apiPrint)

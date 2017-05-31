@@ -595,6 +595,9 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
     Read a gcode file and add M106 after E1.000 lines and
     M107, M126, M127 after each E peak.
     '''
+
+    print '\n\n\n\n', payload, '\n\n\n\n'
+    print '\n\n\n\n\n', cl_params, '\n\n\n\n\n\n'
     
     processed = False
 
@@ -847,24 +850,42 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
 
 
 def post_process_api(apiPrint):
+
+    print '\n\n\n\n\n', apiPrint, '\n\n\n\n'
+
     processed = False
 
     e0_pos = 46
     e1_pos = 0
-    filename = str(apiPrint["printName"])
+    filename = str(apiPrint["content"]["printName"])
 
     fName = '.'.join(str.split(filename, '.')[0:-1])
     fType = '.gcode'
     timeformat = '%Y-%m-%d-%H-%M-%S'
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime(timeformat)
-    
-    if processed == True:
-        outputFileName = inputFileName + timestamp + '.' + fType
-        outputFile = fName + timestamp + '.' + fType    
-    elif processed == False:
-        outputFileName = inputFileName + '_processed_' + timestamp + '.' + fType
-        outputFile = fName + '_processed_' + timestamp + '.' + fType
 
+    printName = "_".join([filename, str(apiPrint["_id"]), timestamp]).replace(' ', '_')
+    
+    outputFileName = printName + '.' + fType
+    outputFile = settings().getBaseFolder("uploads") + '/' + printName + '.' + fType    
+
+    print '\n\n\n\n\n\n', outputFileName, outputFile, '\n\n\n\n'
+
+    positions = {
+        "tool0": apiPrint["content"]["extruderPositions"]["0"],
+        "tool1": apiPrint["content"]["extruderPositions"]["1"]
+    }
+
+    welltypes = {
+        "Petri Dish": 1,
+        "6 Wells": 6,
+        "12 Wells": 12,
+        "24 Wells": 24,
+        "48 Wells": 48,
+        "96 Wells": 96
+    }
+
+    wellPlate = welltypes[apiPrint["content"]["welltype"]]
 
     if processed == False:
         wellPlatePositions = calculate_wellplate_positions(positions)
@@ -891,7 +912,43 @@ def post_process_api(apiPrint):
                     e1_Z = wellPlatePositions[wellPlate][r][c][1]["Z"]
                     x_pos, x_pos_old = [e0_Xctr, e1_Xctr], [e0_Xctr, e1_Xctr]
                     y_pos, y_pos_old = [e0_Yctr, e1_Yctr], [e0_Yctr, e1_Yctr]
-                    with open(filename, 'r') as f:
+
+                    print '\n\n\n\n', apiPrint["content"]["wellFiles"][str(r)][str(c)], '\n\n\n\n'
+
+                    combinedPrint = apiPrint["content"]["wellFiles"][str(r)][str(c)]["combinedPrint"]
+
+                    bucket = combinedPrint["file"]["bucket"]
+                    key = combinedPrint["file"]["key"]
+                    name = combinedPrint["file"]["text"]
+
+                    wellFilename = settings().getBaseFolder("uploads") + '/' + name
+
+                    client = boto3.client('cognito-identity')
+                    IdentityId = client.get_id(
+                        IdentityPoolId='us-east-1:d288096b-6104-4457-ac73-3900d39fbba6'
+                    )['IdentityId']
+
+                    credentials = client.get_credentials_for_identity(
+                        IdentityId=IdentityId
+                    )
+
+                    ACCESS_KEY = credentials['Credentials']['AccessKeyId']
+                    SECRET_KEY = credentials['Credentials']['SecretKey']
+                    SESSION_TOKEN = credentials['Credentials']['SessionToken']
+
+                    s3 = boto3.client(
+                        's3',
+                        aws_access_key_id=ACCESS_KEY,
+                        aws_secret_access_key=SECRET_KEY,
+                        aws_session_token=SESSION_TOKEN,
+                    )
+
+                    file = s3.download_file(bucket,
+                        key,
+                        wellFilename
+                    )
+
+                    with open(wellFilename, 'r') as f:
                         o.write('G1 Z50\n')
                         o.write('G1 E' + str(mid) + '\n')
                         o.write('G21\n')
@@ -996,7 +1053,11 @@ def post_process_api(apiPrint):
                     f.close()
             o.write(end_print() + '\n')
         o.close()
-
+    return {
+        "file": outputFile,
+        "filename": outputFileName,
+        "origin": 'local',
+    }
 
 def bb2_post_process(payload, positions, wellPlate, cl_params, tempData):
     return payload
@@ -1032,4 +1093,841 @@ cl_params = {
 
 # post_process(test_payload, test_positions, 1, cl_params, None)
 # print calculate_wellplate_positions(test_positions, 24)
+
+apiPrint = {
+    "_id": "001",
+    "content": {
+        "printName": "Test 1",
+        "welltype": "6 Wells",
+        "extruderPositions": {
+            "0": {
+                "X": 58.00,
+                "Y": 90.00,
+                "Z": 25.00
+            },
+            "1": {
+                "X": 96.00,
+                "Y": 90.00,
+                "Z": 25.00
+            }
+        },
+        "bedProfile": {},
+        "wellFiles": {
+            "A": {
+                "0": {
+                    "printFiles": [
+                        {
+                            "outfill": "B",
+                            "infill": "A",
+                            "id": "591ad830e2c7dd000159b073",
+                            "file": {
+                                "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
+                                "text": "novartis.gcode",
+                                "bucket": "biobots-ui",
+                                "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
+                                "id": "591ad830e2c7dd000159b073"
+                            }
+                        }
+                    ],
+            "imagingProfile": {
+              
+            },
+            "extruderProfile": {
+              
+            },
+            "combinedPrint": {
+              "outfill": "B",
+              "infill": "A",
+              "id": "591ad830e2c7dd000159b073",
+              "file": {
+                "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
+                "text": "novartis.gcode",
+                "bucket": "biobots-ui",
+                "value": {
+                  "ref": "None",
+                  "_owner": "None",
+                  "_store": {
+                    
+                  },
+                  "key": "None",
+                  "props": {
+                    "checked": False,
+                    "focusState": "none",
+                    "insetChildren": False,
+                    "desktop": False,
+                    "disabled": False,
+                    "targetOrigin": {
+                      "horizontal": "left",
+                      "vertical": "top"
+                    },
+                    "primaryText": "novartis.gcode",
+                    "anchorOrigin": {
+                      "horizontal": "right",
+                      "vertical": "top"
+                    }
+                  }
+                },
+                "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
+                "id": "591ad830e2c7dd000159b073"
+              }
+            }
+            },
+            "1": {
+            "printFiles": [
+              {
+                "slicingProfileObject": {
+                  "content": {
+                    "Properties": {
+                      "SkirtDistance": "0",
+                      "PrinterCenterY": "0",
+                      "PrinterCenterX": "0",
+                      "FirstLayerHeight": 0.2,
+                      "Name": "Pluronic 4mm/s",
+                      "SkirtHeight": "0",
+                      "InfillSpeed": 4,
+                      "InfillDensity": 0.99,
+                      "PrintSpeed": 4,
+                      "LayerHeight": "0.2 mm",
+                      "TravelSpeed": 4,
+                      "SolidLayers": 0,
+                      "InfillPattern": 1,
+                      "Scale": 1,
+                      "InfillAngle": 0,
+                      "Perimeters": 1,
+                      "Rotate": "0",
+                      "PerimeterSpeed": 4,
+                      "Skirts": 0
+                    }
+                  },
+                  "updatedAt": "2017-05-16T10:45:27.105Z",
+                  "access": "PRIVATE",
+                  "__v": 0,
+                  "parents": [
+                    
+                  ],
+                  "templateId": "58e2fd51805b7a0001aea47d",
+                  "owner": "591abdeac6826600018c6200",
+                  "_id": "591ad847e2c7dd000159b075",
+                  "children": [
+                    
+                  ],
+                  "createdAt": "2017-05-16T10:45:27.105Z"
+                },
+                "infill": "B",
+                "file": {
+                  "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
+                  "text": "dual_lattice_well_plate.gcode",
+                  "bucket": "biobots-ui",
+                  "value": {
+                    "ref": "None",
+                    "_owner": "None",
+                    "_store": {
+                      
+                    },
+                    "key": "None",
+                    "props": {
+                      "checked": False,
+                      "focusState": "none",
+                      "insetChildren": False,
+                      "desktop": False,
+                      "disabled": False,
+                      "targetOrigin": {
+                        "horizontal": "left",
+                        "vertical": "top"
+                      },
+                      "primaryText": "dual_lattice_well_plate.gcode",
+                      "anchorOrigin": {
+                        "horizontal": "right",
+                        "vertical": "top"
+                      }
+                    }
+                  },
+                  "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
+                  "id": "59284e06e2c7dd000159b095"
+                },
+                "outfill": "A",
+                "slicingProfile": 0,
+                "id": "59284e06e2c7dd000159b095"
+              }
+            ],
+            "imagingProfile": {
+              
+            },
+            "extruderProfile": {
+              
+            },
+            "combinedPrint": {
+              "slicingProfileObject": {
+                "content": {
+                  "Properties": {
+                    "SkirtDistance": "0",
+                    "PrinterCenterY": "0",
+                    "PrinterCenterX": "0",
+                    "FirstLayerHeight": 0.2,
+                    "Name": "Pluronic 4mm/s",
+                    "SkirtHeight": "0",
+                    "InfillSpeed": 4,
+                    "InfillDensity": 0.99,
+                    "PrintSpeed": 4,
+                    "LayerHeight": "0.2 mm",
+                    "TravelSpeed": 4,
+                    "SolidLayers": 0,
+                    "InfillPattern": 1,
+                    "Scale": 1,
+                    "InfillAngle": 0,
+                    "Perimeters": 1,
+                    "Rotate": "0",
+                    "PerimeterSpeed": 4,
+                    "Skirts": 0
+                  }
+                },
+                "updatedAt": "2017-05-16T10:45:27.105Z",
+                "access": "PRIVATE",
+                "__v": 0,
+                "parents": [
+                  
+                ],
+                "templateId": "58e2fd51805b7a0001aea47d",
+                "owner": "591abdeac6826600018c6200",
+                "_id": "591ad847e2c7dd000159b075",
+                "children": [
+                  
+                ],
+                "createdAt": "2017-05-16T10:45:27.105Z"
+              },
+              "infill": "B",
+              "file": {
+                "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
+                "text": "dual_lattice_well_plate.gcode",
+                "bucket": "biobots-ui",
+                "value": {
+                  "ref": "None",
+                  "_owner": "None",
+                  "_store": {
+                    
+                  },
+                  "key": "None",
+                  "props": {
+                    "checked": False,
+                    "focusState": "none",
+                    "insetChildren": False,
+                    "desktop": False,
+                    "disabled": False,
+                    "targetOrigin": {
+                      "horizontal": "left",
+                      "vertical": "top"
+                    },
+                    "primaryText": "dual_lattice_well_plate.gcode",
+                    "anchorOrigin": {
+                      "horizontal": "right",
+                      "vertical": "top"
+                    }
+                  }
+                },
+                "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
+                "id": "59284e06e2c7dd000159b095"
+              },
+              "outfill": "A",
+              "slicingProfile": 0,
+              "id": "59284e06e2c7dd000159b095"
+            }
+            },
+            "2": {
+            "printFiles": [
+              {
+                "slicingProfileObject": {
+                  "content": {
+                    "Properties": {
+                      "SkirtDistance": "0",
+                      "PrinterCenterY": "0",
+                      "PrinterCenterX": "0",
+                      "FirstLayerHeight": 0.2,
+                      "Name": "Pluronic 4mm/s",
+                      "SkirtHeight": "0",
+                      "InfillSpeed": 4,
+                      "InfillDensity": 0.99,
+                      "PrintSpeed": 4,
+                      "LayerHeight": "0.2 mm",
+                      "TravelSpeed": 4,
+                      "SolidLayers": 0,
+                      "InfillPattern": 1,
+                      "Scale": 1,
+                      "InfillAngle": 0,
+                      "Perimeters": 1,
+                      "Rotate": "0",
+                      "PerimeterSpeed": 4,
+                      "Skirts": 0
+                    }
+                  },
+                  "updatedAt": "2017-05-16T10:45:27.105Z",
+                  "access": "PRIVATE",
+                  "__v": 0,
+                  "parents": [
+                    
+                  ],
+                  "templateId": "58e2fd51805b7a0001aea47d",
+                  "owner": "591abdeac6826600018c6200",
+                  "_id": "591ad847e2c7dd000159b075",
+                  "children": [
+                    
+                  ],
+                  "createdAt": "2017-05-16T10:45:27.105Z"
+                },
+                "infill": "B",
+                "file": {
+                  "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
+                  "text": "single_lattice_2layer_0.2mm_4mms.gcode",
+                  "bucket": "biobots-ui",
+                  "value": {
+                    "ref": "None",
+                    "_owner": "None",
+                    "_store": {
+                      
+                    },
+                    "key": "None",
+                    "props": {
+                      "checked": False,
+                      "focusState": "none",
+                      "insetChildren": False,
+                      "desktop": False,
+                      "disabled": False,
+                      "targetOrigin": {
+                        "horizontal": "left",
+                        "vertical": "top"
+                      },
+                      "primaryText": "single_lattice_2layer_0.2mm_4mms.gcode",
+                      "anchorOrigin": {
+                        "horizontal": "right",
+                        "vertical": "top"
+                      }
+                    }
+                  },
+                  "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
+                  "id": "59285044e2c7dd000159b097"
+                },
+                "outfill": "A",
+                "slicingProfile": 0,
+                "id": "59285044e2c7dd000159b097"
+              }
+            ],
+            "imagingProfile": {
+              
+            },
+            "extruderProfile": {
+              
+            },
+            "combinedPrint": {
+              "slicingProfileObject": {
+                "content": {
+                  "Properties": {
+                    "SkirtDistance": "0",
+                    "PrinterCenterY": "0",
+                    "PrinterCenterX": "0",
+                    "FirstLayerHeight": 0.2,
+                    "Name": "Pluronic 4mm/s",
+                    "SkirtHeight": "0",
+                    "InfillSpeed": 4,
+                    "InfillDensity": 0.99,
+                    "PrintSpeed": 4,
+                    "LayerHeight": "0.2 mm",
+                    "TravelSpeed": 4,
+                    "SolidLayers": 0,
+                    "InfillPattern": 1,
+                    "Scale": 1,
+                    "InfillAngle": 0,
+                    "Perimeters": 1,
+                    "Rotate": "0",
+                    "PerimeterSpeed": 4,
+                    "Skirts": 0
+                  }
+                },
+                "updatedAt": "2017-05-16T10:45:27.105Z",
+                "access": "PRIVATE",
+                "__v": 0,
+                "parents": [
+                  
+                ],
+                "templateId": "58e2fd51805b7a0001aea47d",
+                "owner": "591abdeac6826600018c6200",
+                "_id": "591ad847e2c7dd000159b075",
+                "children": [
+                  
+                ],
+                "createdAt": "2017-05-16T10:45:27.105Z"
+              },
+              "infill": "B",
+              "file": {
+                "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
+                "text": "single_lattice_2layer_0.2mm_4mms.gcode",
+                "bucket": "biobots-ui",
+                "value": {
+                  "ref": "None",
+                  "_owner": "None",
+                  "_store": {
+                    
+                  },
+                  "key": "None",
+                  "props": {
+                    "checked": False,
+                    "focusState": "none",
+                    "insetChildren": False,
+                    "desktop": False,
+                    "disabled": False,
+                    "targetOrigin": {
+                      "horizontal": "left",
+                      "vertical": "top"
+                    },
+                    "primaryText": "single_lattice_2layer_0.2mm_4mms.gcode",
+                    "anchorOrigin": {
+                      "horizontal": "right",
+                      "vertical": "top"
+                    }
+                  }
+                },
+                "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
+                "id": "59285044e2c7dd000159b097"
+              },
+              "outfill": "A",
+              "slicingProfile": 0,
+              "id": "59285044e2c7dd000159b097"
+            }
+            }
+            },
+            "B": {
+            "0": {
+            "printFiles": [
+              {
+                "outfill": "B",
+                "infill": "A",
+                "id": "591ad830e2c7dd000159b073",
+                "file": {
+                  "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
+                  "text": "novartis.gcode",
+                  "bucket": "biobots-ui",
+                  "value": {
+                    "ref": "None",
+                    "_owner": "None",
+                    "_store": {
+                      
+                    },
+                    "key": "None",
+                    "props": {
+                      "checked": False,
+                      "focusState": "none",
+                      "insetChildren": False,
+                      "desktop": False,
+                      "disabled": False,
+                      "targetOrigin": {
+                        "horizontal": "left",
+                        "vertical": "top"
+                      },
+                      "primaryText": "novartis.gcode",
+                      "anchorOrigin": {
+                        "horizontal": "right",
+                        "vertical": "top"
+                      }
+                    }
+                  },
+                  "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
+                  "id": "591ad830e2c7dd000159b073"
+                }
+              }
+            ],
+            "imagingProfile": {
+              
+            },
+            "extruderProfile": {
+              
+            },
+            "combinedPrint": {
+              "outfill": "B",
+              "infill": "A",
+              "id": "591ad830e2c7dd000159b073",
+              "file": {
+                "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
+                "text": "novartis.gcode",
+                "bucket": "biobots-ui",
+                "value": {
+                  "ref": "None",
+                  "_owner": "None",
+                  "_store": {
+                    
+                  },
+                  "key": "None",
+                  "props": {
+                    "checked": False,
+                    "focusState": "none",
+                    "insetChildren": False,
+                    "desktop": False,
+                    "disabled": False,
+                    "targetOrigin": {
+                      "horizontal": "left",
+                      "vertical": "top"
+                    },
+                    "primaryText": "novartis.gcode",
+                    "anchorOrigin": {
+                      "horizontal": "right",
+                      "vertical": "top"
+                    }
+                  }
+                },
+                "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
+                "id": "591ad830e2c7dd000159b073"
+              }
+            }
+            },
+            "1": {
+            "printFiles": [
+              {
+                "slicingProfileObject": {
+                  "content": {
+                    "Properties": {
+                      "SkirtDistance": "0",
+                      "PrinterCenterY": "0",
+                      "PrinterCenterX": "0",
+                      "FirstLayerHeight": 0.2,
+                      "Name": "Pluronic 4mm/s",
+                      "SkirtHeight": "0",
+                      "InfillSpeed": 4,
+                      "InfillDensity": 0.99,
+                      "PrintSpeed": 4,
+                      "LayerHeight": "0.2 mm",
+                      "TravelSpeed": 4,
+                      "SolidLayers": 0,
+                      "InfillPattern": 1,
+                      "Scale": 1,
+                      "InfillAngle": 0,
+                      "Perimeters": 1,
+                      "Rotate": "0",
+                      "PerimeterSpeed": 4,
+                      "Skirts": 0
+                    }
+                  },
+                  "updatedAt": "2017-05-16T10:45:27.105Z",
+                  "access": "PRIVATE",
+                  "__v": 0,
+                  "parents": [
+                    
+                  ],
+                  "templateId": "58e2fd51805b7a0001aea47d",
+                  "owner": "591abdeac6826600018c6200",
+                  "_id": "591ad847e2c7dd000159b075",
+                  "children": [
+                    
+                  ],
+                  "createdAt": "2017-05-16T10:45:27.105Z"
+                },
+                "infill": "B",
+                "file": {
+                  "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
+                  "text": "dual_lattice_well_plate.gcode",
+                  "bucket": "biobots-ui",
+                  "value": {
+                    "ref": "None",
+                    "_owner": "None",
+                    "_store": {
+                      
+                    },
+                    "key": "None",
+                    "props": {
+                      "checked": False,
+                      "focusState": "none",
+                      "insetChildren": False,
+                      "desktop": False,
+                      "disabled": False,
+                      "targetOrigin": {
+                        "horizontal": "left",
+                        "vertical": "top"
+                      },
+                      "primaryText": "dual_lattice_well_plate.gcode",
+                      "anchorOrigin": {
+                        "horizontal": "right",
+                        "vertical": "top"
+                      }
+                    }
+                  },
+                  "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
+                  "id": "59284e06e2c7dd000159b095"
+                },
+                "outfill": "A",
+                "slicingProfile": 0,
+                "id": "59284e06e2c7dd000159b095"
+              }
+            ],
+            "imagingProfile": {
+              
+            },
+            "extruderProfile": {
+              
+            },
+            "combinedPrint": {
+              "slicingProfileObject": {
+                "content": {
+                  "Properties": {
+                    "SkirtDistance": "0",
+                    "PrinterCenterY": "0",
+                    "PrinterCenterX": "0",
+                    "FirstLayerHeight": 0.2,
+                    "Name": "Pluronic 4mm/s",
+                    "SkirtHeight": "0",
+                    "InfillSpeed": 4,
+                    "InfillDensity": 0.99,
+                    "PrintSpeed": 4,
+                    "LayerHeight": "0.2 mm",
+                    "TravelSpeed": 4,
+                    "SolidLayers": 0,
+                    "InfillPattern": 1,
+                    "Scale": 1,
+                    "InfillAngle": 0,
+                    "Perimeters": 1,
+                    "Rotate": "0",
+                    "PerimeterSpeed": 4,
+                    "Skirts": 0
+                  }
+                },
+                "updatedAt": "2017-05-16T10:45:27.105Z",
+                "access": "PRIVATE",
+                "__v": 0,
+                "parents": [
+                  
+                ],
+                "templateId": "58e2fd51805b7a0001aea47d",
+                "owner": "591abdeac6826600018c6200",
+                "_id": "591ad847e2c7dd000159b075",
+                "children": [
+                  
+                ],
+                "createdAt": "2017-05-16T10:45:27.105Z"
+              },
+              "infill": "B",
+              "file": {
+                "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
+                "text": "dual_lattice_well_plate.gcode",
+                "bucket": "biobots-ui",
+                "value": {
+                  "ref": "None",
+                  "_owner": "None",
+                  "_store": {
+                    
+                  },
+                  "key": "None",
+                  "props": {
+                    "checked": False,
+                    "focusState": "none",
+                    "insetChildren": False,
+                    "desktop": False,
+                    "disabled": False,
+                    "targetOrigin": {
+                      "horizontal": "left",
+                      "vertical": "top"
+                    },
+                    "primaryText": "dual_lattice_well_plate.gcode",
+                    "anchorOrigin": {
+                      "horizontal": "right",
+                      "vertical": "top"
+                    }
+                  }
+                },
+                "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
+                "id": "59284e06e2c7dd000159b095"
+              },
+              "outfill": "A",
+              "slicingProfile": 0,
+              "id": "59284e06e2c7dd000159b095"
+            }
+            },
+            "2": {
+            "printFiles": [
+              {
+                "slicingProfileObject": {
+                  "content": {
+                    "Properties": {
+                      "SkirtDistance": "0",
+                      "PrinterCenterY": "0",
+                      "PrinterCenterX": "0",
+                      "FirstLayerHeight": 0.2,
+                      "Name": "Pluronic 4mm/s",
+                      "SkirtHeight": "0",
+                      "InfillSpeed": 4,
+                      "InfillDensity": 0.99,
+                      "PrintSpeed": 4,
+                      "LayerHeight": "0.2 mm",
+                      "TravelSpeed": 4,
+                      "SolidLayers": 0,
+                      "InfillPattern": 1,
+                      "Scale": 1,
+                      "InfillAngle": 0,
+                      "Perimeters": 1,
+                      "Rotate": "0",
+                      "PerimeterSpeed": 4,
+                      "Skirts": 0
+                    }
+                  },
+                  "updatedAt": "2017-05-16T10:45:27.105Z",
+                  "access": "PRIVATE",
+                  "__v": 0,
+                  "parents": [
+                    
+                  ],
+                  "templateId": "58e2fd51805b7a0001aea47d",
+                  "owner": "591abdeac6826600018c6200",
+                  "_id": "591ad847e2c7dd000159b075",
+                  "children": [
+                    
+                  ],
+                  "createdAt": "2017-05-16T10:45:27.105Z"
+                },
+                "infill": "B",
+                "file": {
+                  "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
+                  "text": "single_lattice_2layer_0.2mm_4mms.gcode",
+                  "bucket": "biobots-ui",
+                  "value": {
+                    "ref": "None",
+                    "_owner": "None",
+                    "_store": {
+                      
+                    },
+                    "key": "None",
+                    "props": {
+                      "checked": False,
+                      "focusState": "none",
+                      "insetChildren": False,
+                      "desktop": False,
+                      "disabled": False,
+                      "targetOrigin": {
+                        "horizontal": "left",
+                        "vertical": "top"
+                      },
+                      "primaryText": "single_lattice_2layer_0.2mm_4mms.gcode",
+                      "anchorOrigin": {
+                        "horizontal": "right",
+                        "vertical": "top"
+                      }
+                    }
+                  },
+                  "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
+                  "id": "59285044e2c7dd000159b097"
+                },
+                "outfill": "A",
+                "slicingProfile": 0,
+                "id": "59285044e2c7dd000159b097"
+              }
+            ],
+            "imagingProfile": {
+              
+            },
+            "extruderProfile": {
+              
+            },
+            "combinedPrint": {
+              "slicingProfileObject": {
+                "content": {
+                  "Properties": {
+                    "SkirtDistance": "0",
+                    "PrinterCenterY": "0",
+                    "PrinterCenterX": "0",
+                    "FirstLayerHeight": 0.2,
+                    "Name": "Pluronic 4mm/s",
+                    "SkirtHeight": "0",
+                    "InfillSpeed": 4,
+                    "InfillDensity": 0.99,
+                    "PrintSpeed": 4,
+                    "LayerHeight": "0.2 mm",
+                    "TravelSpeed": 4,
+                    "SolidLayers": 0,
+                    "InfillPattern": 1,
+                    "Scale": 1,
+                    "InfillAngle": 0,
+                    "Perimeters": 1,
+                    "Rotate": "0",
+                    "PerimeterSpeed": 4,
+                    "Skirts": 0
+                  }
+                },
+                "updatedAt": "2017-05-16T10:45:27.105Z",
+                "access": "PRIVATE",
+                "__v": 0,
+                "parents": [
+                  
+                ],
+                "templateId": "58e2fd51805b7a0001aea47d",
+                "owner": "591abdeac6826600018c6200",
+                "_id": "591ad847e2c7dd000159b075",
+                "children": [
+                  
+                ],
+                "createdAt": "2017-05-16T10:45:27.105Z"
+              },
+              "infill": "B",
+              "file": {
+                "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
+                "text": "single_lattice_2layer_0.2mm_4mms.gcode",
+                "bucket": "biobots-ui",
+                "value": {
+                  "ref": "None",
+                  "_owner": "None",
+                  "_store": {
+                    
+                  },
+                  "key": "None",
+                  "props": {
+                    "checked": False,
+                    "focusState": "none",
+                    "insetChildren": False,
+                    "desktop": False,
+                    "disabled": False,
+                    "targetOrigin": {
+                      "horizontal": "left",
+                      "vertical": "top"
+                    },
+                    "primaryText": "single_lattice_2layer_0.2mm_4mms.gcode",
+                    "anchorOrigin": {
+                      "horizontal": "right",
+                      "vertical": "top"
+                    }
+                  }
+                },
+                "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
+                "id": "59285044e2c7dd000159b097"
+              },
+              "outfill": "A",
+              "slicingProfile": 0,
+              "id": "59285044e2c7dd000159b097"
+            }
+            }
+        }
+    }
+  },
+  "selectedPrinter": {
+    "content": {
+      "serialNumber": "0001",
+      "model": "BioBot 1",
+      "version": 1,
+      "name": "BioBot's BioBot1",
+      "extruders": [
+        "591a5970288474000137a836",
+        "591a59700c309400017cd799"
+      ]
+    },
+    "updatedAt": "2017-05-16T01: 44: 17.382Z",
+    "access": "DEFAULT",
+    "__v": 0,
+    "parents": [
+      
+    ],
+    "templateId": "58e2fd4f805b7a0001aea479",
+    "owner": "58e2f8bd805b7a0001aea472",
+    "_id": "591a5971980cd10001a93fd5",
+    "children": [
+      
+    ],
+    "createdAt": "2017-05-16T01: 44: 17.382Z"
+  }
+}
+# s = settings(init=True, basedir=None, configfile=None)
+
+# post_process_api(apiPrint)
+
+
 
