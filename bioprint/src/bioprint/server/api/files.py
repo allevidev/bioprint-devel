@@ -295,7 +295,7 @@ def apiFileCommand():
 
 		print '\n\n\n\n', data["entry"], '\n\n\n\n'
 
-		# printer.select_file(None, False, printAfterLoading, apiPrint=data["entry"])
+		printer.select_file(None, False, printAfterLoading, apiPrint=data["entry"])
 
 	return make_response("Print Started", 200)
 
