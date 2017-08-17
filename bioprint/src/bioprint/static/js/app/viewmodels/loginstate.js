@@ -45,6 +45,16 @@ $(function() {
             })
         };
 
+        self.register_admin = function(){
+            $.ajax({
+                url: API_BASEURL + "register_admin",
+                type: "GET",
+                success: function(response) {
+                    console.log(response)
+                },
+            })
+        }
+
         self.fromResponse = function(response) {
             if (response && response.name) {
                 self.loggedIn(true);

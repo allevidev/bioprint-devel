@@ -66,8 +66,7 @@ class SocketManager(sockjs.tornado.SockJSConnection, bioprint.printer.PrinterCal
 
 	#	Fired on <thread>.start() event of this class
 	def run(self):
-		self.cloudManagerSocket = SocketIO(self.cloudSocketManagerURL, self.cloudSocketManagerPort, LoggingNamespace)	#	TODO: CHange to env variables
-
+		self.cloudManagerSocket = SocketIO(self.cloudSocketManagerURL, self.cloudSocketManagerPort, LoggingNamespace)	#	TODO: Change to env variables
 
 		self.cloudManagerSocket.on(self.CONNECT, self._on_connect_cloud)
 		self.cloudManagerSocket.on(self.DISCONNECT, self._on_disconnect_cloud)

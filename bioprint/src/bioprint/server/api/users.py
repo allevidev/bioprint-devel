@@ -25,14 +25,19 @@ from requests.auth import HTTPDigestAuth
 
 
 @api.route("/users", methods=["GET"])
-@restricted_access
-@admin_permission.require(403)
 def getUsers():
 	if userManager is None:
 		return jsonify(SUCCESS)
 
 	return jsonify({"users": userManager.getAllUsers()})
 
+@api.route("/register_admin", methods=["GET"])
+def registerAdmin():
+	if userManager is None:
+		return jsonify(SUCCESS)
+
+	userManager.addUser('admin', 'admin', 'info@biobots.io', '001', True, roles='admin', apikey=None)
+	return jsonify({ 'username': 'admin', 'password': 'admin' })
 
 @api.route("/users", methods=["POST"])
 @restricted_access

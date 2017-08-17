@@ -75,7 +75,7 @@ def connectionCommand():
 	elif command == "fake_ack":
 		printer.fake_ack()
 
-	return NO_CONTENT
+	return jsonify({ "message": "success" })
 
 def _get_options():
 	connection_options = get_connection_options()

@@ -13,6 +13,8 @@ from flask.ext.login import LoginManager, current_user
 from flask.ext.principal import Principal, Permission, RoleNeed, identity_loaded, UserNeed
 from flask.ext.babel import Babel, gettext, ngettext
 from flask.ext.assets import Environment, Bundle
+from flask_cors import CORS, cross_origin
+
 from babel import Locale
 from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
@@ -28,6 +30,8 @@ SUCCESS = {}
 NO_CONTENT = ("", 204)
 
 app = Flask("bioprint")
+CORS(app)
+
 assets = None
 babel = None
 debug = False
