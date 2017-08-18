@@ -120,6 +120,7 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 			"messages": messages,
 			"busyFiles": busy_files,
 		})
+
 		self._emit("current", data)
 
 	def on_printer_send_initial_data(self, data):
