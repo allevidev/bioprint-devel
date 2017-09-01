@@ -30,7 +30,7 @@ SUCCESS = {}
 NO_CONTENT = ("", 204)
 
 app = Flask("bioprint")
-CORS(app)
+CORS(app, supports_credentials=True)
 
 assets = None
 babel = None

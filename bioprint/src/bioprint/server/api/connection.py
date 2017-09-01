@@ -38,7 +38,7 @@ def connectionCommand():
 	}
 
 	command, data, response = get_json_command_from_request(request, valid_commands)
-
+	print('Reaching response', command, data)
 	if response is not None:
 		return response
 
