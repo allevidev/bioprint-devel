@@ -922,8 +922,9 @@ def post_process_api(apiPrint):
                     name = combinedPrint["file"]["text"]
 
                     wellFilename = settings().getBaseFolder("uploads") + '/' + name
-
-                    client = boto3.client('cognito-identity')
+                    
+                    boto3.setup_default_session(region_name='us-east-1')
+                    client = boto3.client('cognito-identity', region_name='us-east-1')
                     IdentityId = client.get_id(
                         IdentityPoolId='us-east-1:d288096b-6104-4457-ac73-3900d39fbba6'
                     )['IdentityId']
