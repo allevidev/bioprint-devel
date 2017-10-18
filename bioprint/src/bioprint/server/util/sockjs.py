@@ -43,11 +43,16 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 		self._pluginManager = pluginManager
 
 		self._remoteAddress = None
-
+	
 	def initializeDevice(self):
 		print(threading.currentThread().getName(), 'Starting')
 		self.device = hid.device()
 		self.bioprintBaseUrl = ''.join(['http://', '0.0.0.0', ':', '8090', '/api/']) #	This instance's url
+		self.movingThread = threading.Thread(name='Moving thread', target=self.movingThread)
+		self.movingThread.daemon = True
+		self.isMoving = False
+		self.isExtruding = False
+		self.movingThread.start()
 		try:
 			for d in hid.enumerate():
 					if(d['product_id'] == 39):
@@ -65,6 +70,34 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 		except IOError as ex:
 			print(ex)
 		print(threading.currentThread().getName(), 'Exiting')
+
+	def restrainPositions(self):
+		def restrict(number, max_n, min_n):
+			return min(max(number, min_n), max_n)
+		self.position['X'] = restrict(self.position['X'], 150, 0)
+		self.position['Y'] = restrict(self.position['Y'], 125, 0)
+
+	def movingThread(self):
+		while self.collectInput:
+			if self.isMoving:
+				self.position['X'] += self.deltaX
+				self.position['Y'] += self.deltaY
+				self.restrainPositions()
+				command = {
+					'commands': [ 'G90', 'G1 X' + str(self.position['X']) + ' Y' + str(self.position['Y']) + ' Z' + str(self.position['Z']) + ' F1000' ]
+				}
+				requests.post(
+					self.bioprintBaseUrl + url,
+					headers={
+						'x-api-key': 'BIOBOTS_API_KEY',
+						'x-socket-key': 'BIOBOTS_SOCKET_KEY',
+						'Content-Type': 'application/json'
+					},
+					json=body
+				)
+				time.sleep(0.25)
+		print(threading.currentThread().getName(), 'Exiting')
+
 
 	def read(self):
 		data = self.__input_translate(self.device.read(64))
@@ -131,6 +164,7 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 						'G1 M42 P16 S255',
 					]
 				}
+				self.isExtruding = True
 			elif(button == 'RT'):
 				body = {
 					'commands': [
@@ -138,7 +172,8 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 						'G1 M42 P17 S255',
 					]
 				}
-			else:
+				self.isExtruding = True
+			elif (self.isExtruding and button != 'RT' and button != 'LT'):
 				body = {
 					'commands': [
 						'G90',
@@ -146,25 +181,8 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 						'G1 M42 P17 S0',
 					]
 				}
-		requests.post(
-			self.bioprintBaseUrl + url,
-			headers={
-				'x-api-key': 'BIOBOTS_API_KEY',
-				'x-socket-key': 'BIOBOTS_SOCKET_KEY',
-				'Content-Type': 'application/json'
-			},
-			json=body
-		)
 		
-		directions = data['thumpad']
-		w_e = directions[0]
-		n_s = directions[1]
-		if not (not w_e and not n_s):
-			deltaX = (self.position['X'] + (1 if w_e == 'W' else -1)) if w_e != '' else self.position['X']
-			deltaY = (self.position['Y'] + (1 if n_s == 'N' else -1)) if n_s != '' else self.position['Y']
-			command = {
-				'commands': [ 'G90', 'G1 X' + str(deltaX) + ' Y' + str(deltaY) + ' Z' + str(self.position['Z']) + ' F1000' ]
-			}
+		if body:
 			requests.post(
 				self.bioprintBaseUrl + url,
 				headers={
@@ -172,10 +190,20 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 					'x-socket-key': 'BIOBOTS_SOCKET_KEY',
 					'Content-Type': 'application/json'
 				},
-				json=command
+				json=body
 			)
-			self.position['X'] = deltaX
-			self.position['Y'] = deltaY
+		
+		directions = data['thumpad']
+		w_e = directions[0]
+		n_s = directions[1]
+		if not (not w_e and not n_s):
+			self.deltaX = (1 if w_e == 'W' else -1) if w_e != '' else 0
+			self.deltaY = (1 if n_s == 'N' else -1) if n_s != '' else 0
+			if not self.isMoving:
+				self.isMoving = True
+		else:
+			self.isMoving = False
+			
 
 	def __input_translate(self, data):
 		values = {
@@ -257,6 +285,7 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 		bioprint.timelapse.notifyCallbacks(bioprint.timelapse.current)
 		self.deviceReadingThread = threading.Thread(name='Device Reader', target=self.initializeDevice)
 		self.collectInput = True
+		self.deviceReadingThread.daemon = True
 		self.deviceReadingThread.start()
 
 	def on_close(self):

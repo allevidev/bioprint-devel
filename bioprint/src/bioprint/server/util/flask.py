@@ -431,6 +431,7 @@ def restricted_access(func):
 	def decorated_view(*args, **kwargs):
 		#return func(*args, **kwargs)
 		# if bioprint hasn't been set up yet, abort
+
 		if settings().getBoolean(["server", "firstRun"]) and (bioprint.server.userManager is None or not bioprint.server.userManager.hasBeenCustomized()):
 			return flask.make_response("bioprint isn't setup yet", 403)
 

@@ -47,8 +47,8 @@ $(function() {
 
         self.register_admin = function(){
             $.ajax({
-                url: API_BASEURL + "register_admin",
-                type: "GET",
+                url: API_BASEURL + "setup",
+                type: "POST",
                 success: function(response) {
                     console.log(response)
                 },
