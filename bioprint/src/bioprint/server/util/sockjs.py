@@ -48,11 +48,6 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 		print(threading.currentThread().getName(), 'Starting')
 		self.device = hid.device()
 		self.bioprintBaseUrl = ''.join(['http://', '0.0.0.0', ':', '8090', '/api/']) #	This instance's url
-		self.movingThread = threading.Thread(name='Moving thread', target=self.movingThread)
-		self.movingThread.daemon = True
-		self.isMoving = False
-		self.isExtruding = False
-		self.movingThread.start()
 		try:
 			for d in hid.enumerate():
 					if(d['product_id'] == 39):
@@ -64,11 +59,19 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 				'Y': 0,
 				'Z': 50,
 			}
+			self.movingThread = threading.Thread(name='Moving thread', target=self.movingThread)
+			self.movingThread.daemon = True
+			self.isMoving = False
+			self.isExtruding = False
+			self.movingThread.start()
 			while self.collectInput:
 				self.read()
 				time.sleep(0.05)
 		except IOError as ex:
-			print(ex)
+			print('Input error', ex)
+		except ValueError as ve:
+			print('Controller error', ve)
+		self.device.close()
 		print(threading.currentThread().getName(), 'Exiting')
 
 	def restrainPositions(self):
