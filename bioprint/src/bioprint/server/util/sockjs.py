@@ -63,6 +63,7 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 			self.movingThread.daemon = True
 			self.isMoving = False
 			self.isExtruding = False
+			self.activeExtruder = 'B'
 			self.movingThread.start()
 			while self.collectInput:
 				self.read()
@@ -79,8 +80,11 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 			return min(max(number, min_n), max_n)
 		self.position['X'] = restrict(self.position['X'], 150, 0)
 		self.position['Y'] = restrict(self.position['Y'], 125, 0)
+		self.position['Z'] = restrict(self.position['Z'], 55, 0)
 
 	def movingThread(self):
+		url = 'printer/command'
+
 		while self.collectInput:
 			if self.isMoving:
 				self.position['X'] += self.deltaX
@@ -96,9 +100,9 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 						'x-socket-key': 'BIOBOTS_SOCKET_KEY',
 						'Content-Type': 'application/json'
 					},
-					json=body
+					json=command
 				)
-				time.sleep(0.25)
+				time.sleep(0.05)
 		print(threading.currentThread().getName(), 'Exiting')
 
 
@@ -108,7 +112,8 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 		body = {}
 
 		for button in data['buttons']:
-			if(button == 'A'):
+			if(button == 'A' and self.activeExtruder != 'A'):
+				self.position['Z'] = 35
 				body = {
 					'commands': [
 						'G90',
@@ -126,7 +131,10 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 						'M400',
 					]
 				}
-			elif(button == 'B'):
+				self.activeExtruder = 'A'
+				self.position['X'] -= 48.33
+			elif(button == 'B' and self.activeExtruder != 'B'):
+				self.position['Z'] = 35
 				body = {
 					'commands': [
 						'G90',
@@ -144,48 +152,53 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 						'M400',
 					]
 				}
+				self.activeExtruder = 'B'
+				self.position['X'] += 48.33
 			elif(button == 'X'):
+				self.position['Z'] += 0.8
+				self.restrainPositions()
 				body = {
 					'commands': [
 						'G90',
-						'G1 X' + str(self.position['X']) + ' Y' + str(self.position['Y']) + ' Z' + str(self.position['Z'] + 1) + ' F1000'
+						'G1 X' + str(self.position['X']) + ' Y' + str(self.position['Y']) + ' Z' + str(self.position['Z']) + ' F1000'
 					]
 				}
-				self.position['Z'] += 1
 			elif(button == 'Y'):
+				self.position['Z'] -= 0.8
+				self.restrainPositions()
 				body = {
 					'commands': [
 						'G90',
-						'G1 X' + str(self.position['X']) + ' Y' + str(self.position['Y']) + ' Z' + str(self.position['Z'] - 1) + ' F1000'
+						'G1 X' + str(self.position['X']) + ' Y' + str(self.position['Y']) + ' Z' + str(self.position['Z']) + ' F1000'
 					]
 				}
-				self.position['Z'] -= 1
 			elif(button == 'LT'):
 				body = {
 					'commands': [
-						'G90',
-						'G1 M42 P16 S255',
+						'M400',
+						'M42 P16 S255',
 					]
 				}
 				self.isExtruding = True
 			elif(button == 'RT'):
 				body = {
 					'commands': [
-						'G90',
-						'G1 M42 P17 S255',
+						'M400',
+						'M42 P17 S255',
 					]
 				}
 				self.isExtruding = True
 			elif (self.isExtruding and button != 'RT' and button != 'LT'):
 				body = {
 					'commands': [
-						'G90',
-						'G1 M42 P16 S0',
-						'G1 M42 P17 S0',
+						'M400',
+						'M42 P16 S0',
+						'M42 P17 S0',
 					]
 				}
 		
 		if body:
+			print(self.bioprintBaseUrl + url, body)
 			requests.post(
 				self.bioprintBaseUrl + url,
 				headers={
