@@ -255,9 +255,9 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, bioprint.printer.P
 			self._eventManager.subscribe(event, self._onEvent)
 
 		bioprint.timelapse.notifyCallbacks(bioprint.timelapse.current)
-		self.deviceReadingThread = threading.Thread(name='Device Reader', target=self.initializeDevice)
-		self.collectInput = True
-		self.deviceReadingThread.start()
+		# self.deviceReadingThread = threading.Thread(name='Device Reader', target=self.initializeDevice)
+		# self.collectInput = True
+		# self.deviceReadingThread.start()
 
 	def on_close(self):
 		self._logger.info("Client connection closed: %s" % self._remoteAddress)

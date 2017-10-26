@@ -731,6 +731,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 				path_in_storage = filename
 				path_on_disk = None
 			else:
+				print filename
 				path_in_storage = self._fileManager.path_in_storage(FileDestinations.LOCAL, filename)
 				path_on_disk = self._fileManager.path_on_disk(FileDestinations.LOCAL, filename)
 			self._selectedFile = {
@@ -761,6 +762,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		date = None
 		filament = None
 		if path_on_disk:
+			print '\n\n\n', path_on_disk, os.path.isfile(path_on_disk), '\n\n\n'
 			# Use a string for mtime because it could be float and the
 			# javascript needs to exact match
 			if not sd:

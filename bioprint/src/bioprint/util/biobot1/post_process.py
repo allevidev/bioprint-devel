@@ -474,6 +474,16 @@ def crosslink(cl_x, cl_y, target_x, target_y, z, wellplate, cl_duration, cl_inte
 
     return '\n'.join(commands)
 
+def extruderHeating(extruderProfile, totalExtruders):
+    def returnCommand(start, n):
+        return start + ' T' + str(n) + ' S' + str(extruderProfile[chr(n + 65)]["target_temperature"])
+    def isValid(n):
+        return chr(n + 65) in extruderProfile
+    commands = [ returnCommand('M104', key) if isValid(key) else None for key in range(totalExtruders) ]
+    commands += [ returnCommand('M109', key) if isValid(key) else None for key in range(totalExtruders) ]
+    
+    return '\n'.join(filter(None, commands))
+
 def calculate_wellplate_positions(positions):
     petri = {
         "A": {
@@ -851,13 +861,11 @@ def post_process(payload, positions, wellPlate, cl_params, tempData):
 
 def post_process_api(apiPrint):
 
-    print '\n\n\n\n\n', apiPrint, '\n\n\n\n'
-
     processed = False
 
     e0_pos = 46
     e1_pos = 0
-    filename = str(apiPrint["content"]["printName"])
+    filename = str(apiPrint["content"]["printName"]).replace('%20', ' ')
 
     fName = '.'.join(str.split(filename, '.')[0:-1])
     fType = '.gcode'
@@ -866,8 +874,8 @@ def post_process_api(apiPrint):
 
     printName = "_".join([filename, str(apiPrint["_id"]), timestamp]).replace(' ', '_')
     
-    outputFileName = printName + '.' + fType
-    outputFile = settings().getBaseFolder("uploads") + '/' + printName + '.' + fType    
+    outputFileName = printName + fType
+    outputFile = settings().getBaseFolder("uploads") + '/' + outputFileName    
 
     print '\n\n\n\n\n\n', outputFileName, outputFile, '\n\n\n\n'
 
@@ -913,145 +921,153 @@ def post_process_api(apiPrint):
                     x_pos, x_pos_old = [e0_Xctr, e1_Xctr], [e0_Xctr, e1_Xctr]
                     y_pos, y_pos_old = [e0_Yctr, e1_Yctr], [e0_Yctr, e1_Yctr]
 
-                    print '\n\n\n\n', apiPrint["content"]["wellFiles"][str(r)][str(c)], '\n\n\n\n'
-
                     combinedPrint = apiPrint["content"]["wellFiles"][str(r)][str(c)]["combinedPrint"]
+                    crosslinkingProfile = apiPrint["content"]["wellFiles"][str(r)][str(c)]["crosslinkingProfile"]
 
-                    bucket = combinedPrint["file"]["bucket"]
-                    key = combinedPrint["file"]["key"]
-                    name = combinedPrint["file"]["text"]
+                    extruderProfile = apiPrint["content"]["wellFiles"][str(r)][str(c)]["extruderProfile"]
 
-                    wellFilename = settings().getBaseFolder("uploads") + '/' + name
-                    
-                    boto3.setup_default_session(region_name='us-east-1')
-                    client = boto3.client('cognito-identity', region_name='us-east-1')
-                    IdentityId = client.get_id(
-                        IdentityPoolId='us-east-1:d288096b-6104-4457-ac73-3900d39fbba6'
-                    )['IdentityId']
+                    if "file" in combinedPrint.keys():
 
-                    credentials = client.get_credentials_for_identity(
-                        IdentityId=IdentityId
-                    )
+                        bucket = combinedPrint["file"]["bucket"]
+                        key = combinedPrint["file"]["key"]
+                        name = combinedPrint["file"]["text"]
 
-                    ACCESS_KEY = credentials['Credentials']['AccessKeyId']
-                    SECRET_KEY = credentials['Credentials']['SecretKey']
-                    SESSION_TOKEN = credentials['Credentials']['SessionToken']
+                        wellFilename = settings().getBaseFolder("uploads") + '/' + name
 
-                    s3 = boto3.client(
-                        's3',
-                        aws_access_key_id=ACCESS_KEY,
-                        aws_secret_access_key=SECRET_KEY,
-                        aws_session_token=SESSION_TOKEN,
-                    )
+                        client = boto3.client('cognito-identity')
+                        IdentityId = client.get_id(
+                            IdentityPoolId='us-east-1:d288096b-6104-4457-ac73-3900d39fbba6'
+                        )['IdentityId']
 
-                    file = s3.download_file(bucket,
-                        key,
-                        wellFilename
-                    )
+                        credentials = client.get_credentials_for_identity(
+                            IdentityId=IdentityId
+                        )
 
-                    with open(wellFilename, 'r') as f:
-                        o.write('G1 Z50\n')
-                        o.write('G1 E' + str(mid) + '\n')
-                        o.write('G21\n')
-                        o.write('G1 X' + str(e0_Xctr) + ' Y' + str(e0_Yctr) + ' F1000\n')
-                        for i, line in enumerate(f):
-                            if z_value(line) is not None:
-                                o.write(stop_extrude(active_e) + '\n')
-                                last_e = 0
-                                extruding = False
-                                if cl_params["cl_layers_enabled"]:
-                                    if layer % cl_params["cl_layers"] == 0 and layer != 0:
+                        ACCESS_KEY = credentials['Credentials']['AccessKeyId']
+                        SECRET_KEY = credentials['Credentials']['SecretKey']
+                        SESSION_TOKEN = credentials['Credentials']['SessionToken']
+
+                        s3 = boto3.client(
+                            's3',
+                            aws_access_key_id=ACCESS_KEY,
+                            aws_secret_access_key=SECRET_KEY,
+                            aws_session_token=SESSION_TOKEN,
+                        )
+
+                        file = s3.download_file(bucket,
+                            key,
+                            wellFilename
+                        )
+
+                        with open(wellFilename, 'r') as f:
+                            o.write('G1 Z50\n')
+                            o.write('G1 E' + str(mid) + '\n')
+                            o.write('G21\n')
+                            o.write('G1 X' + str(e0_Xctr) + ' Y' + str(e0_Yctr) + ' F1000\n')
+                            if "A" in extruderProfile or "B" in extruderProfile:
+                                o.write(extruderHeating(extruderProfile, 2))
+                            if crosslinkingProfile["always_on_crosslinking"]:
+                                o.write('M42 P4 S' + str(crosslinkingProfile["always_on_intensity"]) + ' ; CROSSLINK ALWAYS ON HERE')
+                            for i, line in enumerate(f):
+                                if z_value(line) is not None:
+                                    o.write(stop_extrude(active_e) + '\n')
+                                    last_e = 0
+                                    extruding = False
+                                    if crosslinkingProfile["during_print_crosslinking"]:
+                                        if layer % crosslinkingProfile["during_print_frequency"] == 0 and layer != 0:
+                                            if active_e == 0:
+                                                target_x = e0_Xctr
+                                                target_y = e0_Yctr
+                                            elif active_e == 1:
+                                                target_x = e1_Xctr
+                                                target_y = e1_Yctr
+                                            o.write(crosslink(e1_Xctr, e1_Yctr, target_x, target_y, layer_z, wellPlate, crosslinkingProfile["during_print_duration"], crosslinkingProfile["during_print_intensity"]) + '\n')
+
+                                    layer_z[0] = z_value(line) + e0_Z
+                                    layer_z[1] = z_value(line) + e1_Z
+                                    layer += 1
+                                    next
+                                if m_value(line) == 190.0 or m_value(line) == 104.0 or m_value(line) == 109.0:
+                                    next
+                                else:
+                                    if x_value(line) is not None:
+                                        x_pos_old[active_e] = x_pos[active_e]
                                         if active_e == 0:
-                                            target_x = e0_Xctr
-                                            target_y = e0_Yctr
+                                            x_pos[active_e] = x_value(line) + e0_Xctr    
                                         elif active_e == 1:
-                                            target_x = e1_Xctr
-                                            target_y = e1_Yctr
-                                        o.write(crosslink(e1_Xctr, e1_Yctr, target_x, target_y, layer_z, wellPlate, cl_params["cl_duration"], cl_params["cl_intensity"]) + '\n')
-                                
-                                layer_z[0] = z_value(line) + e0_Z
-                                layer_z[1] = z_value(line) + e1_Z
-                                layer += 1
-                                next
-                            if m_value(line) == 190.0 or m_value(line) == 104.0 or m_value(line) == 109.0:
-                                next
-                            else:
-                                if x_value(line) is not None:
-                                    x_pos_old[active_e] = x_pos[active_e]
-                                    if active_e == 0:
-                                        x_pos[active_e] = x_value(line) + e0_Xctr    
-                                    elif active_e == 1:
-                                        x_pos[active_e] = x_value(line) + e1_Xctr
-                                if y_value(line) is not None:
-                                    y_pos_old[active_e] = y_pos[active_e]
-                                    if active_e == 0:
-                                        y_pos[active_e] = y_value(line) + e0_Yctr    
-                                    elif active_e == 1:
-                                        y_pos[active_e] = y_value(line) + e1_Yctr
-                                if g_value(line) is not None:
-                                    if g_value(line) == 28.0:
-                                        next
-                                    elif g_value(line) == 1 or e_value(line) is not None:
-                                        if e_value(line) is not None:
-                                            d_e = e_value(line) - last_e
-                                            if d_e > 0:
-                                                o.write('G1 X' + str(x_pos_old[active_e]) + ' Y' + str(y_pos_old[active_e]) + '\n')
-                                                if not extruding:
-                                                    o.write(start_extrude(active_e, e0_pos, e1_pos, layer_z) + '\n')
-                                                    extruding = True
-                                                if active_e == 0:
-                                                    o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
-                                                elif active_e == 1:
-                                                    o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
-                                                last_e = e_value(line)
-                                                next
-                                            elif d_e < 0:
-                                                if active_e == 0:
-                                                    o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
-                                                elif active_e == 1:
-                                                    o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
-                                                if extruding:
-                                                    o.write(stop_extrude(active_e) + '\n')   
-                                                    extruding = False
-                                                last_e = e_value(line)
-                                                next
-                                        elif g_value(line) == 1:
-                                            if e_value(line) is None and last_e > 0:
-                                                if extruding:
-                                                    o.write(stop_extrude(active_e) + '\n')   
-                                                    extruding = not extruding
-                                                last_e = 0
-                                                if active_e == 0:
-                                                    o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
-                                                elif active_e == 1:
-                                                    o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
-                                                next
-                                            else:
-                                                if active_e == 0:
-                                                    o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
-                                                elif active_e == 1:
-                                                    o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
+                                            x_pos[active_e] = x_value(line) + e1_Xctr
+                                    if y_value(line) is not None:
+                                        y_pos_old[active_e] = y_pos[active_e]
+                                        if active_e == 0:
+                                            y_pos[active_e] = y_value(line) + e0_Yctr    
+                                        elif active_e == 1:
+                                            y_pos[active_e] = y_value(line) + e1_Yctr
+                                    if g_value(line) is not None:
+                                        if g_value(line) == 28.0:
+                                            next
+                                        elif g_value(line) == 1 or e_value(line) is not None:
+                                            if e_value(line) is not None:
+                                                d_e = e_value(line) - last_e
+                                                if d_e > 0:
+                                                    o.write('G1 X' + str(x_pos_old[active_e]) + ' Y' + str(y_pos_old[active_e]) + '\n')
+                                                    if not extruding:
+                                                        o.write(start_extrude(active_e, e0_pos, e1_pos, layer_z) + '\n')
+                                                        extruding = True
+                                                    if active_e == 0:
+                                                        o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
+                                                    elif active_e == 1:
+                                                        o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
+                                                    last_e = e_value(line)
+                                                    next
+                                                elif d_e < 0:
+                                                    if active_e == 0:
+                                                        o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
+                                                    elif active_e == 1:
+                                                        o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
+                                                    if extruding:
+                                                        o.write(stop_extrude(active_e) + '\n')   
+                                                        extruding = False
+                                                    last_e = e_value(line)
+                                                    next
+                                            elif g_value(line) == 1:
+                                                if e_value(line) is None and last_e > 0:
+                                                    if extruding:
+                                                        o.write(stop_extrude(active_e) + '\n')   
+                                                        extruding = not extruding
+                                                    last_e = 0
+                                                    if active_e == 0:
+                                                        o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
+                                                    elif active_e == 1:
+                                                        o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
+                                                    next
+                                                else:
+                                                    if active_e == 0:
+                                                        o.write(g1_modify(line, e0_Xctr, e0_Yctr) + '\n')
+                                                    elif active_e == 1:
+                                                        o.write(g1_modify(line, e1_Xctr, e1_Yctr) + '\n')
+                                        else:
+                                            o.write(line)
+                                    elif line.startswith('T') and t_value(line) is not None:
+                                        active_e = int(t_value(line))
+                                        o.write(switch_extruder(active_e, e0_pos, e1_pos, e0_Xctr, e0_Yctr, e1_Xctr, e1_Yctr) + '\n')
+                                    elif m_value(line) == 106.0:
+                                        o.write(start_extrude(active_e, e0_pos, e1_pos, layer_z) + '\n')
+                                    elif m_value(line) == 107.0:
+                                        o.write(stop_extrude(active_e) + '\n')
                                     else:
                                         o.write(line)
-                                elif line.startswith('T') and t_value(line) is not None:
-                                    active_e = int(t_value(line))
-                                    o.write(switch_extruder(active_e, e0_pos, e1_pos, e0_Xctr, e0_Yctr, e1_Xctr, e1_Yctr) + '\n')
-                                elif m_value(line) == 106.0:
-                                    o.write(start_extrude(active_e, e0_pos, e1_pos, layer_z) + '\n')
-                                elif m_value(line) == 107.0:
-                                    o.write(stop_extrude(active_e) + '\n')
-                                else:
-                                    o.write(line)
-                        if cl_params["cl_end"]:
-                            o.write(stop_extrude(active_e) + '\n')
-                            if active_e == 0:
-                                target_x = e0_Xctr
-                                target_y = e0_Yctr
-                            elif active_e == 1:
-                                target_x = e1_Xctr
-                                target_y = e1_Yctr
-                            o.write(crosslink(e1_Xctr, e1_Yctr, target_x, target_y, layer_z, wellPlate, cl_params["cl_end_duration"], cl_params["cl_end_intensity"])+ '\n')
-                    f.close()
+                            if crosslinkingProfile["post_print"]:
+                                o.write(stop_extrude(active_e) + '\n')
+                                if active_e == 0:
+                                    target_x = e0_Xctr
+                                    target_y = e0_Yctr
+                                elif active_e == 1:
+                                    target_x = e1_Xctr
+                                    target_y = e1_Yctr
+                                o.write(crosslink(e1_Xctr, e1_Yctr, target_x, target_y, layer_z, wellPlate, crosslinkingProfile["port_print_duration"], crosslinkingProfile["post_print_intensity"])+ '\n')
+                            if crosslinkingProfile["always_on_crosslinking"]:
+                                o.write('M42 P4 S0; CROSSLINK ALWAYS OFF HERE')
+                        f.close()
             o.write(end_print() + '\n')
         o.close()
     return {
@@ -1059,6 +1075,7 @@ def post_process_api(apiPrint):
         "filename": outputFileName,
         "origin": 'local',
     }
+
 
 def bb2_post_process(payload, positions, wellPlate, cl_params, tempData):
     return payload
@@ -1094,838 +1111,6 @@ cl_params = {
 
 # post_process(test_payload, test_positions, 1, cl_params, None)
 # print calculate_wellplate_positions(test_positions, 24)
-
-apiPrint = {
-    "_id": "001",
-    "content": {
-        "printName": "Test 1",
-        "welltype": "6 Wells",
-        "extruderPositions": {
-            "0": {
-                "X": 58.00,
-                "Y": 90.00,
-                "Z": 25.00
-            },
-            "1": {
-                "X": 96.00,
-                "Y": 90.00,
-                "Z": 25.00
-            }
-        },
-        "bedProfile": {},
-        "wellFiles": {
-            "A": {
-                "0": {
-                    "printFiles": [
-                        {
-                            "outfill": "B",
-                            "infill": "A",
-                            "id": "591ad830e2c7dd000159b073",
-                            "file": {
-                                "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
-                                "text": "novartis.gcode",
-                                "bucket": "biobots-ui",
-                                "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
-                                "id": "591ad830e2c7dd000159b073"
-                            }
-                        }
-                    ],
-            "imagingProfile": {
-              
-            },
-            "extruderProfile": {
-              
-            },
-            "combinedPrint": {
-              "outfill": "B",
-              "infill": "A",
-              "id": "591ad830e2c7dd000159b073",
-              "file": {
-                "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
-                "text": "novartis.gcode",
-                "bucket": "biobots-ui",
-                "value": {
-                  "ref": "None",
-                  "_owner": "None",
-                  "_store": {
-                    
-                  },
-                  "key": "None",
-                  "props": {
-                    "checked": False,
-                    "focusState": "none",
-                    "insetChildren": False,
-                    "desktop": False,
-                    "disabled": False,
-                    "targetOrigin": {
-                      "horizontal": "left",
-                      "vertical": "top"
-                    },
-                    "primaryText": "novartis.gcode",
-                    "anchorOrigin": {
-                      "horizontal": "right",
-                      "vertical": "top"
-                    }
-                  }
-                },
-                "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
-                "id": "591ad830e2c7dd000159b073"
-              }
-            }
-            },
-            "1": {
-            "printFiles": [
-              {
-                "slicingProfileObject": {
-                  "content": {
-                    "Properties": {
-                      "SkirtDistance": "0",
-                      "PrinterCenterY": "0",
-                      "PrinterCenterX": "0",
-                      "FirstLayerHeight": 0.2,
-                      "Name": "Pluronic 4mm/s",
-                      "SkirtHeight": "0",
-                      "InfillSpeed": 4,
-                      "InfillDensity": 0.99,
-                      "PrintSpeed": 4,
-                      "LayerHeight": "0.2 mm",
-                      "TravelSpeed": 4,
-                      "SolidLayers": 0,
-                      "InfillPattern": 1,
-                      "Scale": 1,
-                      "InfillAngle": 0,
-                      "Perimeters": 1,
-                      "Rotate": "0",
-                      "PerimeterSpeed": 4,
-                      "Skirts": 0
-                    }
-                  },
-                  "updatedAt": "2017-05-16T10:45:27.105Z",
-                  "access": "PRIVATE",
-                  "__v": 0,
-                  "parents": [
-                    
-                  ],
-                  "templateId": "58e2fd51805b7a0001aea47d",
-                  "owner": "591abdeac6826600018c6200",
-                  "_id": "591ad847e2c7dd000159b075",
-                  "children": [
-                    
-                  ],
-                  "createdAt": "2017-05-16T10:45:27.105Z"
-                },
-                "infill": "B",
-                "file": {
-                  "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
-                  "text": "dual_lattice_well_plate.gcode",
-                  "bucket": "biobots-ui",
-                  "value": {
-                    "ref": "None",
-                    "_owner": "None",
-                    "_store": {
-                      
-                    },
-                    "key": "None",
-                    "props": {
-                      "checked": False,
-                      "focusState": "none",
-                      "insetChildren": False,
-                      "desktop": False,
-                      "disabled": False,
-                      "targetOrigin": {
-                        "horizontal": "left",
-                        "vertical": "top"
-                      },
-                      "primaryText": "dual_lattice_well_plate.gcode",
-                      "anchorOrigin": {
-                        "horizontal": "right",
-                        "vertical": "top"
-                      }
-                    }
-                  },
-                  "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
-                  "id": "59284e06e2c7dd000159b095"
-                },
-                "outfill": "A",
-                "slicingProfile": 0,
-                "id": "59284e06e2c7dd000159b095"
-              }
-            ],
-            "imagingProfile": {
-              
-            },
-            "extruderProfile": {
-              
-            },
-            "combinedPrint": {
-              "slicingProfileObject": {
-                "content": {
-                  "Properties": {
-                    "SkirtDistance": "0",
-                    "PrinterCenterY": "0",
-                    "PrinterCenterX": "0",
-                    "FirstLayerHeight": 0.2,
-                    "Name": "Pluronic 4mm/s",
-                    "SkirtHeight": "0",
-                    "InfillSpeed": 4,
-                    "InfillDensity": 0.99,
-                    "PrintSpeed": 4,
-                    "LayerHeight": "0.2 mm",
-                    "TravelSpeed": 4,
-                    "SolidLayers": 0,
-                    "InfillPattern": 1,
-                    "Scale": 1,
-                    "InfillAngle": 0,
-                    "Perimeters": 1,
-                    "Rotate": "0",
-                    "PerimeterSpeed": 4,
-                    "Skirts": 0
-                  }
-                },
-                "updatedAt": "2017-05-16T10:45:27.105Z",
-                "access": "PRIVATE",
-                "__v": 0,
-                "parents": [
-                  
-                ],
-                "templateId": "58e2fd51805b7a0001aea47d",
-                "owner": "591abdeac6826600018c6200",
-                "_id": "591ad847e2c7dd000159b075",
-                "children": [
-                  
-                ],
-                "createdAt": "2017-05-16T10:45:27.105Z"
-              },
-              "infill": "B",
-              "file": {
-                "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
-                "text": "dual_lattice_well_plate.gcode",
-                "bucket": "biobots-ui",
-                "value": {
-                  "ref": "None",
-                  "_owner": "None",
-                  "_store": {
-                    
-                  },
-                  "key": "None",
-                  "props": {
-                    "checked": False,
-                    "focusState": "none",
-                    "insetChildren": False,
-                    "desktop": False,
-                    "disabled": False,
-                    "targetOrigin": {
-                      "horizontal": "left",
-                      "vertical": "top"
-                    },
-                    "primaryText": "dual_lattice_well_plate.gcode",
-                    "anchorOrigin": {
-                      "horizontal": "right",
-                      "vertical": "top"
-                    }
-                  }
-                },
-                "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
-                "id": "59284e06e2c7dd000159b095"
-              },
-              "outfill": "A",
-              "slicingProfile": 0,
-              "id": "59284e06e2c7dd000159b095"
-            }
-            },
-            "2": {
-            "printFiles": [
-              {
-                "slicingProfileObject": {
-                  "content": {
-                    "Properties": {
-                      "SkirtDistance": "0",
-                      "PrinterCenterY": "0",
-                      "PrinterCenterX": "0",
-                      "FirstLayerHeight": 0.2,
-                      "Name": "Pluronic 4mm/s",
-                      "SkirtHeight": "0",
-                      "InfillSpeed": 4,
-                      "InfillDensity": 0.99,
-                      "PrintSpeed": 4,
-                      "LayerHeight": "0.2 mm",
-                      "TravelSpeed": 4,
-                      "SolidLayers": 0,
-                      "InfillPattern": 1,
-                      "Scale": 1,
-                      "InfillAngle": 0,
-                      "Perimeters": 1,
-                      "Rotate": "0",
-                      "PerimeterSpeed": 4,
-                      "Skirts": 0
-                    }
-                  },
-                  "updatedAt": "2017-05-16T10:45:27.105Z",
-                  "access": "PRIVATE",
-                  "__v": 0,
-                  "parents": [
-                    
-                  ],
-                  "templateId": "58e2fd51805b7a0001aea47d",
-                  "owner": "591abdeac6826600018c6200",
-                  "_id": "591ad847e2c7dd000159b075",
-                  "children": [
-                    
-                  ],
-                  "createdAt": "2017-05-16T10:45:27.105Z"
-                },
-                "infill": "B",
-                "file": {
-                  "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
-                  "text": "single_lattice_2layer_0.2mm_4mms.gcode",
-                  "bucket": "biobots-ui",
-                  "value": {
-                    "ref": "None",
-                    "_owner": "None",
-                    "_store": {
-                      
-                    },
-                    "key": "None",
-                    "props": {
-                      "checked": False,
-                      "focusState": "none",
-                      "insetChildren": False,
-                      "desktop": False,
-                      "disabled": False,
-                      "targetOrigin": {
-                        "horizontal": "left",
-                        "vertical": "top"
-                      },
-                      "primaryText": "single_lattice_2layer_0.2mm_4mms.gcode",
-                      "anchorOrigin": {
-                        "horizontal": "right",
-                        "vertical": "top"
-                      }
-                    }
-                  },
-                  "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
-                  "id": "59285044e2c7dd000159b097"
-                },
-                "outfill": "A",
-                "slicingProfile": 0,
-                "id": "59285044e2c7dd000159b097"
-              }
-            ],
-            "imagingProfile": {
-              
-            },
-            "extruderProfile": {
-              
-            },
-            "combinedPrint": {
-              "slicingProfileObject": {
-                "content": {
-                  "Properties": {
-                    "SkirtDistance": "0",
-                    "PrinterCenterY": "0",
-                    "PrinterCenterX": "0",
-                    "FirstLayerHeight": 0.2,
-                    "Name": "Pluronic 4mm/s",
-                    "SkirtHeight": "0",
-                    "InfillSpeed": 4,
-                    "InfillDensity": 0.99,
-                    "PrintSpeed": 4,
-                    "LayerHeight": "0.2 mm",
-                    "TravelSpeed": 4,
-                    "SolidLayers": 0,
-                    "InfillPattern": 1,
-                    "Scale": 1,
-                    "InfillAngle": 0,
-                    "Perimeters": 1,
-                    "Rotate": "0",
-                    "PerimeterSpeed": 4,
-                    "Skirts": 0
-                  }
-                },
-                "updatedAt": "2017-05-16T10:45:27.105Z",
-                "access": "PRIVATE",
-                "__v": 0,
-                "parents": [
-                  
-                ],
-                "templateId": "58e2fd51805b7a0001aea47d",
-                "owner": "591abdeac6826600018c6200",
-                "_id": "591ad847e2c7dd000159b075",
-                "children": [
-                  
-                ],
-                "createdAt": "2017-05-16T10:45:27.105Z"
-              },
-              "infill": "B",
-              "file": {
-                "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
-                "text": "single_lattice_2layer_0.2mm_4mms.gcode",
-                "bucket": "biobots-ui",
-                "value": {
-                  "ref": "None",
-                  "_owner": "None",
-                  "_store": {
-                    
-                  },
-                  "key": "None",
-                  "props": {
-                    "checked": False,
-                    "focusState": "none",
-                    "insetChildren": False,
-                    "desktop": False,
-                    "disabled": False,
-                    "targetOrigin": {
-                      "horizontal": "left",
-                      "vertical": "top"
-                    },
-                    "primaryText": "single_lattice_2layer_0.2mm_4mms.gcode",
-                    "anchorOrigin": {
-                      "horizontal": "right",
-                      "vertical": "top"
-                    }
-                  }
-                },
-                "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
-                "id": "59285044e2c7dd000159b097"
-              },
-              "outfill": "A",
-              "slicingProfile": 0,
-              "id": "59285044e2c7dd000159b097"
-            }
-            }
-            },
-            "B": {
-            "0": {
-            "printFiles": [
-              {
-                "outfill": "B",
-                "infill": "A",
-                "id": "591ad830e2c7dd000159b073",
-                "file": {
-                  "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
-                  "text": "novartis.gcode",
-                  "bucket": "biobots-ui",
-                  "value": {
-                    "ref": "None",
-                    "_owner": "None",
-                    "_store": {
-                      
-                    },
-                    "key": "None",
-                    "props": {
-                      "checked": False,
-                      "focusState": "none",
-                      "insetChildren": False,
-                      "desktop": False,
-                      "disabled": False,
-                      "targetOrigin": {
-                        "horizontal": "left",
-                        "vertical": "top"
-                      },
-                      "primaryText": "novartis.gcode",
-                      "anchorOrigin": {
-                        "horizontal": "right",
-                        "vertical": "top"
-                      }
-                    }
-                  },
-                  "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
-                  "id": "591ad830e2c7dd000159b073"
-                }
-              }
-            ],
-            "imagingProfile": {
-              
-            },
-            "extruderProfile": {
-              
-            },
-            "combinedPrint": {
-              "outfill": "B",
-              "infill": "A",
-              "id": "591ad830e2c7dd000159b073",
-              "file": {
-                "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
-                "text": "novartis.gcode",
-                "bucket": "biobots-ui",
-                "value": {
-                  "ref": "None",
-                  "_owner": "None",
-                  "_store": {
-                    
-                  },
-                  "key": "None",
-                  "props": {
-                    "checked": False,
-                    "focusState": "none",
-                    "insetChildren": False,
-                    "desktop": False,
-                    "disabled": False,
-                    "targetOrigin": {
-                      "horizontal": "left",
-                      "vertical": "top"
-                    },
-                    "primaryText": "novartis.gcode",
-                    "anchorOrigin": {
-                      "horizontal": "right",
-                      "vertical": "top"
-                    }
-                  }
-                },
-                "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/591ad830e2c7dd000159b073_novartis.gcode",
-                "id": "591ad830e2c7dd000159b073"
-              }
-            }
-            },
-            "1": {
-            "printFiles": [
-              {
-                "slicingProfileObject": {
-                  "content": {
-                    "Properties": {
-                      "SkirtDistance": "0",
-                      "PrinterCenterY": "0",
-                      "PrinterCenterX": "0",
-                      "FirstLayerHeight": 0.2,
-                      "Name": "Pluronic 4mm/s",
-                      "SkirtHeight": "0",
-                      "InfillSpeed": 4,
-                      "InfillDensity": 0.99,
-                      "PrintSpeed": 4,
-                      "LayerHeight": "0.2 mm",
-                      "TravelSpeed": 4,
-                      "SolidLayers": 0,
-                      "InfillPattern": 1,
-                      "Scale": 1,
-                      "InfillAngle": 0,
-                      "Perimeters": 1,
-                      "Rotate": "0",
-                      "PerimeterSpeed": 4,
-                      "Skirts": 0
-                    }
-                  },
-                  "updatedAt": "2017-05-16T10:45:27.105Z",
-                  "access": "PRIVATE",
-                  "__v": 0,
-                  "parents": [
-                    
-                  ],
-                  "templateId": "58e2fd51805b7a0001aea47d",
-                  "owner": "591abdeac6826600018c6200",
-                  "_id": "591ad847e2c7dd000159b075",
-                  "children": [
-                    
-                  ],
-                  "createdAt": "2017-05-16T10:45:27.105Z"
-                },
-                "infill": "B",
-                "file": {
-                  "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
-                  "text": "dual_lattice_well_plate.gcode",
-                  "bucket": "biobots-ui",
-                  "value": {
-                    "ref": "None",
-                    "_owner": "None",
-                    "_store": {
-                      
-                    },
-                    "key": "None",
-                    "props": {
-                      "checked": False,
-                      "focusState": "none",
-                      "insetChildren": False,
-                      "desktop": False,
-                      "disabled": False,
-                      "targetOrigin": {
-                        "horizontal": "left",
-                        "vertical": "top"
-                      },
-                      "primaryText": "dual_lattice_well_plate.gcode",
-                      "anchorOrigin": {
-                        "horizontal": "right",
-                        "vertical": "top"
-                      }
-                    }
-                  },
-                  "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
-                  "id": "59284e06e2c7dd000159b095"
-                },
-                "outfill": "A",
-                "slicingProfile": 0,
-                "id": "59284e06e2c7dd000159b095"
-              }
-            ],
-            "imagingProfile": {
-              
-            },
-            "extruderProfile": {
-              
-            },
-            "combinedPrint": {
-              "slicingProfileObject": {
-                "content": {
-                  "Properties": {
-                    "SkirtDistance": "0",
-                    "PrinterCenterY": "0",
-                    "PrinterCenterX": "0",
-                    "FirstLayerHeight": 0.2,
-                    "Name": "Pluronic 4mm/s",
-                    "SkirtHeight": "0",
-                    "InfillSpeed": 4,
-                    "InfillDensity": 0.99,
-                    "PrintSpeed": 4,
-                    "LayerHeight": "0.2 mm",
-                    "TravelSpeed": 4,
-                    "SolidLayers": 0,
-                    "InfillPattern": 1,
-                    "Scale": 1,
-                    "InfillAngle": 0,
-                    "Perimeters": 1,
-                    "Rotate": "0",
-                    "PerimeterSpeed": 4,
-                    "Skirts": 0
-                  }
-                },
-                "updatedAt": "2017-05-16T10:45:27.105Z",
-                "access": "PRIVATE",
-                "__v": 0,
-                "parents": [
-                  
-                ],
-                "templateId": "58e2fd51805b7a0001aea47d",
-                "owner": "591abdeac6826600018c6200",
-                "_id": "591ad847e2c7dd000159b075",
-                "children": [
-                  
-                ],
-                "createdAt": "2017-05-16T10:45:27.105Z"
-              },
-              "infill": "B",
-              "file": {
-                "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
-                "text": "dual_lattice_well_plate.gcode",
-                "bucket": "biobots-ui",
-                "value": {
-                  "ref": "None",
-                  "_owner": "None",
-                  "_store": {
-                    
-                  },
-                  "key": "None",
-                  "props": {
-                    "checked": False,
-                    "focusState": "none",
-                    "insetChildren": False,
-                    "desktop": False,
-                    "disabled": False,
-                    "targetOrigin": {
-                      "horizontal": "left",
-                      "vertical": "top"
-                    },
-                    "primaryText": "dual_lattice_well_plate.gcode",
-                    "anchorOrigin": {
-                      "horizontal": "right",
-                      "vertical": "top"
-                    }
-                  }
-                },
-                "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59284e06e2c7dd000159b095_dual_lattice_well_plate.gcode",
-                "id": "59284e06e2c7dd000159b095"
-              },
-              "outfill": "A",
-              "slicingProfile": 0,
-              "id": "59284e06e2c7dd000159b095"
-            }
-            },
-            "2": {
-            "printFiles": [
-              {
-                "slicingProfileObject": {
-                  "content": {
-                    "Properties": {
-                      "SkirtDistance": "0",
-                      "PrinterCenterY": "0",
-                      "PrinterCenterX": "0",
-                      "FirstLayerHeight": 0.2,
-                      "Name": "Pluronic 4mm/s",
-                      "SkirtHeight": "0",
-                      "InfillSpeed": 4,
-                      "InfillDensity": 0.99,
-                      "PrintSpeed": 4,
-                      "LayerHeight": "0.2 mm",
-                      "TravelSpeed": 4,
-                      "SolidLayers": 0,
-                      "InfillPattern": 1,
-                      "Scale": 1,
-                      "InfillAngle": 0,
-                      "Perimeters": 1,
-                      "Rotate": "0",
-                      "PerimeterSpeed": 4,
-                      "Skirts": 0
-                    }
-                  },
-                  "updatedAt": "2017-05-16T10:45:27.105Z",
-                  "access": "PRIVATE",
-                  "__v": 0,
-                  "parents": [
-                    
-                  ],
-                  "templateId": "58e2fd51805b7a0001aea47d",
-                  "owner": "591abdeac6826600018c6200",
-                  "_id": "591ad847e2c7dd000159b075",
-                  "children": [
-                    
-                  ],
-                  "createdAt": "2017-05-16T10:45:27.105Z"
-                },
-                "infill": "B",
-                "file": {
-                  "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
-                  "text": "single_lattice_2layer_0.2mm_4mms.gcode",
-                  "bucket": "biobots-ui",
-                  "value": {
-                    "ref": "None",
-                    "_owner": "None",
-                    "_store": {
-                      
-                    },
-                    "key": "None",
-                    "props": {
-                      "checked": False,
-                      "focusState": "none",
-                      "insetChildren": False,
-                      "desktop": False,
-                      "disabled": False,
-                      "targetOrigin": {
-                        "horizontal": "left",
-                        "vertical": "top"
-                      },
-                      "primaryText": "single_lattice_2layer_0.2mm_4mms.gcode",
-                      "anchorOrigin": {
-                        "horizontal": "right",
-                        "vertical": "top"
-                      }
-                    }
-                  },
-                  "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
-                  "id": "59285044e2c7dd000159b097"
-                },
-                "outfill": "A",
-                "slicingProfile": 0,
-                "id": "59285044e2c7dd000159b097"
-              }
-            ],
-            "imagingProfile": {
-              
-            },
-            "extruderProfile": {
-              
-            },
-            "combinedPrint": {
-              "slicingProfileObject": {
-                "content": {
-                  "Properties": {
-                    "SkirtDistance": "0",
-                    "PrinterCenterY": "0",
-                    "PrinterCenterX": "0",
-                    "FirstLayerHeight": 0.2,
-                    "Name": "Pluronic 4mm/s",
-                    "SkirtHeight": "0",
-                    "InfillSpeed": 4,
-                    "InfillDensity": 0.99,
-                    "PrintSpeed": 4,
-                    "LayerHeight": "0.2 mm",
-                    "TravelSpeed": 4,
-                    "SolidLayers": 0,
-                    "InfillPattern": 1,
-                    "Scale": 1,
-                    "InfillAngle": 0,
-                    "Perimeters": 1,
-                    "Rotate": "0",
-                    "PerimeterSpeed": 4,
-                    "Skirts": 0
-                  }
-                },
-                "updatedAt": "2017-05-16T10:45:27.105Z",
-                "access": "PRIVATE",
-                "__v": 0,
-                "parents": [
-                  
-                ],
-                "templateId": "58e2fd51805b7a0001aea47d",
-                "owner": "591abdeac6826600018c6200",
-                "_id": "591ad847e2c7dd000159b075",
-                "children": [
-                  
-                ],
-                "createdAt": "2017-05-16T10:45:27.105Z"
-              },
-              "infill": "B",
-              "file": {
-                "url": "https://biobots-ui.s3.amazonaws.com/Files/gcode/591abdeac6826600018c6200_karanh%40biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
-                "text": "single_lattice_2layer_0.2mm_4mms.gcode",
-                "bucket": "biobots-ui",
-                "value": {
-                  "ref": "None",
-                  "_owner": "None",
-                  "_store": {
-                    
-                  },
-                  "key": "None",
-                  "props": {
-                    "checked": False,
-                    "focusState": "none",
-                    "insetChildren": False,
-                    "desktop": False,
-                    "disabled": False,
-                    "targetOrigin": {
-                      "horizontal": "left",
-                      "vertical": "top"
-                    },
-                    "primaryText": "single_lattice_2layer_0.2mm_4mms.gcode",
-                    "anchorOrigin": {
-                      "horizontal": "right",
-                      "vertical": "top"
-                    }
-                  }
-                },
-                "key": "Files/gcode/591abdeac6826600018c6200_karanh@biobots.io/59285044e2c7dd000159b097_single_lattice_2layer_0.2mm_4mms.gcode",
-                "id": "59285044e2c7dd000159b097"
-              },
-              "outfill": "A",
-              "slicingProfile": 0,
-              "id": "59285044e2c7dd000159b097"
-            }
-            }
-        }
-    }
-  },
-  "selectedPrinter": {
-    "content": {
-      "serialNumber": "0001",
-      "model": "BioBot 1",
-      "version": 1,
-      "name": "BioBot's BioBot1",
-      "extruders": [
-        "591a5970288474000137a836",
-        "591a59700c309400017cd799"
-      ]
-    },
-    "updatedAt": "2017-05-16T01: 44: 17.382Z",
-    "access": "DEFAULT",
-    "__v": 0,
-    "parents": [
-      
-    ],
-    "templateId": "58e2fd4f805b7a0001aea479",
-    "owner": "58e2f8bd805b7a0001aea472",
-    "_id": "591a5971980cd10001a93fd5",
-    "children": [
-      
-    ],
-    "createdAt": "2017-05-16T01: 44: 17.382Z"
-  }
-}
 # s = settings(init=True, basedir=None, configfile=None)
 
 # post_process_api(apiPrint)

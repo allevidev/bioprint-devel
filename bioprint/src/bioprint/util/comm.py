@@ -1738,6 +1738,12 @@ class MachineCom(object):
         else:
             self._log("No api print file selected")
 
+        print 'REACHINGGGGGGGG'
+        
+        print os.path.isfile(processed["file"]) 
+
+        print '\n\n\n', processed, '\n\n\n'
+
         self._currentFile = PrintingGcodeFileInformation(processed["file"], offsets_callback=self.getOffsets, current_tool_callback=self.getCurrentTool)
         
         eventManager().fire(Events.FILE_SELECTED, {
