@@ -21,9 +21,6 @@ function DataUpdater(allViewModels) {
         }
 
         self._socket = new SockJS(SOCKJS_URI, undefined, options);
-
-        console.log(self._socket, SOCKJS_URI)
-        
         self._socket.onopen = self._onconnect;
         self._socket.onclose = self._onclose;
         self._socket.onmessage = self._onmessage;

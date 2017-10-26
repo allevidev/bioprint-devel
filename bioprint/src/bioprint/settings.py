@@ -72,6 +72,12 @@ def settings(init=False, basedir=None, configfile=None):
     return _instance
 
 default_settings = {
+    "printerData": {
+        "serialNumber": os.environ.get('RESIN_DEVICE_UUID', 'TEST_DEVICE_UUID'),
+        "clientType": 'PRINTER',
+        "version": 1.0,
+        "model": "BioBot-1" 
+    },
     "serial": {
         "port": None,
         "baudrate": 115200,
@@ -103,7 +109,7 @@ default_settings = {
     "server": {
         "host": "0.0.0.0",
         "port": 80,
-        "firstRun": True,
+        "firstRun": os.environ.get('FIRST_RUN', False),
         "secretKey": None,
         "reverseProxy": {
             "prefixHeader": "X-Script-Name",
@@ -130,7 +136,7 @@ default_settings = {
         }
     },
     "analytics": {
-        "enabled": True
+        "enabled": os.environ.get('ACCESS_CONTROL', False),
     },
     "webcam": {
         "stream": None,
@@ -240,7 +246,7 @@ default_settings = {
         "actions": []
     },
     "accessControl": {
-        "enabled": True,
+        "enabled": os.environ.get('ACCESS_CONTROL', False),
         "salt": None,
         "userManager": "bioprint.users.FilebasedUserManager",
         "userfile": None,
@@ -1119,7 +1125,7 @@ class Settings(object):
     def setBaseFolder(self, type, path, force=False):
         if type not in default_settings["folder"].keys():
             return None
-
+        
         currentPath = self.getBaseFolder(type)
         defaultPath = self._get_default_folder(type)
         if (path is None or path == defaultPath) and "folder" in self._config.keys() and type in self._config["folder"].keys():

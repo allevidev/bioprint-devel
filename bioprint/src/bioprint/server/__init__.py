@@ -13,8 +13,6 @@ from flask.ext.login import LoginManager, current_user
 from flask.ext.principal import Principal, Permission, RoleNeed, identity_loaded, UserNeed
 from flask.ext.babel import Babel, gettext, ngettext
 from flask.ext.assets import Environment, Bundle
-from flask_cors import CORS, cross_origin
-
 from babel import Locale
 from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
@@ -30,8 +28,6 @@ SUCCESS = {}
 NO_CONTENT = ("", 204)
 
 app = Flask("bioprint")
-CORS(app, supports_credentials=True)
-
 assets = None
 babel = None
 debug = False
@@ -160,7 +156,7 @@ class Server():
 
 		# first initialize the settings singleton and make sure it uses given configfile and basedir if available
 		s = settings(init=True, basedir=self._basedir, configfile=self._configfile)
-
+		
 		# then monkey patch a bunch of stuff
 		util.tornado.fix_ioloop_scheduling()
 		util.flask.enable_additional_translations(additional_folders=[s.getBaseFolder("translations")])
@@ -538,6 +534,7 @@ class Server():
 		return request.accept_languages.best_match(LANGUAGES)
 
 	def _setup_logging(self, debug, logConf=None):
+		settings().setBaseFolder("logs", "/usr/share/biobots/logs", True)
 		defaultConfig = {
 			"version": 1,
 			"formatters": {
@@ -558,7 +555,7 @@ class Server():
 					"formatter": "simple",
 					"when": "D",
 					"backupCount": "1",
-					"filename": os.path.join(settings().getBaseFolder("logs"), "bioprint.log")
+					"filename": "bioprint.log"
 				},
 				"serialFile": {
 					"class": "logging.handlers.RotatingFileHandler",

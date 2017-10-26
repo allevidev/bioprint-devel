@@ -29,14 +29,12 @@ $(function() {
         })
 
         self.validData = ko.computed(function() {
-            console.log(self.validSerial());
             return !self.passwordMismatch() && self.validUsername() && self.validPassword() && self.validEmail() && self.validSerial();
         });
 
 
 
         self.keepAccessControl = function() {
-
             if (!self.validData()) return;
 
             var data = {

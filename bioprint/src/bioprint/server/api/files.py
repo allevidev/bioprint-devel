@@ -297,7 +297,7 @@ def apiFileCommand():
 
 		printer.select_file(None, False, printAfterLoading, apiPrint=data["entry"])
 
-	return make_response("Print Started", 200)
+	return NO_CONTENT
 
 
 @api.route("/files/<string:target>/<path:filename>", methods=["POST"])

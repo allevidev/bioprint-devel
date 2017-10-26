@@ -38,7 +38,7 @@ def connectionCommand():
 	}
 
 	command, data, response = get_json_command_from_request(request, valid_commands)
-	print('Reaching response', command, data)
+
 	if response is not None:
 		return response
 
@@ -75,7 +75,7 @@ def connectionCommand():
 	elif command == "fake_ack":
 		printer.fake_ack()
 
-	return jsonify({ "message": "success" })
+	return NO_CONTENT
 
 def _get_options():
 	connection_options = get_connection_options()

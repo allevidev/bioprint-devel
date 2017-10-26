@@ -1110,7 +1110,6 @@ class CANCom(object):
         if apiPrint is not None:
             if apiPrint.extruderPositions is None and apiPrint.printer.autoCalibrate is True:
                 apiPrint.extruder_positions = self.calibrateTools()
-
             processed = can_post_process.can_post_process_api(apiPrint, positions)
         else:
             self._log("No api print file selected")

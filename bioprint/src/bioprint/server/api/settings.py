@@ -24,6 +24,9 @@ import bioprint.util
 import requests
 from requests.auth import HTTPDigestAuth
 
+from os import listdir
+from os.path import isfile, join
+
 #~~ settings
 
 
@@ -232,7 +235,12 @@ def getSettings():
 
 	return jsonify(data)
 
-
+@api.route("/settings/wifi", methods=["GET"])
+def getWifiNetworks():
+	__location__ = "/usr/share/"
+	onlyfiles = [f for f in listdir(__location__) if isfile(join(__location__, f))]
+	return jsonify({"wifiNetworks": onlyfiles})
+	
 @api.route("/settings", methods=["POST"])
 @restricted_access
 @admin_permission.require(403)
