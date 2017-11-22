@@ -1737,8 +1737,6 @@ class MachineCom(object):
 
         else:
             self._log("No api print file selected")
-
-        print 'REACHINGGGGGGGG'
         
         print os.path.isfile(processed["file"]) 
 
