@@ -23,10 +23,10 @@ import json
 from flask.ext.login import current_user
 
 analytics = True
-# biobots_url = 'http://data.biobots.io/'
-biobots_url = 'http://data.biobots.io'
+# biobots_url = 'http://data.allevi.us.com/'
+biobots_url = 'http://data.allevi.us.com'
 
-def connected_to_biobots(url='http://data.biobots.io/', timeout=5):
+def connected_to_biobots(url='http://data.allevi.us.com/', timeout=5):
     try:
         _ = requests.get(url, timeout=timeout)
         return True
