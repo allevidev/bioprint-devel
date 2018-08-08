@@ -43,8 +43,14 @@ src/bioprint/plugins/bioprint/static/font/dinpromedium.woff
 src/bioprint/plugins/bioprint/static/font/dinproregular.eot
 src/bioprint/plugins/bioprint/static/font/dinproregular.ttf
 src/bioprint/plugins/bioprint/static/font/dinproregular.woff
+src/bioprint/plugins/bioprint/static/img/allevi-logo-final.png
+src/bioprint/plugins/bioprint/static/img/allevi-logo-med.png
+src/bioprint/plugins/bioprint/static/img/allevi-logo-mod.png
+src/bioprint/plugins/bioprint/static/img/allevi-logo-small.png
+src/bioprint/plugins/bioprint/static/img/allevi-logo.png
 src/bioprint/plugins/bioprint/static/img/biobots-20.png
 src/bioprint/plugins/bioprint/static/img/biobots-black.png
+src/bioprint/plugins/bioprint/static/img/logo.png
 src/bioprint/plugins/bioprint/static/js/bioprint.js
 src/bioprint/plugins/bioprint/static/less/bioprint.less
 src/bioprint/plugins/bioprint/templates/bioprint_navbar.jinja2

@@ -322,8 +322,10 @@ select {
   background-size: 213px 80px;
   background-position: left center;
   padding-left: 213px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   background-repeat: no-repeat;
-  background-image: url(../img/biobots-black.png);
+  background-image: url(../img/logo.png);
 }
 
 #navbar .navbar-inner .nav>li>a {

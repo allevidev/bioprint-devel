@@ -17,7 +17,7 @@ $(function() {
             if (self.name())
                 return self.name() + " [" + gettext("") + "]";
             else
-                return gettext("BioBots");
+                return gettext("Allevi");
         });
     }
 
