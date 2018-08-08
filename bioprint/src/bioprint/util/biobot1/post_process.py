@@ -544,7 +544,7 @@ def calculate_wellplate_positions(positions):
                 }
             }
         out_24[row_24[i]] = row_out
-    row_96 = ["A", "B", "C", "D", "E", "F"]
+    row_96 = ["A", "B", "C", "D", "E", "F", "G", "H"]
     column_96 = 12
     out_96 = {}
     for i in xrange(len(row_96)):
@@ -870,4 +870,3 @@ cl_params = {
 
 # post_process(test_payload, test_positions, 1, cl_params, None)
 # print calculate_wellplate_positions(test_positions, 24)
-

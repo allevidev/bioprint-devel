@@ -25,10 +25,7 @@ src/bioprint/filemanager/util.py
 src/bioprint/plugin/__init__.py
 src/bioprint/plugin/core.py
 src/bioprint/plugin/types.py
-src/bioprint/plugins/.DS_Store
-src/bioprint/plugins/bioprint/.DS_Store
 src/bioprint/plugins/bioprint/__init__.py
-src/bioprint/plugins/bioprint/static/.DS_Store
 src/bioprint/plugins/bioprint/static/css/bioprint.css
 src/bioprint/plugins/bioprint/static/font/COUTURE-Bold.eot
 src/bioprint/plugins/bioprint/static/font/COUTURE-Bold.svg
