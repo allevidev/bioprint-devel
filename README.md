@@ -29,3 +29,7 @@ Installation
 7. Navigate to [bioprint](http://bioprint/) in your browser.
 8. Setup a username and password to use with Bioprint.
 9. Begin printing with life!
+
+### Manual
+1. python setup.py install
+2. python run --iknowwhatimdoing
