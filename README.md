@@ -9,9 +9,10 @@ Packaging
 
 1. Install [PyInstaller](https://pyinstaller.readthedocs.io/en/stable/installation.html) on your host OS
 2. Install required Python modules in `bioprint` with `pip install -r requirements.txt`
+2a. For Windows you might need the [VC 2008](http://download.microsoft.com/download/d/2/4/d242c3fb-da5a-4542-ad66-f9661d0a8d19/vcredist_x64.exe) and [VC 2010](http://download.microsoft.com/download/3/2/2/3224B87F-CFA0-4E70-BDA3-3DE650EFEBA5/vcredist_x64.exe) redistributables
 3. Run `pyinstaller Bioprint.spec`
 4. Executables are in `bioprint/dist`
-
+5. For Windows: Download and install [Inno Setup](http://www.jrsoftware.org/isinfo.php) and use Bioprint.iss to package the executable into an installer
 
 Installation
 ------------

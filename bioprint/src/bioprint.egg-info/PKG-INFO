@@ -1,4 +1,4 @@
-Metadata-Version: 2.1
+Metadata-Version: 1.1
 Name: bioprint
 Version: bioprint
 Summary: A responsive web interface for 3D printers
@@ -54,5 +54,3 @@ Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
 Classifier: Topic :: Internet :: WWW/HTTP :: WSGI
 Classifier: Topic :: Printing
 Classifier: Topic :: System :: Networking :: Monitoring
-Provides-Extra: develop
-Provides-Extra: plugins
