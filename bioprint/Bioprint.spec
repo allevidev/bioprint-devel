@@ -1,10 +1,19 @@
 # -*- mode: python -*-
+import sys
+
+
+icon = 'allevi.icns'
+msvcp_binaries = []
+if sys.platform == 'win32':
+    # Include MSCVP libs on Windows
+    msvcp_binaries = [('msvcp100.dll', 'C:\\Windows\\System32\\msvcp100.dll', 'BINARY'),
+                ('msvcr100.dll', 'C:\\Windows\\System32\\msvcr100.dll', 'BINARY')]
+    icon = 'allevi.ico'
 
 block_cipher = None
 
-
 a = Analysis(['Bioprint.py'],
-             pathex=['/Users/nick/Desktop/bioprint-devel/bioprint', '/Users/nick/Desktop/bioprint-devel/bioprint/src'],
+             pathex=['.', 'src'],
              binaries=[],
              datas=[
                 ('allevi.png', '.'),
@@ -36,19 +45,23 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=False,
-          console=False , icon='allevi.icns')
+          console=False , icon=icon)
+
 coll = COLLECT(exe,
-               a.binaries,
+               a.binaries + msvcp_binaries,
                a.zipfiles,
                a.datas,
                strip=False,
                upx=False,
                name='Allevi Bioprint')
-app = BUNDLE(coll,
-             name='Allevi Bioprint.app',
-             icon='allevi.icns',
-             bundle_identifier=None,
-             info_plist={
-                'LSUIElement': True,
-                }
-            )
+
+#  Bundle .app on OS X
+if sys.platform == 'darwin':
+    app = BUNDLE(coll,
+                 name='Allevi Bioprint.app',
+                 icon='allevi.icns',
+                 bundle_identifier=None,
+                 info_plist={
+                    'LSUIElement': True,
+                    }
+                )

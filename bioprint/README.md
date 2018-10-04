@@ -10,6 +10,7 @@ Packaging
 2. Install required Python modules in `bioprint` with `pip install -r requirements.txt`
 3. Run `pyinstaller Bioprint.spec`
 4. Executables are in `bioprint/dist`
+5. For Windows: Download and install [Inno Setup](http://www.jrsoftware.org/isinfo.php) and use Bioprint.iss to package the executable into an installer
 
 Installation
 ------------

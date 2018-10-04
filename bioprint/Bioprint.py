@@ -7,7 +7,7 @@ import bioprint
 import wx.adv
 import wx
 
-from multiprocessing import Process
+import multiprocessing
 import webbrowser
 
 def resource_path(relative_path):
@@ -53,7 +53,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         pass
 
     def on_open_bioprint(self, event):
-        webbrowser.open('http://bioprint', new=2)
+        webbrowser.open('http://localhost', new=2)
 
     def on_exit(self, event):
         p.terminate()
@@ -73,8 +73,12 @@ def startUI():
 
 
 if __name__ == '__main__':
+    # On Windows calling this function is necessary.
+    # On Linux/OSX it does nothing.
+    multiprocessing.freeze_support()
+
     #  Start Bioprint
-    p = Process(target=bioprint.main)
+    p = multiprocessing.Process(target=bioprint.main)
     p.start()
 
     startUI()
