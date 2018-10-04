@@ -21,7 +21,7 @@ from bioprint.server.util.flask import restricted_access
 
 from bioprint.plugin import plugin_manager
 
-from flask.ext.babel import Locale
+from flask_babel import Locale
 
 @api.route("/languages", methods=["GET"])
 @restricted_access

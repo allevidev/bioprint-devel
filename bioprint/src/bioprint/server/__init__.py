@@ -9,10 +9,10 @@ __copyright__ = "Copyright (C) 2014 The bioprint Project - Released under terms 
 import uuid
 from sockjs.tornado import SockJSRouter
 from flask import Flask, g, request, session, Blueprint
-from flask.ext.login import LoginManager, current_user
-from flask.ext.principal import Principal, Permission, RoleNeed, identity_loaded, UserNeed
-from flask.ext.babel import Babel, gettext, ngettext
-from flask.ext.assets import Environment, Bundle
+from flask_login import LoginManager, current_user
+from flask_principal import Principal, Permission, RoleNeed, identity_loaded, UserNeed
+from flask_babel import Babel, gettext, ngettext
+from flask_assets import Environment, Bundle
 from babel import Locale
 from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver

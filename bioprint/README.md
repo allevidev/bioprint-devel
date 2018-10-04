@@ -3,6 +3,14 @@ BioPrint
 
 BioPrint provides a  web interface for controlling a the BioBot1 3D Biomaterial printer
 
+Packaging
+------------
+
+1. Install [PyInstaller](https://pyinstaller.readthedocs.io/en/stable/installation.html) on your host OS
+2. Install required Python modules in `bioprint` with `pip install -r requirements.txt`
+3. Run `pyinstaller Bioprint.spec`
+4. Executables are in `bioprint/dist`
+
 Installation
 ------------
 
