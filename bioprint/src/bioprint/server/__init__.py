@@ -415,7 +415,12 @@ class Server():
 						max_body_sizes.append((method, route, size))
 
 		self._server = util.tornado.CustomHTTPServer(self._tornado_app)
-		self._server.listen(self._port, address=self._host)
+
+		try:
+			self._server.listen(self._port, address=self._host)
+		except Exception as e:
+			print 'Port already in use. Server quitting!'
+			sys.exit()
 
 		eventManager.fire(events.Events.STARTUP)
 		if s.getBoolean(["serial", "autoconnect"]):
@@ -822,6 +827,10 @@ class Server():
 
 		assets = CustomDirectoryEnvironment(app)
 		assets.debug = not settings().getBoolean(["devel", "webassets", "bundle"])
+
+		# Use timestamp for bundle versions to ensure browser cache invalidation
+		assets.url_expire=True
+		assets.versions='timestamp'
 
 		UpdaterType = type(util.flask.SettingsCheckUpdater)(util.flask.SettingsCheckUpdater.__name__, (util.flask.SettingsCheckUpdater,), dict(
 			updater=assets.updater

@@ -40,7 +40,7 @@ def main():
 
 	parser.add_argument("--host", action="store", type=str, dest="host",
 						help="Specify the host on which to bind the server")
-	parser.add_argument("--port", action="store", type=int, dest="port",
+	parser.add_argument("--port", action="store", type=int, dest="port", default=9999,
 						help="Specify the port on which to bind the server")
 
 	parser.add_argument("-c", "--config", action="store", dest="config",

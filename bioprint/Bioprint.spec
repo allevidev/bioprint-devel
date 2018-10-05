@@ -1,13 +1,14 @@
 # -*- mode: python -*-
-import sys
+import sys, os
 
-
+#  Platform-specific icons and binaries
 icon = 'allevi.icns'
 msvcp_binaries = []
 if sys.platform == 'win32':
     # Include MSCVP libs on Windows
     msvcp_binaries = [('msvcp100.dll', 'C:\\Windows\\System32\\msvcp100.dll', 'BINARY'),
                 ('msvcr100.dll', 'C:\\Windows\\System32\\msvcr100.dll', 'BINARY')]
+    #  Windows uses .cio instead of .icns
     icon = 'allevi.ico'
 
 block_cipher = None

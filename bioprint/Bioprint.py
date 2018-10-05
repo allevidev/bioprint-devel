@@ -7,8 +7,11 @@ import bioprint
 import wx.adv
 import wx
 
+from bioprint.util.singleton import SingleInstance, SingleInstanceException
 import multiprocessing
 import webbrowser
+
+global p
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -38,6 +41,9 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         self.set_icon(TRAY_ICON)
         self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, self.on_click)
 
+        # Open browser after 1 second
+        wx.CallLater(1000, self.on_open_bioprint, None)
+
     def CreatePopupMenu(self):
         menu = wx.Menu()
         create_menu_item(menu, 'Open Bioprint', self.on_open_bioprint)
@@ -53,7 +59,12 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         pass
 
     def on_open_bioprint(self, event):
-        webbrowser.open('http://localhost', new=2)
+        #  Open browser to Bioprint page if server is running
+        if p.is_alive():
+            webbrowser.open('http://localhost:9999', new=2)
+        else:
+            print 'Server is not running. Exiting!'
+            sys.exit()
 
     def on_exit(self, event):
         p.terminate()
@@ -76,6 +87,11 @@ if __name__ == '__main__':
     # On Windows calling this function is necessary.
     # On Linux/OSX it does nothing.
     multiprocessing.freeze_support()
+
+    try:
+        bioprintInstance = SingleInstance()
+    except SingleInstanceException:
+        sys.exit()
 
     #  Start Bioprint
     p = multiprocessing.Process(target=bioprint.main)
