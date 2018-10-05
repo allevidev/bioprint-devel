@@ -23,7 +23,7 @@ SolidCompression=yes
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
@@ -38,4 +38,3 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\Allevi Bioprint"; 
 
 [Run]
 Filename: "{app}\Allevi Bioprint.exe"; Description: "{cm:LaunchProgram,Allevi Bioprint}"; Flags: nowait postinstall skipifsilent
-
