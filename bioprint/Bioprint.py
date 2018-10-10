@@ -11,6 +11,7 @@ from bioprint.util.singleton import SingleInstance, SingleInstanceException
 import multiprocessing
 import webbrowser
 
+# Bioprint worker process handle
 global p
 
 def resource_path(relative_path):
