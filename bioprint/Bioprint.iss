@@ -5,6 +5,7 @@
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
+SignTool=MSSignTool $f
 AppId={{E0A8300A-4192-49C9-8737-AE5573A02E5E}
 AppName=Allevi Bioprint
 AppVersion=1.5
@@ -18,6 +19,7 @@ DisableProgramGroupPage=yes
 OutputBaseFilename=Allevi-Bioprint-1.5
 Compression=lzma
 SolidCompression=yes
+SignedUninstaller=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -27,7 +29,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "C:\Users\Administrator\Desktop\bioprint-devel\bioprint\dist\Allevi Bioprint\Allevi Bioprint.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Administrator\Desktop\bioprint-devel\bioprint\dist\Allevi Bioprint\Allevi Bioprint.exe"; DestDir: "{app}"; Flags: ignoreversion signonce
 Source: "C:\Users\Administrator\Desktop\bioprint-devel\bioprint\dist\Allevi Bioprint\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
