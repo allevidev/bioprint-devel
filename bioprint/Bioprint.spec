@@ -1,6 +1,8 @@
 # -*- mode: python -*-
 import sys, os
 
+BIOPRINT_VERSION = '1.5.0'
+
 #  Platform-specific icons and binaries
 icon = 'allevi.icns'
 msvcp_binaries = []
@@ -15,7 +17,10 @@ block_cipher = None
 
 a = Analysis(['Bioprint.py'],
              pathex=['.', 'src'],
-             binaries=[],
+             binaries=[
+                ('/System/Library/Frameworks/Tk.framework/Tk', 'tk'),
+                ('/System/Library/Frameworks/Tcl.framework/Tcl', 'tcl')
+             ],
              datas=[
                 ('allevi.png', '.'),
                 ('allevi.png', 'bioprint/static'),
@@ -63,6 +68,12 @@ if sys.platform == 'darwin':
                  icon='allevi.icns',
                  bundle_identifier=None,
                  info_plist={
+                    'NSPrincipalClass': 'NSApplication',
+                    'CFBundleName': 'Bioprint',
+                    'CFBundleDisplayName': 'Allevi Bioprint',
+                    'CFBundleIdentifier': 'org.allevi.bioprint',
+                    'CFBundleVersion': BIOPRINT_VERSION,
+                    'CFBundleShortVersionString': BIOPRINT_VERSION,
                     'LSUIElement': True,
                     }
                 )
