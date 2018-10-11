@@ -68,7 +68,6 @@ if sys.platform == 'darwin':
                  icon='allevi.icns',
                  bundle_identifier=None,
                  info_plist={
-                    'NSPrincipalClass': 'NSApplication',
                     'CFBundleName': 'Bioprint',
                     'CFBundleDisplayName': 'Allevi Bioprint',
                     'CFBundleIdentifier': 'org.allevi.bioprint',
