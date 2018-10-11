@@ -81,6 +81,9 @@ class App(wx.App):
 
 def startUI():
     app = App(False)
+    # Start Bioprint server
+    p.start()
+    #  Start GUI
     app.MainLoop()
 
 
@@ -94,8 +97,7 @@ if __name__ == '__main__':
     except SingleInstanceException:
         sys.exit()
 
-    #  Start Bioprint
+    #  Bioprint server process
     p = multiprocessing.Process(target=bioprint.main)
-    p.start()
 
     startUI()
