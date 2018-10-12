@@ -6,6 +6,7 @@ BIOPRINT_VERSION = '1.5.0'
 #  Platform-specific icons and binaries
 icon = 'allevi.icns'
 msvcp_binaries = []
+osx_binaries = []
 if sys.platform == 'win32':
     # Include MSCVP libs on Windows
     msvcp_binaries = [('msvcp100.dll', 'C:\\Windows\\System32\\msvcp100.dll', 'BINARY'),
@@ -13,14 +14,17 @@ if sys.platform == 'win32':
     #  Windows uses .cio instead of .icns
     icon = 'allevi.ico'
 
+if sys.platform == 'darwin':
+    osx_binaries=[
+       ('/System/Library/Frameworks/Tk.framework/Tk', 'tk'),
+       ('/System/Library/Frameworks/Tcl.framework/Tcl', 'tcl')
+    ]
+
 block_cipher = None
 
 a = Analysis(['Bioprint.py'],
              pathex=['.', 'src'],
-             binaries=[
-                ('/System/Library/Frameworks/Tk.framework/Tk', 'tk'),
-                ('/System/Library/Frameworks/Tcl.framework/Tcl', 'tcl')
-             ],
+             binaries=osx_binaries,
              datas=[
                 ('allevi.png', '.'),
                 ('allevi.png', 'bioprint/static'),
