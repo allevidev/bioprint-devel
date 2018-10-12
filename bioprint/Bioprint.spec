@@ -13,7 +13,7 @@ if sys.platform == 'win32':
     #  Windows uses .cio instead of .icns
     icon = 'allevi.ico'
 
-block_cipher = None
+block_cipher = pyi_crypto.PyiBlockCipher(key='Bioprint3401Py18')
 
 a = Analysis(['Bioprint.py'],
              pathex=['.', 'src'],
