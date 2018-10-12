@@ -27,7 +27,12 @@ class Main(Daemon):
 		bioprint = Server(self._configfile, self._basedir, self._host, self._port, self._debug, self._allowRoot)
 		bioprint.run()
 
-def main():
+def main(no_argparse=False, config=None, basedir=None, host=None, port=None, debug=False, allowRoot=False, logConf=None):
+	if no_argparse:
+		bioprint = Server(config, basedir, host, port, debug, allowRoot, logConf)
+		bioprint.run()
+		return
+
 	import argparse
 
 	parser = argparse.ArgumentParser(prog="run")

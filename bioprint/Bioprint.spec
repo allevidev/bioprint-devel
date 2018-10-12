@@ -13,7 +13,7 @@ if sys.platform == 'win32':
     #  Windows uses .cio instead of .icns
     icon = 'allevi.ico'
 
-block_cipher = pyi_crypto.PyiBlockCipher(key='Bioprint3401Py18')
+block_cipher = None
 
 a = Analysis(['Bioprint.py'],
              pathex=['.', 'src'],
@@ -68,6 +68,7 @@ if sys.platform == 'darwin':
                  icon='allevi.icns',
                  bundle_identifier=None,
                  info_plist={
+                    'NSPrincipalClass': 'NSApplication',
                     'CFBundleName': 'Bioprint',
                     'CFBundleDisplayName': 'Allevi Bioprint',
                     'CFBundleIdentifier': 'org.allevi.bioprint',

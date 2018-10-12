@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "sr
 import bioprint
 
 from bioprint.util.singleton import SingleInstance, SingleInstanceException
-import multiprocessing
+from multiprocessing import Process, freeze_support
 import webbrowser
 
 # Bioprint worker process handle
@@ -14,7 +14,7 @@ def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
+        base_path = os.path.abspath(sys._MEIPASS)
     except Exception:
         base_path = os.path.abspath(".")
 
@@ -89,14 +89,14 @@ def startUI():
 
 #  Starts Bioprint server in a new process
 def startBioprint():
-    p = multiprocessing.Process(target=bioprint.main)
+    p = Process(target=bioprint.main, args=(True, None, None, 'localhost', 9999))
     p.start()
     return p
 
 if __name__ == '__main__':
     # On Windows calling this function is necessary.
     # On Linux/OSX it does nothing.
-    multiprocessing.freeze_support()
+    freeze_support()
 
     try:
         bioprintInstance = SingleInstance()
@@ -104,4 +104,5 @@ if __name__ == '__main__':
         sys.exit()
 
     p = startBioprint()
+
     startUI()
