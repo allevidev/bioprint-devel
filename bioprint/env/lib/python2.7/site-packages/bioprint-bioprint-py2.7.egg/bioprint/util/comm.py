@@ -16,7 +16,7 @@ import serial
 import bioprint.plugin
 
 from collections import deque
-from flask.ext.login import current_user
+from flask_login import current_user
 
 from bioprint.util.avr_isp import stk500v2
 from bioprint.util.avr_isp import ispBase

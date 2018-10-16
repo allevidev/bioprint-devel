@@ -20,7 +20,7 @@ import time
 import re
 import requests
 import json
-from flask.ext.login import current_user
+from flask_login import current_user
 
 analytics = True
 # biobots_url = 'http://data.allevi.us.com/'

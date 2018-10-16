@@ -32,7 +32,7 @@ import uuid
 
 from bioprint.util import atomic_write
 
-_APPNAME = "BioPrint"
+_APPNAME = "Allevi Bioprint"
 
 _instance = None
 
@@ -207,7 +207,7 @@ default_settings = {
                 "settings": [
                     "section_printer", "serial", "printerprofiles", "temperatures", "terminalfilters", "gcodescripts",
                     "section_features", "features", "webcam", "accesscontrol", "api",
-                    "section_bioprint", "server", "folders", "appearance", "logs", "plugin_pluginmanager" 
+                    "section_bioprint", "server", "folders", "appearance", "logs", "plugin_pluginmanager"
                 ],
                 "usersettings": ["access", "interface"],
                 "generic": []

@@ -7,7 +7,7 @@ __copyright__ = "Copyright (C) 2014 The bioprint Project - Released under terms 
 
 from flask import request, jsonify, abort, make_response, session
 from werkzeug.exceptions import BadRequest
-from flask.ext.login import current_user
+from flask_login import current_user
 
 import bioprint.users as users
 from datetime import datetime

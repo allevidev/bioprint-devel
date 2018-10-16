@@ -43,14 +43,8 @@ src/bioprint/plugins/bioprint/static/font/dinpromedium.woff
 src/bioprint/plugins/bioprint/static/font/dinproregular.eot
 src/bioprint/plugins/bioprint/static/font/dinproregular.ttf
 src/bioprint/plugins/bioprint/static/font/dinproregular.woff
-src/bioprint/plugins/bioprint/static/img/allevi-logo-final.png
-src/bioprint/plugins/bioprint/static/img/allevi-logo-med.png
-src/bioprint/plugins/bioprint/static/img/allevi-logo-mod.png
-src/bioprint/plugins/bioprint/static/img/allevi-logo-small.png
-src/bioprint/plugins/bioprint/static/img/allevi-logo.png
 src/bioprint/plugins/bioprint/static/img/biobots-20.png
 src/bioprint/plugins/bioprint/static/img/biobots-black.png
-src/bioprint/plugins/bioprint/static/img/logo.png
 src/bioprint/plugins/bioprint/static/js/bioprint.js
 src/bioprint/plugins/bioprint/static/less/bioprint.less
 src/bioprint/plugins/bioprint/templates/bioprint_navbar.jinja2
@@ -97,6 +91,7 @@ src/bioprint/server/util/tornado.py
 src/bioprint/server/util/watchdog.py
 src/bioprint/slicing/__init__.py
 src/bioprint/slicing/exceptions.py
+src/bioprint/static/.DS_Store
 src/bioprint/static/empty
 src/bioprint/static/robots.txt
 src/bioprint/static/css/bioprint.css
@@ -165,7 +160,6 @@ src/bioprint/static/js/app/viewmodels/users.js
 src/bioprint/static/js/app/viewmodels/usersettings.js
 src/bioprint/static/js/lib/avltree.js
 src/bioprint/static/js/lib/babel.js
-src/bioprint/static/js/lib/bluebird.js
 src/bioprint/static/js/lib/bootstrap-slider-knockout-binding.js
 src/bioprint/static/js/lib/detectmobilebrowser.js
 src/bioprint/static/js/lib/knockout.js
@@ -178,7 +172,6 @@ src/bioprint/static/js/lib/modernizr.custom.js
 src/bioprint/static/js/lib/moment-with-locales.min.js
 src/bioprint/static/js/lib/pnotify.min.js
 src/bioprint/static/js/lib/pusher.color.min.js
-src/bioprint/static/js/lib/ramda.min.js
 src/bioprint/static/js/lib/sockjs-0.3.4.min.js
 src/bioprint/static/js/lib/sprintf.min.js
 src/bioprint/static/js/lib/bootstrap/bootstrap-modal.js

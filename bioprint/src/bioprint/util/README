@@ -4,3 +4,7 @@ slightly reorganized and adapted. The mapping to the original Cura source is the
 * avr_isp.* => Cura.avr_isp.*
 * comm => Cura.util.machineCom (highly modified now)
 * gcodeInterpreter => Cura.util.gcodeInterpreter
+
+Some code also originates from the [tendo](https://github.com/pycontribs/tendo/blob/master/tendo/singleton.py) project
+
+* singleton => tendo.singleton

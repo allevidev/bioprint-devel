@@ -27,7 +27,12 @@ class Main(Daemon):
 		bioprint = Server(self._configfile, self._basedir, self._host, self._port, self._debug, self._allowRoot)
 		bioprint.run()
 
-def main():
+def main(no_argparse=False, config=None, basedir=None, host=None, port=None, debug=False, allowRoot=False, logConf=None):
+	if no_argparse:
+		bioprint = Server(config, basedir, host, port, debug, allowRoot, logConf)
+		bioprint.run()
+		return
+
 	import argparse
 
 	parser = argparse.ArgumentParser(prog="run")
@@ -40,7 +45,7 @@ def main():
 
 	parser.add_argument("--host", action="store", type=str, dest="host",
 						help="Specify the host on which to bind the server")
-	parser.add_argument("--port", action="store", type=int, dest="port",
+	parser.add_argument("--port", action="store", type=int, dest="port", default=9999,
 						help="Specify the port on which to bind the server")
 
 	parser.add_argument("-c", "--config", action="store", dest="config",
