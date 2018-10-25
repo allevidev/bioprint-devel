@@ -31,8 +31,7 @@ Signing
 1. Ensure that an Apple Developer ID Application code signing certificate is installed. Xcode -> Preferences -> Accounts -> Manage Certificates
 2. Run `xattr -rc "Allevi Bioprint.app"`
 3. Run `codesign --force --deep --verify --verbose --options runtime --entitlements bioprint.entitlements --sign "Developer ID Application: Allevi Inc." "Allevi Bioprint.app"`
-4. Pakcage the .app into a .dmg *(see above)*
+4. Package the .app into a .dmg *(see above)*
 5. Notarize the app with `xcrun altool -t osx --notarize-app --primary-bundle-id org.allevi.bioprint -f [DMG FILE] -u [APPLE ID]` using an app-specific password generated from https://appleid.apple.com with the app name `Allevi Bioprint`
 6. Check notarization progress using `xcrun altool --notarization-info [UUID from step 3] -u [APPLE ID]`
 7. Run `xcrun stapler staple -v [DMG FILE]`
-8. Verify the .dmg is signed and notarized with `spctl -a -v [DMG FILE]`
