@@ -22,5 +22,7 @@
 	<string>1.5.0</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
 </dict>
 </plist>

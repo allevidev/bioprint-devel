@@ -567,7 +567,7 @@
 #define HAVE_PTHREAD_H 1
 
 /* Define to 1 if you have the `pthread_init' function. */
-#define HAVE_PTHREAD_INIT 1
+/* #undef HAVE_PTHREAD_INIT */
 
 /* Define to 1 if you have the `pthread_sigmask' function. */
 #define HAVE_PTHREAD_SIGMASK 1

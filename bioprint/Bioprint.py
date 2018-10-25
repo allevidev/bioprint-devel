@@ -1,4 +1,5 @@
 import sys, os
+import mimetypes
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "src"))
 import bioprint
@@ -97,6 +98,9 @@ if __name__ == '__main__':
     # On Windows calling this function is necessary.
     # On Linux/OSX it does nothing.
     freeze_support()
+
+    # Use local mime.types to avoid call to /etc on OS X
+    mimetypes.init(files=['./mime.types'])
 
     try:
         bioprintInstance = SingleInstance()

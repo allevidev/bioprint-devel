@@ -28,10 +28,10 @@ MODLIBS=        $(LOCALMODLIBS) $(BASEMODLIBS)
 VERSION=	2.7
 srcdir=		.
 
-abs_srcdir=	/private/tmp/python20181011-31731-1asmrtx/Python-2.7.15
-abs_builddir=	/private/tmp/python20181011-31731-1asmrtx/Python-2.7.15
-build=		x86_64-apple-darwin12.5.0
-host=		x86_64-apple-darwin12.5.0
+abs_srcdir=	/private/tmp/python@2-20181024-87434-zapthg/Python-2.7.15
+abs_builddir=	/private/tmp/python@2-20181024-87434-zapthg/Python-2.7.15
+build=		x86_64-apple-darwin13.4.0
+host=		x86_64-apple-darwin13.4.0
 
 CC=		clang
 CXX=		clang++
@@ -44,9 +44,9 @@ GITTAG=
 GITBRANCH=	
 PGO_PROF_GEN_FLAG=-fprofile-instr-generate
 PGO_PROF_USE_FLAG=-fprofile-instr-use=code.profclangd
-LLVM_PROF_MERGER='' merge -output=code.profclangd *.profclangr
+LLVM_PROF_MERGER=/usr/bin/xcrun llvm-profdata merge -output=code.profclangd *.profclangr
 LLVM_PROF_FILE=LLVM_PROFILE_FILE="code-%p.profclangr"
-LLVM_PROF_ERR=yes
+LLVM_PROF_ERR=no
 
 GNULD=          no
 
@@ -97,13 +97,13 @@ MACHDEP=	darwin
 MULTIARCH=	
 
 # Install prefix for architecture-independent files
-prefix=		/usr/local/opt/python/Frameworks/Python.framework/Versions/2.7
+prefix=		/usr/local/opt/python@2/Frameworks/Python.framework/Versions/2.7
 
 # Install prefix for architecture-dependent files
 exec_prefix=	${prefix}
 
 # Install prefix for data files
-datarootdir=    /usr/local/opt/python/share
+datarootdir=    /usr/local/opt/python@2/share
 
 # Expanded directories
 BINDIR=		${exec_prefix}/bin
@@ -135,19 +135,19 @@ BUILDEXE=	.exe
 UNIVERSALSDK=
 PYTHONFRAMEWORK=	Python
 PYTHONFRAMEWORKDIR=	Python.framework
-PYTHONFRAMEWORKPREFIX=	/usr/local/opt/python/Frameworks
-PYTHONFRAMEWORKINSTALLDIR= /usr/local/opt/python/Frameworks/Python.framework
+PYTHONFRAMEWORKPREFIX=	/usr/local/opt/python@2/Frameworks
+PYTHONFRAMEWORKINSTALLDIR= /usr/local/opt/python@2/Frameworks/Python.framework
 # Deployment target selected during configure, to be checked
 # by distutils. The export statement is needed to ensure that the
 # deployment target is active during build.
-MACOSX_DEPLOYMENT_TARGET=10.8
+MACOSX_DEPLOYMENT_TARGET=10.9
 export MACOSX_DEPLOYMENT_TARGET
 
 # Options to enable prebinding (for fast startup prior to Mac OS X 10.3)
 OTHER_LIBTOOL_OPT=
 
 # Environment to run shared python without installed libraries
-RUNSHARED=       DYLD_FRAMEWORK_PATH=/private/tmp/python20181011-31731-1asmrtx/Python-2.7.15
+RUNSHARED=       DYLD_FRAMEWORK_PATH=/private/tmp/python@2-20181024-87434-zapthg/Python-2.7.15
 
 # ensurepip options
 ENSUREPIP=      no
@@ -159,7 +159,7 @@ EXEMODE=	755
 FILEMODE=	644
 
 # configure script arguments
-CONFIG_ARGS=	 '--prefix=/usr/local/opt/python' '--enable-ipv6' '--datarootdir=/usr/local/opt/python/share' '--datadir=/usr/local/opt/python/share' '--enable-framework=/usr/local/opt/python/Frameworks' '--without-ensurepip' '--without-gcc' 'MACOSX_DEPLOYMENT_TARGET=10.8' 'CC=clang' 'PKG_CONFIG_PATH=/usr/local/opt/xz/lib/pkgconfig:/usr/local/opt/sqlite/lib/pkgconfig:/usr/local/opt/openssl/lib/pkgconfig' 'PKG_CONFIG_LIBDIR=/usr/lib/pkgconfig:/usr/local/Library/ENV/pkgconfig/10.8'
+CONFIG_ARGS=	 '--prefix=/usr/local/opt/python@2' '--enable-ipv6' '--datarootdir=/usr/local/opt/python@2/share' '--datadir=/usr/local/opt/python@2/share' '--enable-framework=/usr/local/opt/python@2/Frameworks' '--without-ensurepip' '--without-gcc' 'MACOSX_DEPLOYMENT_TARGET=10.9' 'CC=clang' 'PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig:/usr/local/opt/sqlite/lib/pkgconfig' 'PKG_CONFIG_LIBDIR=/usr/lib/pkgconfig:/usr/local/Homebrew/Library/Homebrew/os/mac/pkgconfig/10.9'
 
 
 # Subdirectories with code
@@ -203,7 +203,7 @@ BUILDPYTHON=	python$(BUILDEXE)
 PYTHON_FOR_REGEN=python2.7
 PYTHON_FOR_BUILD=./$(BUILDPYTHON) -E
 _PYTHON_HOST_PLATFORM=
-HOST_GNU_TYPE=  x86_64-apple-darwin12.5.0
+HOST_GNU_TYPE=  x86_64-apple-darwin13.4.0
 
 # Tcl and Tk config info from --with-tcltk-includes and -libs options
 TCLTK_INCLUDES=	
