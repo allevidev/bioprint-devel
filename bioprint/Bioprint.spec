@@ -26,7 +26,7 @@ a = Analysis(['Bioprint.py'],
              pathex=['.', 'src'],
              binaries=osx_binaries,
              datas=[
-                ('mime.types, '.'),
+                ('mime.types', '.'),
                 ('allevi.png', '.'),
                 ('allevi.png', 'bioprint/static'),
                 ('allevi-114.png', 'bioprint/static'),
